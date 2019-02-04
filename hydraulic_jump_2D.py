@@ -77,7 +77,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
             fig.savefig(fname)   
         return im,
 
-    return animation.FuncAnimation(fig, fplot, frames=frames, interval=40)
+    return animation.FuncAnimation(fig, fplot, frames=frames, interval=40, repeat=False)
 
 def set_jet_values(_, state):
     """
@@ -145,9 +145,20 @@ def subsonic_boundary_upper(state, dim, _, qbc, __, num_ghost):
     else:
         raise Exception(dim)
         
+def step_friction(solver, state, dt):
+    "Friction source term:  -cf u / h.  This version is for Classic."
+    cf = state.problem_data['cf']
+    q = state.q
+    h = q[0,:,:]
+    u = q[1,:,:]/h
+    v = q[2,:,:]/h
+
+    q[1,:,:] = q[1,:,:] - dt*cf*u/h
+    q[2,:,:] = q[2,:,:] - dt*cf*v/h
         
-def setup(h0, u0, g=1., num_cells=100, tfinal=1, solver_type='classic',
-          num_output_times=10, riemann_solver='hlle', boundary='subcritical'):
+def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
+          num_output_times=10, riemann_solver='hlle', boundary='subcritical',
+          friction=False, friction_coeff=0.01):
     
     from clawpack import riemann
     from clawpack import pyclaw
@@ -183,20 +194,36 @@ def setup(h0, u0, g=1., num_cells=100, tfinal=1, solver_type='classic',
         else:
             raise Exception('Riemann solver must be hlle or geoclaw')
 
-    if boundary != 'subcritical':
+    bathymetry = False
+
+    if boundary == 'outflow':
         # Use bathymetry to create hydrualic jump
-        bathymetry = True
-        assert riemann_solver == 'geoclaw'
-    else:  # subcritical boundary condition
-        bathymetry = False
+        if friction == False:
+            assert riemann_solver == 'geoclaw'
+            bathymetry = True  # Otherwise, no jump
+
+        solver.bc_lower[0] = pyclaw.BC.extrap
+        solver.bc_upper[0] = pyclaw.BC.extrap
+        solver.bc_lower[1] = pyclaw.BC.extrap
+        solver.bc_upper[1] = pyclaw.BC.extrap
+    elif boundary == 'subcritical':  # subcritical boundary condition
         solver.bc_lower[0] = pyclaw.BC.custom
         solver.bc_upper[0] = pyclaw.BC.custom
         solver.bc_lower[1] = pyclaw.BC.custom
         solver.bc_upper[1] = pyclaw.BC.custom
         solver.user_bc_lower = subsonic_boundary_lower
         solver.user_bc_upper = subsonic_boundary_upper
+    elif boundary == 'wall':
+        solver.bc_lower[0] = pyclaw.BC.wall
+        solver.bc_upper[0] = pyclaw.BC.wall
+        solver.bc_lower[1] = pyclaw.BC.wall
+        solver.bc_upper[1] = pyclaw.BC.wall
 
     solver.before_step = set_jet_values
+
+    if friction:
+        solver.step_source = step_friction
+        solver.source_split = 1
 
     xlower = -1;  xupper =  1.
     ylower = -1;  yupper =  1.
@@ -218,10 +245,9 @@ def setup(h0, u0, g=1., num_cells=100, tfinal=1, solver_type='classic',
         state = pyclaw.State(domain,3)
     
     xc, yc = state.p_centers
-    r0 = 0.1
     
+    rc = np.sqrt(xc**2 + yc**2)
     if bathymetry:
-        rc = np.sqrt(xc**2 + yc**2)
         state.aux[0,:,:] = 0.1*np.exp(-300*(rc-0.8)**2) - 0.2*np.exp(-1000*(rc-0.75)**2)
 
     state.problem_data['r0'] = r0
@@ -229,11 +255,11 @@ def setup(h0, u0, g=1., num_cells=100, tfinal=1, solver_type='classic',
     state.problem_data['u0'] = u0
     state.problem_data['grav'] = g   # Gravitational force
     state.problem_data['F_bdy'] = 0.1
+    state.problem_data['cf'] = friction_coeff
 
     state.q[0,:,:] = (rc<r0)*h0 + (rc>=r0)*0.15
     state.q[1,:,:] = (rc<r0)*h0*u0*xc/(rc+1.e-7)
     state.q[2,:,:] = (rc<r0)*h0*u0*yc/(rc+1.e-7)
-
 
     #===========================================================================
     # Set up controller and controller parameters
