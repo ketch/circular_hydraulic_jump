@@ -37,7 +37,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
         frame = claw.frames[0]
     except:
         # Read solution from disk
-        frame = pyclaw.Solution(0,read_aux=bathymetry)
+        frame = pyclaw.Solution(0,path=claw,read_aux=bathymetry)
     if bathymetry:
         b = frame.aux[0,:,:]
     else:
@@ -62,7 +62,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
         try:
             frame = claw.frames[frame_number]
         except:
-            frame = pyclaw.Solution(frame_number,read_aux=bathymetry)
+            frame = pyclaw.Solution(frame_number,path=claw,read_aux=bathymetry)
         h = frame.q[0,:,:]
         if val == 'surface':
             qq = np.maximum(b,h+b)
@@ -157,8 +157,8 @@ def step_friction(solver, state, dt):
     q[2,:,:] = q[2,:,:] - dt*cf*v/h
         
 def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
-          num_output_times=10, riemann_solver='hlle', boundary='subcritical',
-          friction=False, friction_coeff=0.01):
+          num_output_times=10, riemann_solver='hlle', boundary='subcritical', outdir='./_output',
+          friction=False, friction_coeff=0.01, F_bdy=0.1):
     
     from clawpack import riemann
     from clawpack import pyclaw
@@ -254,7 +254,7 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     state.problem_data['h0'] = h0
     state.problem_data['u0'] = u0
     state.problem_data['grav'] = g   # Gravitational force
-    state.problem_data['F_bdy'] = 0.1
+    state.problem_data['F_bdy'] = F_bdy
     state.problem_data['cf'] = friction_coeff
 
     state.q[0,:,:] = (rc<r0)*h0 + (rc>=r0)*0.15
@@ -269,6 +269,7 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     claw.solution = pyclaw.Solution(state,domain)
     claw.solver = solver
     claw.num_output_times = num_output_times
+    claw.outdir = outdir
     if num_cells < 400:
         claw.keep_copy = True
         #claw.output_format = None
