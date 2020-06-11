@@ -63,6 +63,28 @@ and can be stable for sufficiently small velocities and depths.
 
 \subsection{Numerical shock instabilities}
 
+In \cite{peery1988blunt} a particular instability was observed to
+appear in numerical simulation of a bow shock, near the symmetry plane.
+This phenomenon, known as a ``carbuncle", has been observed by many researchers
+in similar numerical experiments for the Euler equations, and many remedies
+have been proposed, mainly in the form of additional numerical dissipation
+\cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
+Most notably, the HLLE Riemann solver suppresses the carbuncle instability \cite{quirk1997contribution}.
+For a recent review of numerical shock instability and work to alleviate it,
+we refer to \cite[Section 2.5]{simonnumerical}.
+
+Given the similarity of structure between the Euler equations and the shallow
+water equations, one might expect carbuncles to appear in numerical
+solutions of the latter as well.  Indeed, this has been observed \cite{kemm2014note}.
+The shallow water carbuncle behaves in a fashion very similar to the
+Euler carbuncle: it appears when the Roe solver is used, but not when
+the HLL solver is used, and at least some of the other methods that suppress
+the latter also suppress the former \cite{kemm2014note,bader2014carbuncle}.
+
+Meanwhile, some research has suggested that the carbuncle is not purely a
+numerical instability but instead is the manifestation of a true physical
+instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
+
 \section{The shallow water circular hydraulic jump}
 
 \subsection{Semi-analytical solution under rotational symmetry}
