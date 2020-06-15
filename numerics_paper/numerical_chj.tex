@@ -1,5 +1,9 @@
 \documentclass{article}
 
+\usepackage{amsmath}
+
+\newcommand{\W}{{\mathcal W}}
+
 \title{Numerical simulation of the shallow water circular hydraulic jump}
 
 \author{
@@ -86,6 +90,16 @@ numerical instability but instead is the manifestation of a true physical
 instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 \section{The shallow water circular hydraulic jump}
+The shallow water equations in two (horizontal) dimensions are
+\begin{align}
+    h_t + (hu)_x + (hv)_y & = 0 \\
+    (hu)_t + \left(hu^2 + \frac{1}{2}gh^2\right)_x + (huv)_y & = 0 \\
+    (hv)_t + (huv)_x + \left(hv^2 + \frac{1}{2}gh^2\right)_y & = 0.
+\end{align}
+These can be written in vector form as
+\begin{align}
+    q_t + f(q)_x + g(q)_y & = 0.
+\end{align}
 
 \subsection{Semi-analytical solution under rotational symmetry}
 
@@ -95,9 +109,32 @@ instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 \subsubsection{Roe solver}
 
-\subsubsection{HLLE solver}
+\subsubsection{HLLE (2-wave) solver}
+The HLLE solver approximates the Riemann solution using two waves with
+speeds $s_1, s_2$.  The middle state is
+\begin{align} \label{qm-HLL}
+    q_m^\textup{HLLE} = \frac{f(q_l) - f(q_r) + s_2 q_r - s_1 q_l}{s_2 - s_1}.
+\end{align}
 
-\subsubsection{HLLM solver}
+
+\subsubsection{A 3-wave solver}
+Refinements of the HLLE solver were subsequently introduced in order to better
+resolve contact and shear waves, which are strongly dissipated by the HLLE solver.
+In the shallow water equations, we have only a shear wave.  We can introduce a third
+wave in the approximate Riemann solver that carries the jump in the transverse velocity.
+For simplicity, we describe this solver for an x-interface; i.e. where $u$ is the normal
+velocity component and $v$ is the tangential velocity component.  Then the Riemann
+solution is assumed to consist of 3 jump-discontinuities $\W^1, \W^*, \W^2$ where $\W^{1,2}$
+carry all of the jump in $h$ and $hu$ while $\W^*$ carries all of the jump in $hv$.
+
+The values $h_m$ and $u_m$, along with the speeds for the waves $\W^1,\W^2$ 
+are thus determined by the same formula \eqref{qm-HLL} as in the HLL solver.
+The speed of the middle wave is determined by conservation:
+$$
+    s^* = \frac{h_r v_r - h_l v_l}{h_r u_r v_r - h_l u_l v_l}.
+$$
+The middle state transverse velocity $v_*$ is given by $v_l$ if $s^*>0$ or $v_r$ if $s^*<0$.
+
 
 \subsection{Continuous Galerkin method}
 
