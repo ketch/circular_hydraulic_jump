@@ -1,6 +1,7 @@
 \documentclass{article}
 
 \usepackage{amsmath}
+\usepackage{graphicx}
 
 \newcommand{\W}{{\mathcal W}}
 
@@ -135,6 +136,28 @@ $$
 $$
 The middle state transverse velocity $v_*$ is given by $v_l$ if $s^*>0$ or $v_r$ if $s^*<0$.
 
+\subsubsection{HLLEMCC solver}
+The HLLEMCC approximate Riemann solver for the shallow water equations was proposed
+in \cite{kemm2014note} specifically to deal with carbuncles.  The idea is to adjust
+the amount of dissipation applied to the shear wave, adding dissipation in regions
+where unphysical carbuncles would appear.  The approximate solution in this
+case consists of four waves; the faster waves use the HLLE wave speeds and carry
+jumps only in the depth and normal momentum, while the slower waves carry jumps
+only in the transverse momentum.  By adjusting the value of $\phi$, this solver
+can behave like the HLLE solver (if $\phi=1$) or like the Roe solver (if $\phi=0$).
+
+The middle states $q^1_m, q^2_m$ are the same as those used for the HLLE solver.
+Requiring conservation of the transverse momentum gives
+$$
+    q^3_m = \frac{f^3_l - f^3_r - (\hat{v}-\phi\hat{c})q^3_l + (\hat{v}+\phi\hat{c})q^3_r}{2\phi\hat{c}}.
+$$
+Here $\hat{v}, \hat{c}$ are the Roe-average normal velocity and sound speed, respectively.
+
+\begin{figure}
+    \center
+    \includegraphics[width=0.6\textwidth]{figures/hllemcc.pdf}
+    \caption{Structure of the HLLEMCC approximate Riemann solution, with four waves.}
+\end{figure}
 
 \subsection{Continuous Galerkin method}
 
