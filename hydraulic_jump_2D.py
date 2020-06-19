@@ -162,12 +162,18 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     
     from clawpack import riemann
     from clawpack import pyclaw
+    import shallow_hllc_2D
 
     riemann_solver = riemann_solver.lower()
 
     if solver_type == 'classic':
         if riemann_solver == 'hlle':
             solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
+            solver.fwave = False
+        elif riemann_solver == 'hllc':
+            solver = pyclaw.ClawSolver2D(shallow_hllc_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 3
             solver.fwave = False
         elif riemann_solver == 'hllem':
             # Not yet implemented
