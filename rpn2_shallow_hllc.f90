@@ -2,7 +2,7 @@
 subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apdq)
 ! =====================================================
 
-! HLLEM solver for the 2D shallow water equations.
+! HLLC solver for the 2D shallow water equations.
 
 ! waves: 3
 ! equations: 3
@@ -36,8 +36,9 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 !     # set mu to point to  the component of the system that corresponds
 !     # to momentum in the direction of this slice, mv to the orthogonal
 !     # momentum:
-!
-    maxiter = 20
+
+    ! max num of iteration for the root-finding algorithm
+    maxiter = 20   
     depth = 1
     if (ixy.eq.1) then
         mu = 2
@@ -71,7 +72,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         ! Speeds of non-shear waves
         s1 = min(u_l - c_l, u_hat - c_hat)
         s2 = max(u_r + c_r, u_hat + c_hat)
-        ! Speeds of shear wave
+        ! Speed of shear wave
         s_star = (h_r*v_r*u_r-h_l*v_l*u_l)/(h_r*v_r-h_l*v_l)
         
         if (s_star>0) then
