@@ -9,23 +9,23 @@
 
 \author{
     David I. Ketcheson \and
-    Manuel Quezada de Luna
+    Manuel Quezada de Luna \and
+    David Batista
 }
 \begin{document}
 
 \maketitle
 
 \begin{abstract}
-We study numerical discretrizations of the shallow water equations
+We study numerical discretizations of the shallow water equations
 for the simulation of the circular hydraulic jump formed
 when a vertical fluid jet impacts a horizontal plate.  
-We focus on three numerical methods: finite volume Godunov-type
-methods using either a Roe or HLLE approximate Riemann solver, and
+We test a range of numerical methods, including finite volume Godunov-type
+methods with a variety of approximate Riemann solvers, and
 a continuous Galerkin finite element method based on flux-corrected transport (FCT).
-The finite volume methods are employed ona uniform cartesian grid
+The finite volume methods are employed on a uniform cartesian grid
 while the finite element method uses an unstructured triangular grid.
-The three methods give completely different results, even for
-highly-refined meshes.
+The methods give completely different results, even for highly-refined meshes.
 \end{abstract}
 
 
@@ -37,17 +37,18 @@ Perhaps the first reference to the observation of the circular hydraulic jump
 comes from Lord Rayleigh \cite{rayleigh1914theory}, who wrote that it
 ``may usually be seen whenever a stream of water from a tap strikes a horizontal
 surface".  This phenomenon that is familiar in the everyday kitchen sink, is in
-fact highly nonlinear and unintuitive.  Near the jet, the flow is very shallow and
-fast, while further away it is deeper and slower.  The transition between these regions
-occurs in a very narrow region and takes the form of \emph{jump} or \emph{bore}
+fact highly nonlinear and complex.  Near the jet, the flow is shallow and
+supercritical, while further away it is deeper and subcritical.  The transition from supercritical
+to subcritical flow
+occurs in a very narrow region and takes the form of a \emph{jump} or \emph{bore}
 that is roughly circular if the surface is flat; we refer to it herein as a
 circular hydraulic jump (CHJ).
 
-Early experimental work the CHJ began some time later
+Early experimental work on the CHJ began some time later
 \cite{kurihara1946hydraulic,tani1949water,watson1964radial}.
-Watson \cite{watson1964radial} worked out the jump radius
-implied by Rayleigh's approach and then worked out the vertical
-velocity profile in the inner region, assuming a no-slip
+Watson \cite{watson1964radial} derived the jump radius
+implied by Rayleigh's approach and the vertical
+velocity profile in the supercritical region, assuming a no-slip
 boundary condition at the bottom.  He also studied the turbulent
 flow case and performed experiments.
 More detailed experiments revealed different qualitative classification
@@ -57,19 +58,33 @@ Although later work incorporated more physical details (such as surface tension)
 (particularly its radius) could be reasonably predicted using a simple shallow water
 model \cite{bohr1993shallow}.
 
-While the jump is roughly circular, it may deviate from this shape and
-deforming rapidly in time.
+While the jump is roughly circular, under appropriate conditions it may deviate
+from this shape and deform rapidly and chaotically in time.
 Instability of the jump was observed from fairly early on \cite{craik1981circular}.
 Under special circumstances with more viscous fluids, the jump instability may lead to
 the formation of curious shapes such as polygons \cite{ellegaard1998creating}, but
 for a low-viscosity fluid like water the behavior is generally chaotic.
-The instability increases with the jet velocity and with the depth at the outside of the jump,
-and can be stable for sufficiently small velocities and depths.
+The strength of the instability increases with the jet velocity and with the
+depth at the outside of the jump.  The flow can be stable for sufficiently small
+velocities and depths.
+
+\subsection{Scope of this work}
+This work is intended to be more exploratory than explanatory; in other words,
+it is focused more on raising significant questions than on answering them.
+The central issue is the stability of the shallow water CHJ, from both a
+physical and a numerical perspective.
+The main result is our finding that a number of numerical methods that are
+in use give completely different solutions to the CHJ problem.
+These differences do not diminish when the grid is refined.
+Evidence suggests that, at least in some regimes, the CHJ is unstable
+and solutions are chaotic.  This implies that one should not expect pointwise
+convergence of solutions, so a traditional study of accuracy of the numerical
+methods is ruled out.
 
 \subsection{Numerical shock instabilities}
 
-In \cite{peery1988blunt} a particular instability was observed to
-appear in numerical simulation of a bow shock, near the symmetry plane.
+In \cite{peery1988blunt} a numerical instability was observed to
+appear near the symmetry plane in the simulation of a bow shock.
 This phenomenon, known as a ``carbuncle", has been observed by many researchers
 in similar numerical experiments for the Euler equations, and many remedies
 have been proposed, mainly in the form of additional numerical dissipation
@@ -90,21 +105,84 @@ Meanwhile, some research has suggested that the carbuncle is not purely a
 numerical instability but instead is the manifestation of a true physical
 instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
+The carbuncle has not previously been observed in circular hydraulic jump
+simulations.  However, it is known to appear in the presence of steady shocks
+that are nearly aligned with the grid, so it is natural to expect it, and as we
+will see it does indeed arise.  Its presence is particularly interesting 
+in this circumstance since there is a known physical instability that affects
+the shock.  A natural question is whether the carbuncle in this instance is
+a purely numerical phenomenon or a manifestation of the physical instability.
+
 \section{The shallow water circular hydraulic jump}
 The shallow water equations in two (horizontal) dimensions are
+\begin{subequations} \label{eq:sw}
 \begin{align}
     h_t + (hu)_x + (hv)_y & = 0 \\
     (hu)_t + \left(hu^2 + \frac{1}{2}gh^2\right)_x + (huv)_y & = 0 \\
     (hv)_t + (huv)_x + \left(hv^2 + \frac{1}{2}gh^2\right)_y & = 0.
 \end{align}
+\end{subequations}
 These can be written in vector form as
 \begin{align}
     q_t + f(q)_x + g(q)_y & = 0.
 \end{align}
 
-\subsection{Semi-analytical solution under rotational symmetry}
+\subsection{Semi-analytical steady solution under rotational symmetry}
+
+By assuming rotational symmetry in \eqref{eq:sw}, one obtains the
+system (in one spatial variable)
+\begin{subequations} \label{eq:rsw}
+\begin{align}
+    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
+    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
+\end{align}
+\end{subequations}
+Steady-state solutions of \eqref{eq:rsw} satisfy
+\begin{subequations}
+\begin{align}
+    rhu & = C \\
+    h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
+\end{align}
+\end{subequations}
+for some $C$ independent of $r$.  Here $F=|u|/\sqrt{gh}$ is the Froude number.
+We see that two types of steady profiles exist, depending on whether the flow
+is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
+include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
+
+The steady, rotationally-symmetric circular hydraulic jump involves supercritical
+flow for $r<r_0$ and subcritical flow for $r>r_0$, where $r_0$ is the jump radius.
+The jump itself takes the form of a stationary shock wave.  The Rankine-Hugoniot jump
+conditions specify that for such a shock,
+\begin{align} \label{eq:RH}
+    h_+ - h_- & = \frac{-3h_- + \sqrt{h_-^2 + 8 h_- u_-^2/g}}{2} = \frac{3h_-}{2}\left(\sqrt{1+\frac{8}{9}(F_-^2-1)}-1\right),
+\end{align}
+where the subscripts $+, -$ denote states just inside or outside the jump radius, respectively.
+
+A steady-state, rotationally symmetric solution can be given for an annular region as follows:
+
+\begin{enumerate}
+    \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
+    \item Integrate \eqref{eq:dh} from both boundaries.
+    \item Find a radius $r_0$ where the matching condition \eqref{eq:RH} is satisfied.
+\end{enumerate}
+Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the required jump
+radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
+and subcritical at the outer boundary.
+
+Numerical tests suggest that the solution obtained in this way is a stable equilibrium
+of the reduced one-dimensional shallow water equations \eqref{eq:rsw}.  This
+solution provides a useful starting point for testing the stability of the CHJ
+as a solution of the full two-dimensional shallow water equations \eqref{eq:sw}.
 
 \section{Numerical methods}
+
+Potential methods to try:
+\begin{itemize}
+    \item Galerkin methods on cartesian grids (to see if carbuncles appear)
+    \item FV methods on perturbed grids (to avoid grid alignment)
+    \item FV methods on annular grids (with grid alignment everywhere)
+    \item Various Riemann solvers intended to avoid carbuncles
+\end{itemize}
 
 \subsection{Finite volume methods}
 
