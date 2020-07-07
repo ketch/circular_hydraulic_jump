@@ -84,6 +84,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     do i=2-mbc,mx+mbc
         alf(i) = auxl(inx,i)
         beta(i) = auxl(iny,i)
+
         unorl(i) = alf(i)*ql(2,i) + beta(i)*ql(3,i)
         unorr(i-1) = alf(i)*qr(2,i-1) + beta(i)*qr(3,i-1)
         utanl(i) = -beta(i)*ql(2,i) + alf(i)*ql(i,3)
@@ -95,13 +96,16 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! later used in routine rpt2 to do the transverse wave splitting.
 
     do i = 2-mbc, mx+mbc
-        h(i) = (qr(1,i-1)+ql(1,i))*0.50d0
+        h(i) = (qr(1,i-1)+ql(1,i))*0.50d0 ! = h_hat
         hsqrtl = dsqrt(qr(1,i-1))
         hsqrtr = dsqrt(ql(1,i))
         hsq2 = hsqrtl + hsqrtr
+        ! unorr(i-1)/hsqrtl is fine because unorr = momentum 
         u(i) = (unorr(i-1)/hsqrtl + unorl(i)/hsqrtr) / hsq2
         v(i) = (utanr(i-1)/hsqrtl + utanl(i)/hsqrtr) / hsq2
-        a(i) = dsqrt(grav*h(i))
+        ! u(i) = u_hat
+        ! v(i) = v_hat
+        a(i) = dsqrt(grav*h(i)) ! = c_hat
     enddo
 
     ! now split the jump in q at each interface into waves
@@ -144,92 +148,92 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! Incorporate entropy fix by adding a modified fraction of wave
     ! if s should change sign.
 
-    do i=2-mbc,mx+mbc
+        do i=2-mbc,mx+mbc
 
-        ! modified wave speeds to use HLLEM-entropy fix
+            ! modified wave speeds to use HLLEM-entropy fix
 
-        him1 = qr(1,i-1)
-        uim1 = unorr(i-1)
-        cim1 = dsqrt(grav*him1)
-        s1l  = (uim1 - cim1) * auxl(ilenrat,i) !# u-c in left state (cell i-1)
+            him1 = qr(1,i-1)
+            uim1 = unorr(i-1)
+            cim1 = dsqrt(grav*him1)
+            s1l  = (uim1 - cim1) * auxl(ilenrat,i) !# u-c in left state (cell i-1)
         
-        hi   = ql(1,i)
-        ui   = unorl(i)
-        ci   = dsqrt(grav*hi)
-        s3r  = (ui + ci) * auxl(ilenrat,i) !# u+c in right state  (cell i)
+            hi   = ql(1,i)
+            ui   = unorl(i)
+            ci   = dsqrt(grav*hi)
+            s3r  = (ui + ci) * auxl(ilenrat,i) !# u+c in right state  (cell i)
 
-        sm1fix     = dmin1(s(1,i),0.0,s1l)
-        sm1roe     = dmin1(s(1,i),0.0)
-        sminus(1)  = 0.5d0*(sm1fix+sm1roe)
-
-        sp3fix     = dmax1(s(3,i),0.0,s3r) 
-        sp3roe     = dmax1(s(3,i),0.0)
-        splus(3)   = 0.5d0*(sp3fix+sp3roe)
+            sm1fix     = dmin1(s(1,i),0.0,s1l)
+            sm1roe     = dmin1(s(1,i),0.0)
+            sminus(1)  = 0.5d0*(sm1fix+sm1roe)
 
 
-        splus(1)  = s(1,i)-sminus(1)
-        sminus(3) = s(3,i) - splus(3) 
+            sp3fix     = dmax1(s(3,i),0.0,s3r) 
+            sp3roe     = dmax1(s(3,i),0.0)
+            splus(3)   = 0.5d0*(sp3fix+sp3roe)
 
 
-        ! carbuncle cure:
-        ! -----------------
 
-        if(cfix) then
-            ! residual relative to acoustic speed
-            rere1  = wave(1,3,i)-wave(1,1,i)
-            reremu = wave(2,3,i)-wave(2,1,i)
-            reremv = wave(3,3,i)-wave(3,1,i)
-            ! norm of relative residual
-            renore = dsqrt(rere1*rere1 + reremu*reremu + reremv*reremv)
-            ! Indicator for Rankine-Hugoniot condition, original:0.01d0 
-            rhparam = 0.001d0
-            ! rhind = a(i) * max(rhparam*renore,1.)
-            zfroude = dsqrt((u(i)*u(i))/(a(i)*a(i)))
-            ffroude  = dmax1(0.0d0,(1.0d0 - zfroude**(1.0d0/3.0d0))
-            ! Alternative if cbrt for cubic root is available:
-            ! ffroude  = dmax1(0.0d0,(1.0d0 - dcbrt(zfroude)))
+            splus(1)  = s(1,i)-sminus(1)
+            sminus(3) = s(3,i) - splus(3) 
+
+
+            !  carbuncle cure:
+            ! -----------------
+
+            if(cfix) then
+                ! residual relative to acoustic speed
+                rere1  = wave(1,3,i)-wave(1,1,i)
+                reremu = wave(2,3,i)-wave(2,1,i)
+                reremv = wave(3,3,i)-wave(3,1,i)
+                ! norm of relative residual
+                renore = dsqrt(rere1*rere1 + reremu*reremu + reremv*reremv)
+                ! Indicator for Rankine-Hugoniot condition, original:0.01d0 
+                rhparam = 0.001d0
+                ! rhind = a(i) * max(rhparam*renore,1.)
+                zfroude = dsqrt((u(i)*u(i))/(a(i)*a(i)))
+                ffroude  = dmax1(0.0d0,(1.0d0 - zfroude**(1.0d0/3.0d0)))
+                ! Alternative if cbrt for cubic root is available:
+                ! ffroude  = dmax1(0.0d0,(1.0d0 - dcbrt(zfroude)))
                
-            rhind = a(i) * auxl(ilenrat,i)
-            rhind = rhind*dmin1(rhparam*renore*ffroude,1.0d0)**(1.0d0/3.0d0) 
-            ! Alternative if cbrt for cubic root is available:
-            ! rhind = rhind*dcbrt(dmin1(rhparam*renore*ffroude,1.0d0))
+                rhind = a(i) * auxl(ilenrat,i)
+                rhind = rhind*dmin1(rhparam*renore*ffroude,1.0d0)**(1.0d0/3.0d0) 
+                ! Alternative if cbrt for cubic root is available:
+                ! rhind = rhind*dcbrt(dmin1(rhparam*renore*ffroude,1.0d0))
                
-            saux       = .5*(dabs(s(2,i)-rhind)+dabs(s(2,i)+rhind))
+                saux       = .5*(dabs(s(2,i)-rhind)+dabs(s(2,i)+rhind))
 
-            sminus(2)  = .5*(s(2,i) - saux)
-            splus(2)   = s(2,i) - sminus(2)
-        endif
+                sminus(2)  = .5*(s(2,i) - saux)
+                splus(2)   = s(2,i) - sminus(2)
+            endif
 
-        do m=1,meqn
-            amdq(m,i) = 0.d0
-            apdq(m,i) = 0.d0
-            do mw=1,mwaves
-                amdq(m,i) = amdq(m,i) + sminus(mw)*wave(m,mw,i)
-                apdq(m,i) = apdq(m,i) + splus(mw)*wave(m,mw,i)
+            do m=1,meqn
+                amdq(m,i) = 0.d0
+                apdq(m,i) = 0.d0
+                do mw=1,mwaves
+                    amdq(m,i) = amdq(m,i) + sminus(mw)*wave(m,mw,i)
+                    apdq(m,i) = apdq(m,i) + splus(mw)*wave(m,mw,i)
+                enddo
             enddo
         enddo
-    enddo
 
     else ! no efix
 
-    ! amdq = SUM s*wave   over left-going waves
-    ! apdq = SUM s*wave   over right-going waves
+        ! amdq = SUM s*wave   over left-going waves
+        ! apdq = SUM s*wave   over right-going waves
 
-    do m=1,3
-        do i=2-mbc, mx+mbc
-            amdq(m,i) = 0.d0
-            apdq(m,i) = 0.d0
-            do mw=1,mwaves
-                if (s(mw,i) .lt. 0.d0) then
-                    amdq(m,i) = amdq(m,i) + s(mw,i)*wave(m,mw,i)
-                else
-                    apdq(m,i) = apdq(m,i) + s(mw,i)*wave(m,mw,i)
-               endif
+        do m=1,3
+            do i=2-mbc, mx+mbc
+                amdq(m,i) = 0.d0
+                apdq(m,i) = 0.d0
+                do mw=1,mwaves
+                    if (s(mw,i) .lt. 0.d0) then
+                        amdq(m,i) = amdq(m,i) + s(mw,i)*wave(m,mw,i)
+                    else
+                        apdq(m,i) = apdq(m,i) + s(mw,i)*wave(m,mw,i)
+                   endif
+                enddo
             enddo
         enddo
-    enddo
-
-    return
-end
-
-
+    endif
+    
+end subroutine rpn2
