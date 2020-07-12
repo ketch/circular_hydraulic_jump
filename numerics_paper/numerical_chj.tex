@@ -235,7 +235,7 @@ Here $\hat{v}, \hat{c}$ are the Roe-average normal velocity and sound speed, res
 \phi(\theta)=min\left\lbrace 1,\, \left(\varepsilon\,\theta\,max\left\lbrace0,\,1-Fr_{u}^{\alpha} \right\rbrace \right)   \right\rbrace^{\beta}
 \end{equation}
 
-where $Fr_{u}$ is the Froude number perpendicular to the cell face and $\varepsilon$, $\alpha$, and $\beta$ are parameters that have to be chosen appropriately. For the shallow water equations, authors in \cite{kemm2014note} propose to use $\varepsilon=10^{-3}$ and $\alpha=\beta=\frac{1}{3}$. The value of $\theta$ is calculated as the residual in the Rankine-Hugoniot condition for the shear wave.\\
+where $Fr_{u}$ is the Froude number perpendicular to the cell face and $\varepsilon$, $\alpha$, and $\beta$ are parameters that have to be chosen appropriately. For the shallow water equations, authors in \cite{kemm2014note} propose to use $\varepsilon=10^{-3}$ and $\alpha=\beta=\frac{1}{3}$. The value of $\theta$ is calculated as the 2-norm of the residual in the Rankine-Hugoniot condition for the shear wave.\\
 
 The HLLEMCC solver follows the ideas of the Harten-Hyman entropy fix by splitting the shear wave with speed $\hat{u}$, into two waves moving with speeds $\hat{u}-\phi\hat{c}$ and $\hat{u}+\phi\hat{c}$ (see figure \ref{HLLEMCC}). Its implementation, in terms of the fluctuations, is performed by using the values $\hat{u}^{\pm}$ calculated with an absolute-value function defined as
 
