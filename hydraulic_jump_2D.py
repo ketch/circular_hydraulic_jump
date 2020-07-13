@@ -18,9 +18,9 @@ from matplotlib import animation
 import matplotlib.pyplot as plt
 from clawpack import pyclaw
 import numpy as np
-# If plotting in a Jupyter notebook, do this:
-# from clawpack.visclaw.JSAnimation import IPython_display
 
+# If plotting in a Jupyter notebook, do this:
+from clawpack.visclaw.JSAnimation import IPython_display
 
 def plot_surface(claw, save_plots=False, frames=101, val='surface',
                  vmin=0., vmax=0.5, clim=None, bathymetry=False):
@@ -47,7 +47,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
         qq = np.maximum(b,h+b)
     elif val=='u':
         hu = frame.q[1,:,:]
-        qq = hu/h
+        qq = hu #/h
         
 
     x, y = frame.state.grid.p_centers    
@@ -68,7 +68,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
             qq = np.maximum(b,h+b)
         elif val=='u':
             hu = frame.q[1,:,:]
-            qq = hu/h
+            qq = hu #/h
         im.set_data(qq.T)
         if clim:
             im.set_clim(*clim)
@@ -77,7 +77,7 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
             fig.savefig(fname)   
         return im,
 
-    return animation.FuncAnimation(fig, fplot, frames=frames, interval=40, repeat=False)
+    return animation.FuncAnimation(fig, fplot, frames=frames, interval=40, repeat=True)
 
 def set_jet_values(_, state):
     """
@@ -162,7 +162,9 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     
     from clawpack import riemann
     from clawpack import pyclaw
-    import shallow_hllc_2D
+    #import shallow_hllc_2D
+    import shallow_hllemcc_2D
+    import shallow_hllemccRoEF_2D
 
     riemann_solver = riemann_solver.lower()
 
@@ -170,8 +172,21 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
         if riemann_solver == 'hlle':
             solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
             solver.fwave = False
+        if riemann_solver == 'roe':
+            solver = pyclaw.ClawSolver2D(riemann.shallow_roe_with_efix_2D)
+            solver.fwave = False
         elif riemann_solver == 'hllc':
             solver = pyclaw.ClawSolver2D(shallow_hllc_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 3
+            solver.fwave = False
+        elif riemann_solver == 'hllemcc':
+            solver = pyclaw.ClawSolver2D(shallow_hllemcc_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 3
+            solver.fwave = False
+        elif riemann_solver == 'hllemccroef':
+            solver = pyclaw.ClawSolver2D(shallow_hllemccRoEF_2D)
             solver.num_eqn = 3
             solver.num_waves = 3
             solver.fwave = False
@@ -183,7 +198,7 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
             solver = pyclaw.ClawSolver2D(riemann.sw_aug_2D)
             solver.fwave = True
         else:
-            raise Exception('Riemann solver must be hlle or geoclaw')
+            raise Exception('Riemann solver must be hlle or geoclaw -----------')
         #solver.dimensional_split=True
         #solver.limiters = pyclaw.limiters.tvd.minmod
         solver.cfl_max     = 0.9
@@ -283,3 +298,19 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
         claw.keep_copy = False
 
     return claw
+# kingchoncho
+if __name__ == "__main__":
+    claw = setup(h0=0.5, u0=0.75,riemann_solver='hllemccroef',num_output_times=100,tfinal=20,num_cells=100,friction=True)
+    #claw = setup(h0=0.5, u0=0.75,riemann_solver='hlle',num_output_times=100,tfinal=20,num_cells=100,friction=True)    
+    claw.run()
+    
+    # If plotting in a Jupyter notebook
+    #anim=plot_surface(claw)
+    #from IPython.display import HTML
+    #HTML(anim.to_html5_video())
+    
+    # If plotting in the terminal    
+    from clawpack.pyclaw import plot
+    plot.interactive_plot()
+
+#-----------
