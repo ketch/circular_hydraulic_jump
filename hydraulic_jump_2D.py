@@ -166,10 +166,13 @@ def step_friction(solver, state, dt):
         
 def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
           num_output_times=10, riemann_solver='hlle', boundary='subcritical', outdir='./_output',
-          friction=False, friction_coeff=0.01, F_bdy=0.1):
+          friction=False, friction_coeff=0.01, F_bdy=0.1, use_petsc=False):
     
     from clawpack import riemann
-    from clawpack import pyclaw
+    if use_petsc:
+        from clawpack import petclaw as pyclaw
+    else:
+        from clawpack import pyclaw
     #import shallow_hllc_2D
     import shallow_hllemcc_2D
     import shallow_hllemccRoEF_2D
