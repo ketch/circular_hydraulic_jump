@@ -2,7 +2,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
 ! Roe-solver for the 2D shallow water equations on a quadrilateral grid
 ! 
-! Solve Riemann problems along one slice of data.
+! waves: 3
+! equations: 3
 ! 
 ! On input, ql contains the state vector at the left edge of each cell
 !           qr contains the state vector at the right edge of each cell
@@ -22,32 +23,28 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 !                                     and right state ql(i,:)
 ! From the basic clawpack routines, this routine is called with ql = qr
 
-    implicit double precision (a-h,o-z)
+    implicit none
 
-    dimension wave(meqn, mwaves, 1-mbc:maxm+mbc)
-    dimension    s(mwaves, 1-mbc:maxm+mbc)
-    dimension   ql(meqn, 1-mbc:maxm+mbc)
-    dimension   qr(meqn, 1-mbc:maxm+mbc)
-    dimension  apdq(meqn, 1-mbc:maxm+mbc)
-    dimension  amdq(meqn, 1-mbc:maxm+mbc)
-    dimension auxl(maux, 1-mbc:maxm+mbc)
-    dimension auxr(maux, 1-mbc:maxm+mbc)
+    integer, intent(in) :: ixy, maxm, meqn, mwaves, maux, mbc, mx
+    double precision, dimension(meqn,1-mbc:maxm+mbc), intent(in) :: ql, qr
+    double precision, dimension(maux,1-mbc:maxm+mbc), intent(in) :: auxl, auxr
+    double precision, dimension(meqn,mwaves,1-mbc:maxm+mbc), intent(out) :: wave
+    double precision, dimension(mwaves,1-mbc:maxm+mbc), intent(out) :: s
+    double precision, dimension(meqn,1-mbc:maxm+mbc), intent(out) :: amdq, apdq
 
     ! local arrays -- common block comroe is passed to rpt2sh
     ! ------------
 
-    dimension splus(mwaves)
-    dimension sminus(mwaves)
+    double precision, dimension(mwaves) :: splus, sminus
 
-    parameter (maxm2 = 1602)  !# assumes at most 1000x1000 grid with mbc=2
-    dimension delta(3)
-    logical efix, cfix
-    dimension unorl(-1:maxm2), unorr(-1:maxm2)
-    dimension utanl(-1:maxm2), utanr(-1:maxm2)
-    dimension alf(-1:maxm2)
-    dimension beta(-1:maxm2)
+    integer parameter (maxm2 = 1602)  !# assumes at most 1000x1000 grid with mbc=2
+    double precision, dimension(3) :: delta
+    logical :: efix, cfix
+    double precision, dimension(-1:maxm2) :: unorl, unorr, utanl, utanr, alf, beta
+    double precision, dimension(-1:maxm2) :: u, v, a, h
+    double precision :: grav
 
-    common /cparam/  grav
+    common /cparam/ grav
     common /comroe/ u(-1:maxm2),v(-1:maxm2),a(-1:maxm2),h(-1:maxm2)
 
     data efix /.true./        !# use entropy fix for transonic rarefactions

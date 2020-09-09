@@ -3,10 +3,10 @@ Code to simulate 2D circular hydraulic jump in PyClaw.
 
 Currently uses a Cartesian grid.
 
-In order to get a jump, you must either introduce a bathymetric barrier (circular ring)
-or impose a subcritical flow at the outer boundary.  To do the former, you have
-to use a Riemann solver that handles variable bathymetry; for now this means the
-GeoClaw solver.
+In order to get a jump, you must either introduce a bathymetric barrier (circular ring),
+include bottom friction, or impose a subcritical flow at the outer boundary.
+To work with bathymetry, you have to use a Riemann solver that handles variable
+bathymetry; for now this means the GeoClaw solver.
 
 We could also get a jump by introducing bottom friction; we haven't tried this yet.
 
@@ -167,12 +167,13 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     import shallow_hllemccRoEF_2D
 
     riemann_solver = riemann_solver.lower()
+    print(riemann_solver)
 
     if solver_type == 'classic':
         if riemann_solver == 'hlle':
             solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
             solver.fwave = False
-        if riemann_solver == 'roe':
+        elif riemann_solver == 'roe':
             solver = pyclaw.ClawSolver2D(riemann.shallow_roe_with_efix_2D)
             solver.fwave = False
         elif riemann_solver == 'hllc':
@@ -198,7 +199,7 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
             solver = pyclaw.ClawSolver2D(riemann.sw_aug_2D)
             solver.fwave = True
         else:
-            raise Exception('Riemann solver must be hlle or geoclaw -----------')
+            raise Exception('Unrecognized Riemann solver') 
         #solver.dimensional_split=True
         #solver.limiters = pyclaw.limiters.tvd.minmod
         solver.cfl_max     = 0.9
@@ -298,7 +299,7 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
         claw.keep_copy = False
 
     return claw
-# kingchoncho
+
 if __name__ == "__main__":
     claw = setup(h0=0.5, u0=0.75,riemann_solver='hllemccroef',num_output_times=100,tfinal=20,num_cells=100,friction=True)
     #claw = setup(h0=0.5, u0=0.75,riemann_solver='hlle',num_output_times=100,tfinal=20,num_cells=100,friction=True)    

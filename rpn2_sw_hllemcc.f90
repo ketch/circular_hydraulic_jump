@@ -81,7 +81,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
     ! find a1 thru a3, the coefficients of the 3 eigenvectors:
     do i = 2-mbc, mx+mbc
-        delta(1) = ql(1,i) - qr(1,i-1)
+        delta(1) = ql(depth,i) - qr(depth,i-1)
         delta(2) = ql(mu,i) - qr(mu,i-1)
         delta(3) = ql(mv,i) - qr(mv,i-1)
         a1 = ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
@@ -170,6 +170,9 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
                 sminus(2)  = .5*(s(2,i) - saux)
                 splus(2)   = s(2,i) - sminus(2)
+            else
+                sminus(2) = s(2,i)
+                splus(2) = s(2,i)
             endif
 
             do m=1,meqn
