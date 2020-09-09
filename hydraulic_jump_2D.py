@@ -11,7 +11,7 @@ bathymetry; for now this means the GeoClaw solver.
 We could also get a jump by introducing bottom friction; we haven't tried this yet.
 
 Options:
-    - Riemann solver: GeoClaw, Roe, or HLLE
+    - Riemann solver: GeoClaw, Roe, HLLE, HLLEMCC
 """
 
 from matplotlib import animation
@@ -20,16 +20,17 @@ from clawpack import pyclaw
 import numpy as np
 
 # If plotting in a Jupyter notebook, do this:
-from clawpack.visclaw.JSAnimation import IPython_display
+#from clawpack.visclaw.JSAnimation import IPython_display
 
-def plot_surface(claw, save_plots=False, frames=101, val='surface',
-                 vmin=0., vmax=0.5, clim=None, bathymetry=False):
+def plot_surface(claw, make_anim=True, save_plots=False, frames=101, val='surface',
+                 vmin=0., vmax=0.5, clim=None, bathymetry=False, plotdir='./_plots'):
     """
     Plot results of 2D shallow water simulation as a pcolor plot and animate
     (intended for Jupyter notebook).
 
     If variable bathymetry is used, set bathymetry=True.
     """
+    print('plotting')
     fig = plt.figure(figsize=[10,10])
     ax1 = fig.add_subplot(111)
     try:
@@ -73,11 +74,18 @@ def plot_surface(claw, save_plots=False, frames=101, val='surface',
         if clim:
             im.set_clim(*clim)
         if save_plots:
-            fname = 'frame'+str(frame_number).zfill(4)+'.eps'
+            fname = plotdir+'/frame'+str(frame_number).zfill(4)+'.eps'
             fig.savefig(fname)   
         return im,
 
-    return animation.FuncAnimation(fig, fplot, frames=frames, interval=40, repeat=True)
+    if make_anim:
+        return animation.FuncAnimation(fig, fplot, frames=frames, interval=40, repeat=True)
+    elif save_plots:
+        import os
+        if not os.path.exists(plotdir):
+            os.makedirs(plotdir)
+        for i in range(frames):
+            fplot(i)
 
 def set_jet_values(_, state):
     """
@@ -156,7 +164,7 @@ def step_friction(solver, state, dt):
     q[1,:,:] = q[1,:,:] - dt*cf*u/h
     q[2,:,:] = q[2,:,:] - dt*cf*v/h
         
-def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
+def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
           num_output_times=10, riemann_solver='hlle', boundary='subcritical', outdir='./_output',
           friction=False, friction_coeff=0.01, F_bdy=0.1):
     
@@ -301,9 +309,11 @@ def setup(h0, u0, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type
     return claw
 
 if __name__ == "__main__":
-    claw = setup(h0=0.5, u0=0.75,riemann_solver='hllemccroef',num_output_times=100,tfinal=20,num_cells=100,friction=True)
+    from clawpack.pyclaw.util import run_app_from_main
+    claw = run_app_from_main(setup)
+    #claw = setup(h0=0.5, u0=0.75,riemann_solver='hllemccroef',num_output_times=100,tfinal=20,num_cells=100,friction=True)
     #claw = setup(h0=0.5, u0=0.75,riemann_solver='hlle',num_output_times=100,tfinal=20,num_cells=100,friction=True)    
-    claw.run()
+    #claw.run()
     
     # If plotting in a Jupyter notebook
     #anim=plot_surface(claw)
@@ -311,7 +321,13 @@ if __name__ == "__main__":
     #HTML(anim.to_html5_video())
     
     # If plotting in the terminal    
-    from clawpack.pyclaw import plot
-    plot.interactive_plot()
+    #from clawpack.pyclaw import plot
+    #plot.interactive_plot()
+
+    # To write plots to disk:
+    #import sys
+    #print(sys.argv)
+    #plotdir = sys.argv[1]
+    #plot_surface(claw, make_anim=False, save_plots=True, frames=len(claw.frames), plotdir=plotdir)
 
 #-----------

@@ -14,7 +14,7 @@ Code and manuscript for numerical solution of the circular hydraulic jump proble
 - Test mapped grid with circular boundaries
 - Test mapped grid with perturbed nodes
 - Run high-resolution simulations with combinations of the following options
-    - Riemann solvers (Roe, HLLE, HLLEMCC, HLLC, others?)
+    - Riemann solvers (Roe, HLLE, HLLEMCC, HLLC, GeoClaw, others?)
     - Jump forcing conditions (bathymetry, fixed outflow, friction)
     - Grids (Cartesian, circle-ish, perturbed)
     - 2nd-order LW / High-order WENO
