@@ -164,9 +164,11 @@ def step_friction(solver, state, dt):
     q[1,:,:] = q[1,:,:] - dt*cf*u/h
     q[2,:,:] = q[2,:,:] - dt*cf*v/h
         
-def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, solver_type='classic',
-          num_output_times=10, riemann_solver='hlle', boundary='subcritical', outdir='./_output',
-          friction=False, friction_coeff=0.01, F_bdy=0.1, use_petsc=False):
+def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
+          solver_type='classic', num_output_times=10, riemann_solver='hlle',
+          boundary='subcritical', outdir='./_output', friction=False,
+          friction_coeff=0.01, F_bdy=0.1, use_petsc=False, 
+          kalpha=1./3, kbeta=1.3, kepsilon=1.e-3):
     
     from clawpack import riemann
     if use_petsc:
@@ -287,6 +289,9 @@ def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1, so
     state.problem_data['h0'] = h0
     state.problem_data['u0'] = u0
     state.problem_data['grav'] = g   # Gravitational force
+    state.problem_data['kalpha'] = kalpha   # Kemm's alpha
+    state.problem_data['kbeta'] = kbeta   # Kemm's beta
+    state.problem_data['kepsilon'] = kepsilon   # Kemm's epsilon
     state.problem_data['F_bdy'] = F_bdy
     state.problem_data['cf'] = friction_coeff
 

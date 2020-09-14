@@ -34,9 +34,10 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     double precision :: h_l, h_r, u_l, u_r, v_l, v_r, hsqrt_l, hsqrt_r, hsq2, c_l, c_r
     double precision :: grav
     double precision :: s1l, s3r, saux, sm1fix, sm1roe, sp3fix, sp3roe, zfroude
-    double precision :: renore, rere1, reremu, reremv, rhind, rhparam
+    double precision :: renore, rere1, reremu, reremv, rhind
+    double precision :: kalpha, kbeta, kepsilon  ! Kemm's parameters for carbuncle fix
 
-    common /cparam/ grav
+    common /cparam/ grav, kalpha, kbeta, kepsilon
     common /comroe/ u, v, a, h
 
     data efix /.true./        !# use entropy fix for transonic rarefactions
@@ -153,18 +154,16 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
                 reremv = wave(mv,3,i)-wave(mv,1,i)
                 ! norm of relative residual
                 renore = dsqrt(rere1*rere1 + reremu*reremu + reremv*reremv)
-                ! Indicator for Rankine-Hugoniot condition, original:0.01d0 
-                rhparam = 0.001d0
-                ! rhind = a(i) * max(rhparam*renore,1.)
+                ! rhind = a(i) * max(kepsilon*renore,1.)
                 zfroude = dsqrt((u(i)*u(i))/(a(i)*a(i)))
-                ffroude  = dmax1(0.0d0,(1.0d0 - zfroude**(1.0d0/3.0d0)))
+                ffroude  = dmax1(0.0d0,(1.0d0 - zfroude**kalpha))
                 ! Alternative if cbrt for cubic root is available:
                 ! ffroude  = dmax1(0.0d0,(1.0d0 - dcbrt(zfroude)))
                
                 rhind = a(i)
-                rhind = rhind*dmin1(rhparam*renore*ffroude,1.0d0)**(1.0d0/3.0d0) 
+                rhind = rhind*dmin1(kepsilon*renore*ffroude,1.0d0)**kbeta 
                 ! Alternative if cbrt for cubic root is available:
-                ! rhind = rhind*dcbrt(dmin1(rhparam*renore*ffroude,1.0d0))
+                ! rhind = rhind*dcbrt(dmin1(kepsilon*renore*ffroude,1.0d0))
                
                 saux       = .5*(dabs(s(2,i)-rhind)+dabs(s(2,i)+rhind))
 
