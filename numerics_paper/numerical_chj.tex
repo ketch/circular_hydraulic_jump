@@ -2,6 +2,9 @@
 
 \usepackage{amsmath}
 \usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{float}
+\usepackage{subfig}
 
 \newcommand{\W}{{\mathcal W}}
 
@@ -9,8 +12,7 @@
 
 \author{
     David I. Ketcheson \and
-    Manuel Quezada de Luna \and
-    David Batista
+    Manuel Quezada de Luna
 }
 \begin{document}
 
@@ -255,6 +257,72 @@ The HLLEMCC solver follows the ideas of the Harten-Hyman entropy fix by splittin
 \subsection{Discontinuous Galerkin method}
 
 \section{Numerical results}
+
+To demonstrate the range of qualitative solutions that can arise when using
+different numerical methods, we apply several schemes to the following setup.
+We take
+\begin{align*}
+    r_0 & = 0.1 & h_0 & = 0.5 & u_0 & = 0.75 \\
+    g & = 1 & h_\infty & = 0.15 & F_\infty & = 0.1
+\end{align*}
+where $r_0, h_0, u_0$ are the jet radius and the depth and velocity at the outer
+edge of the jet, respectively; $h_\infty$ and $F_\infty$ are the depth
+and Froude number (infinitely) far away from the jet.  The domain is $[-1,1]^2$
+and boundary conditions are imposed based on the 1D steady state solution with
+the chosen jet and far-field conditions.  The bathymetry is flat and friction is
+neglected.  The initial data is chosen to be far from the equilibrium and
+consists of a uniform depth of $h=0.15$ and zero velocity.
+Results using a $1000\times 1000$ grid are shown in Figure \ref{fig:hlle_vs_roe}.  
+We see that by $t=4$, the HLLE solution has already reached the equilibrium
+and remains there indefinitely.  In contrast, the Roe solution is highly
+unsteady with a very non-circular jump containing cusps that tend to form
+near the four points where the jump is aligned with a grid axis.
+
+Based on numerous tests, we have found that results for other initial data
+are very similar to those shown here, although of course the details
+of the Roe solution differ because the solution is chaotic.
+
+\begin{figure}
+  \begin{centering}
+    \subfloat[HLLE Riemann solver, t=4]{
+      \includegraphics[width=0.45\textwidth]{figures/hlle_1000_t4.eps} 
+    }
+    \subfloat[Roe Riemann solver with entropy fix, t=4]{
+      \includegraphics[width=0.45\textwidth]{figures/roe_1000_t4.eps}
+    }
+
+    \subfloat[HLLE Riemann solver, t=20\label{fig:hlle}]{
+      \includegraphics[width=0.45\textwidth]{figures/hlle_1000_t20.eps} 
+    }
+    \subfloat[Roe Riemann solver with entropy fix, t=20\label{fig:roe}]{
+      \includegraphics[width=0.45\textwidth]{figures/roe_1000_t20.eps}
+    }
+  \end{centering}
+  \caption{
+    Comparison of PyClaw solutions using the classic Clawpack discretization
+    with HLLE and Roe Riemann solvers.\label{fig:hlle_vs_roe}}
+\end{figure}
+
+Next we apply Kemm's HLLEMCC solver to the same scenario; results are shown
+in Figure \ref{fig:hllemcc}.  Results at early times are very similar to
+those for the Roe solver.  The cusps that appear have a stronger tendency
+to dissipate and then reform, as indicated in the figure at $t=20$.
+Nevertheless, they continue to appear indefinitely, based on longer-time
+simulations.
+
+\begin{figure}
+  \begin{centering}
+    \subfloat[HLLEMCC Riemann solver, t=4]{
+      \includegraphics[width=0.45\textwidth]{figures/hllemcc_1000_t4.eps} 
+    }
+    \subfloat[HLLEMCC Riemann solver, t=20]{
+      \includegraphics[width=0.45\textwidth]{figures/hllemcc_1000_t20.eps}
+    }
+  \end{centering}
+  \caption{
+    PyClaw solutions using the classic Clawpack discretization
+    with HLLEMCC Riemann solver.\label{fig:hllemcc}}
+\end{figure}
 
 \subsection{Stable jump}
 
