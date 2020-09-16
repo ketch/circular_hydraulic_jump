@@ -324,6 +324,28 @@ simulations.
     with HLLEMCC Riemann solver.\label{fig:hllemcc}}
 \end{figure}
 
+The results above are computed with schemes that include second-order
+correction terms.  In Figure \ref{fig:first-order} we compare the corresponding
+first-order schemes.  Even by increasing the value of $\epsilon$ to $0.1$,
+the carbuncles are not suppressed by the HLLEMCC solver.  Indeed, the Roe
+and HLLEMCC solutions look very similar.
+
+\begin{figure}
+  \begin{centering}
+    \subfloat[Roe Riemann solver, 1st order, t=20]{
+      \includegraphics[width=0.45\textwidth]{figures/_1_roe_1000_t20.eps} 
+    }
+    \subfloat[HLLEMCC Riemann solver, $\epsilon=0.1$, 1st order, t=20]{
+      \includegraphics[width=0.45\textwidth]{figures/_1_hllemcc_1000_eps01_t20.eps}
+    }
+  \end{centering}
+  \caption{
+    PyClaw solutions using a 1st-order discretization
+    with different Riemann solvers.\label{fig:hllemcc}}
+\end{figure}
+
+
+
 \subsection{Stable jump}
 
 \subsection{Unstable jump}
