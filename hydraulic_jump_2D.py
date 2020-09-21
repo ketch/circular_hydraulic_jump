@@ -115,7 +115,7 @@ def subsonic_boundary_lower(state, dim, _, qbc, __, num_ghost):
     beta = r0*h0*u0
     F = state.problem_data['F_bdy'] # Froude number at boundary
     g = state.problem_data['grav']
-    
+
     h = (beta/(rc*F*np.sqrt(g)))**(2./3)
     unorm = beta / (rc*h)
     
@@ -163,8 +163,64 @@ def step_friction(solver, state, dt):
 
     q[1,:,:] = q[1,:,:] - dt*cf*u/h
     q[2,:,:] = q[2,:,:] - dt*cf*v/h
-        
-def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
+#
+
+def steady_rhs(h,r,beta,g=1.):
+    return h/(g/beta**2 * r**3 * h**3 - r)
+#
+    
+def initial_and_boundary_data(r_jump = 1.,
+                              r_inner = 0.1,
+                              r_outer = 4.0,
+                              num_cells = 501,
+                              g=1.,
+                              h_in=0.5,
+                              u_in=0.75):
+    from scipy import integrate
+    rc = np.linspace(r_inner,r_outer,num_cells)
+    i_jump = np.argmin(np.abs(rc-r_jump))
+    
+    # Left boundary
+    h_inner = h_in
+    u_inner = u_in
+    beta_inner = r_inner*h_inner*u_inner
+    
+    h = 0*rc
+    u = 0*rc
+    
+    rvals = rc[:i_jump+1]
+    beta = rvals[0]*h_inner*u_inner
+    hh = integrate.odeint(steady_rhs,h_inner,rvals,args=(beta,g))
+    hh = np.squeeze(hh)
+    uu = beta/(hh*rvals)
+    h[:i_jump+1] = hh[:]
+    u[:i_jump+1] = uu[:]
+    
+    # Jump in h
+    # Left side of jump
+    h_m = h[i_jump]; u_m = u[i_jump]
+    aleph = (-3*h_m+np.sqrt(h_m**2+8*h_m*u_m**2/g))/2.
+    # Right side of jump
+    h_p = h_m + aleph; u_p = h_m*u_m/h_p
+    h[i_jump+1] = h_p; u[i_jump+1] = u_p
+    
+    # Outer part of solution
+    beta_outer = rc[i_jump+1]*h[i_jump+1]*u[i_jump+1]
+    rvals = rc[i_jump+1:]
+    #print (beta_inner,beta_outer)
+    hh = integrate.odeint(steady_rhs,h_p,rvals,args=(beta_outer,g))
+    hh = np.squeeze(hh)
+    uu = beta_outer/(rvals*hh)
+    h[i_jump+1:] = hh[:]
+    u[i_jump+1:] = uu[:]
+
+    return rc, h, u, h_m
+#
+
+def setup(initialConditionType=0,
+          rJump=0.25,
+          rOutflow=1.0,
+          h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
           solver_type='classic', num_output_times=10, riemann_solver='hlle',
           boundary='subcritical', outdir='./_output', friction=False,
           friction_coeff=0.01, F_bdy=0.1, use_petsc=False, 
@@ -180,7 +236,6 @@ def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
     import shallow_hllemccRoEF_2D
 
     riemann_solver = riemann_solver.lower()
-    print(riemann_solver)
 
     if solver_type == 'classic':
         if riemann_solver == 'hlle':
@@ -260,8 +315,8 @@ def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
         solver.step_source = step_friction
         solver.source_split = 1
 
-    xlower = -1;  xupper =  1.
-    ylower = -1;  yupper =  1.
+    xlower = -rOutflow;  xupper =  rOutflow
+    ylower = -rOutflow;  yupper =  rOutflow
 
     mx = num_cells
     my = num_cells
@@ -295,10 +350,30 @@ def setup(h0=0.5, u0=0.75, r0=0.1, h_inf=0.15, g=1., num_cells=100, tfinal=1,
     state.problem_data['F_bdy'] = F_bdy
     state.problem_data['cf'] = friction_coeff
 
-    state.q[0,:,:] = (rc<r0)*h0 + (rc>=r0)*0.15
-    state.q[1,:,:] = (rc<r0)*h0*u0*xc/(rc+1.e-7)
-    state.q[2,:,:] = (rc<r0)*h0*u0*yc/(rc+1.e-7)
-
+    # INITIAL CONDITIONS #
+    nx=xc/(rc+1.e-7); ny=yc/(rc+1.e-7)
+    if initialConditionType==0:
+        state.q[0,:,:] = (rc<r0)*h0 + (rc>=r0)*0.15
+        state.q[1,:,:] = (rc<r0)*h0*u0*nx
+        state.q[2,:,:] = (rc<r0)*h0*u0*ny
+    elif initialConditionType==1:
+        rStab,hStab,uStab,hL = initial_and_boundary_data(r_jump = rJump,
+                                                         r_inner = r0,
+                                                         r_outer = rOutflow,
+                                                         num_cells = 10001,
+                                                         g=g,
+                                                         h_in=h0,
+                                                         u_in=u0)
+        from scipy.interpolate import interp1d
+        hInterp = interp1d(rStab,hStab)
+        rcInterp = np.minimum(np.maximum(rc,r0),rOutflow)
+        state.q[0,:,:] = (rc<r0)*h0 + (rc>=r0)*hInterp(rcInterp)
+        beta=r0*h0*u0
+        state.q[1,:,:] = (rc<r0)*h0*u0*nx + (rc>=r0)*beta/(rc+1.e-7)*nx
+        state.q[2,:,:] = (rc<r0)*h0*u0*ny + (rc>=r0)*beta/(rc+1.e-7)*ny
+        # compute Froude number at outflow boundary
+        velOutflow = uStab[-1] # = beta/(rOutflow*hStab[-1])
+        state.problem_data['F_bdy'] = velOutflow/np.sqrt(g*hStab[-1])
     #===========================================================================
     # Set up controller and controller parameters
     #===========================================================================
