@@ -118,7 +118,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
        ! Compute the waves.
 
         wave(1,1,i) = a1
-        wave(2,1,i) = alf(i)a1*(u(i)-a(i)) - beta(i)*a1*v(i)
+        wave(2,1,i) = alf(i)*a1*(u(i)-a(i)) - beta(i)*a1*v(i)
         wave(3,1,i) = beta(i)*a1*(u(i)-a(i)) + alf(i)*a1*v(i)
         s(1,i) = (u(i)-a(i)) * auxl(i, ilenrat)
 
