@@ -24,7 +24,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! ------------
 
     double precision, dimension(mwaves) :: splus, sminus
-    integer :: depth, mu, mv
+    integer :: depth
     integer :: i, m, mw
     integer :: inx, iny, ilenrat
     double precision :: ffroude, a1, a2, a3
@@ -88,11 +88,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! later used in routine rpt2 to do the transverse wave splitting.
 
     do i = 2-mbc, mx+mbc
-        !u_l = qr(mu,i-1) / qr(depth,i-1)
-        !u_r = ql(mu,i  ) / ql(depth,i  )
-        !v_l = qr(mv,i-1) / qr(depth,i-1)
-        !v_r = ql(mv,i  ) / ql(depth,i  )
-
         hsqrt_l = dsqrt(qr(depth,i-1))
         hsqrt_r = dsqrt(ql(depth,i))
         hsq2 = hsqrt_l + hsqrt_r
@@ -148,8 +143,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
             ! modified wave speeds to use HLLEM-entropy fix
 
-            !u_l = qr(mu,i-1) / qr(depth,i-1)
-            !u_r = ql(mu,i  ) / ql(depth,i  )
             h_l = qr(depth,i-1)
             h_r = ql(depth,i)
             u_l = unorr(i-1)
@@ -178,8 +171,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
             if(cfix) then
                 ! residual relative to acoustic speed
                 rere1  = wave(1,3,i)-wave(1,1,i)
-                reremu = wave(mu,3,i)-wave(mu,1,i)
-                reremv = wave(mv,3,i)-wave(mv,1,i)
+                reremu = wave(2,3,i)-wave(2,1,i)
+                reremv = wave(3,3,i)-wave(3,1,i)
                 ! norm of relative residual
                 renore = dsqrt(rere1*rere1 + reremu*reremu + reremv*reremv)
                 ! rhind = a(i) * max(kepsilon*renore,1.)

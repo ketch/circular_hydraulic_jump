@@ -137,8 +137,6 @@ def plot_surface(claw, make_anim=True, save_plots=False, frames=101, val='surfac
 
 def jet(state, dim, _, qbc, __, num_ghost):
     "Jet inflow BC at inner boundary."
-    rc, thetac = state.grid.p_centers_with_ghost(num_ghost)
-    r0 = r_lower
     h0 =  state.problem_data['h0']
     u0 =  state.problem_data['u0']
     
@@ -151,6 +149,7 @@ def subsonic_boundary_upper(state, dim, _, qbc, __, num_ghost):
     "Subsonic outflow BC at fixed Froude number."
     xc, yc = state.grid.p_centers_with_ghost(num_ghost)
     rc = np.sqrt(xc**2 + yc**2)
+    #rc, thetac = state.grid.c_centers_with_ghost(num_ghost)
     r0 = r_lower
     h0 =  state.problem_data['h0']
     u0 =  state.problem_data['u0']
@@ -184,7 +183,7 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
           solver_type='classic', num_output_times=10,
           boundary='subcritical', outdir='./_output', friction=False,
           friction_coeff=0.01, F_bdy=0.1, use_petsc=False, 
-          kalpha=1./3, kbeta=1.3, kepsilon=1.e-3):
+          kalpha=1./3, kbeta=1./3, kepsilon=1.e-3):
     
     import shallow_quad_hllemcc_2D
     if use_petsc:
@@ -280,9 +279,81 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
         #claw.output_format = None
     else:
         claw.keep_copy = False
+    claw.setplot = setplot
+    print(claw.setplot)
 
     return claw
 
+def setplot(plotdata):
+    """ 
+    Plot solution using VisClaw.
+    """
+    from mapc2p import mapc2p
+    import numpy as np
+    from clawpack.visclaw import colormaps
+
+    plotdata.clearfigures()  # clear any old figures,axes,items data
+    plotdata.mapc2p = mapc2p
+    
+    # Figure for contour plot
+    plotfigure = plotdata.new_plotfigure(name='contour', figno=0)
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
+    plotaxes.title = 'q[0]'
+    plotaxes.scaled = True
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_contour')
+    plotitem.plot_var = 0
+    plotitem.contour_levels = np.linspace(0., 1., 10)
+    plotitem.contour_colors = 'k'
+    plotitem.patchedges_show = 1
+    plotitem.MappedGrid = True
+
+    # Figure for pcolor plot
+    plotfigure = plotdata.new_plotfigure(name='q[0]', figno=1)
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
+    plotaxes.title = 'q[0]'
+    plotaxes.scaled = True
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = 0
+    plotitem.pcolor_cmap = colormaps.red_yellow_blue
+    plotitem.pcolor_cmin = 0.
+    plotitem.pcolor_cmax = 1.
+    plotitem.add_colorbar = True
+    plotitem.MappedGrid = True
+
+    # Figure for pcolor y-momentum plot
+    plotfigure = plotdata.new_plotfigure(name='rho*v', figno=2)
+
+    # Set up for axes in this figure:
+    plotaxes = plotfigure.new_plotaxes()
+    plotaxes.xlimits = 'auto'
+    plotaxes.ylimits = 'auto'
+    plotaxes.title = 'q[2]'
+    plotaxes.scaled = True
+
+    # Set up for item on these axes:
+    plotitem = plotaxes.new_plotitem(plot_type='2d_pcolor')
+    plotitem.plot_var = 2
+    plotitem.pcolor_cmap = colormaps.red_yellow_blue
+    plotitem.pcolor_cmin = -1.
+    plotitem.pcolor_cmax = 1.
+    plotitem.add_colorbar = True
+    plotitem.MappedGrid = True
+
+
+    return plotdata
+
 if __name__ == "__main__":
     from clawpack.pyclaw.util import run_app_from_main
-    claw = run_app_from_main(setup)
+    claw = run_app_from_main(setup,setplot)
