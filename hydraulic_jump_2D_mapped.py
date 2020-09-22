@@ -12,6 +12,7 @@ from matplotlib import animation
 import matplotlib.pyplot as plt
 from clawpack import pyclaw
 import numpy as np
+from mapc2p import mapc2p, mapc2p_annulus
 
 # If plotting in a Jupyter notebook, do this:
 #from clawpack.visclaw.JSAnimation import IPython_display
@@ -22,78 +23,51 @@ r_upper = 1.0
 theta_lower = 0.0
 theta_upper = 2*np.pi
 
-def compute_geometric_values(grid, aux):
+def compute_geometry(grid):
+    r"""Computes
+        a_x
+        a_y
+        length_ratio_left
+        b_x
+        b_y
+        length_ratio_bottom
+        cell_area
     """
-    Determine the normal vector and the length ratio for each edge.
-    Store them in aux.
-    Inputs:
-        - xp, yp: physical coordinates of nodes (corners)
-    """
-    xcorners, ycorners = grid.p_edges
-    v = np.empty(2)
-    w = np.empty(2)
-    xpcorn = np.empty(5)
-    ypcorn = np.empty(5)
 
     dx, dy = grid.delta
+    area_min = 1.e6
+    area_max = 0.0
 
-    for i in range(xcorners.shape[0]):
-        for j in range(xcorners.shape[1]):
+    x_corners, y_corners = grid.p_nodes
 
-            xpcorn[0] = xcorners[i,j]
-            xpcorn[1] = xcorners[i+1,j]
-            xpcorn[2] = xcorners[i+1,j+1]
-            xpcorn[3] = xcorners[i,j+1]
-            xpcorn[4] = xcorners[i,j]
+    lower_left_y, lower_left_x = y_corners[:-1,:-1], x_corners[:-1,:-1]
+    upper_left_y, upper_left_x = y_corners[:-1,1: ], x_corners[:-1,1: ]
+    lower_right_y, lower_right_x = y_corners[1:,:-1], x_corners[1:,:-1]
+    upper_right_y, upper_right_x = y_corners[1:,1: ], x_corners[1:,1: ]
 
-            ypcorn[0] = ycorners[i,j]
-            ypcorn[1] = ycorners[i+1,j]
-            ypcorn[2] = ycorners[i+1,j+1]
-            ypcorn[3] = ycorners[i,j+1]
-            ypcorn[4] = ycorners[i,j]
+    a_x =   upper_left_y - lower_left_y  #upper left and lower left
+    a_y = -(upper_left_x - lower_left_x)
+    anorm = np.sqrt(a_x**2 + a_y**2)
+    a_x, a_y = a_x/anorm, a_y/anorm
+    length_ratio_left = anorm/dy
 
-            area = 0.5*sum((ypcorn[:-1]+ypcorn[1:])*(xpcorn[1:]-xpcorn[:-1]))
+    b_x = -(lower_right_y - lower_left_y)  #lower right and lower left
+    b_y =   lower_right_x - lower_left_x
+    bnorm = np.sqrt(b_x**2 + b_y**2)
+    b_x, b_y = b_x/bnorm, b_y/bnorm
+    length_ratio_bottom = bnorm/dx
 
-            # Compute bottom/left edge vectors
-            v[0] = xcorners[i+1,j] - xcorners[i,j]
-            v[1] = ycorners[i+1,j] - ycorners[i,j]
-            w[0] = xcorners[i,j+1] - xcorners[i,j]
-            w[1] = ycorners[i,j+1] - ycorners[i,j]
+    area = 0*grid.c_centers[0]
+    area += 0.5 * (lower_left_y+upper_left_y)*(upper_left_x-lower_left_x)
+    area += 0.5 * (upper_left_y+upper_right_y)*(upper_right_x-upper_left_x)
+    area += 0.5 * (upper_right_y+lower_right_y)*(lower_right_x-upper_right_x)
+    area += 0.5 * (lower_right_y+lower_left_y)*(lower_left_x-lower_right_x)
+    area = area/(dx*dy)
+    area_min = min(area_min, np.min(area))
+    area_max = max(area_max, np.max(area))
 
-            xlength = np.linalg.norm(v)
-            ylength = np.linalg.norm(y)
+    return a_x, a_y, length_ratio_left, b_x, b_y, length_ratio_bottom, area
 
-            # Normal to x edge
-            aux[0,i,j] =  v[1]/xlength
-            aux[1,i,j] = -v[2]/xlength
-
-            aux[2,i,j] = xlength/dx # x edge length ratio
-
-            # Normal to y edge
-            aux[3,i,j] = -w[1]/ylength
-            aux[4,i,j] =  w[2]/ylength
-
-            aux[5,i,j] = ylength/dy # y edge length ratio
-
-            aux[6,i,j] = area
-
-def mapc2p_annulus(xc, yc):
-    """
-    Specifies the mapping to curvilinear coordinates.
-
-    Inputs: c_centers = Computational cell centers
-                 [array ([Xc1, Xc2, ...]), array([Yc1, Yc2, ...])]
-
-    Output: p_centers = Physical cell centers
-                 [array ([Xp1, Xp2, ...]), array([Yp1, Yp2, ...])]
-    """  
-    p_centers = []
-
-    # Polar coordinates (first coordinate = radius,  second coordinate = theta)
-    p_centers.append(xc[:]*np.cos(yc[:]))
-    p_centers.append(xc[:]*np.sin(yc[:]))
-    
-    return p_centers
 
 def plot_surface(claw, make_anim=True, save_plots=False, frames=101, val='surface',
                  vmin=0., vmax=0.5, clim=None, bathymetry=False, plotdir='./_plots'):
@@ -169,7 +143,7 @@ def jet(state, dim, _, qbc, __, num_ghost):
     u0 =  state.problem_data['u0']
     
     if dim.name == 'r':
-        qbc[0,:num_ghost,:] = h0[:num_ghost,:]
+        qbc[0,:num_ghost,:] = h0
         qbc[1,:num_ghost,:] = h0*u0
         qbc[2,:num_ghost,:] = 0.
 
@@ -212,7 +186,7 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
           friction_coeff=0.01, F_bdy=0.1, use_petsc=False, 
           kalpha=1./3, kbeta=1.3, kepsilon=1.e-3):
     
-    from clawpack import riemann
+    import shallow_quad_hllemcc_2D
     if use_petsc:
         from clawpack import petclaw as pyclaw
     else:
@@ -220,12 +194,12 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     import shallow_quad_hllemcc_2D
 
     if solver_type == 'classic':
-        solver = pyclaw.ClawSolver2D(riemann.shallow_quad_hllemcc_2D)
+        solver = pyclaw.ClawSolver2D(shallow_quad_hllemcc_2D)
         solver.cfl_max     = 0.9
         solver.cfl_desired = 0.8
         solver.transverse_waves = 2
     elif solver_type == 'sharpclaw':
-        solver = pyclaw.SharpClawSolver2D(riemann.shallow_quad_hllemcc_2D)
+        solver = pyclaw.SharpClawSolver2D(shallow_quad_hllemcc_2D)
 
     solver.num_eqn = 3
     solver.num_waves = 3
@@ -236,6 +210,9 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     solver.bc_upper[1] = pyclaw.BC.periodic
     solver.aux_bc_lower[1] = pyclaw.BC.periodic
     solver.aux_bc_upper[1] = pyclaw.BC.periodic
+
+    solver.aux_bc_lower[0] = pyclaw.BC.extrap
+    solver.aux_bc_upper[0] = pyclaw.BC.extrap
 
     # Jet at inner boundary
     solver.bc_lower[0] = pyclaw.BC.custom
@@ -256,10 +233,11 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
         solver.source_split = 1
 
     r = pyclaw.Dimension(r_lower,r_upper,num_cells_r,name='r')
-    y = pyclaw.Dimension(ylower,yupper,num_cells_theta,name='theta')
+    theta = pyclaw.Dimension(theta_lower,theta_upper,num_cells_theta,name='theta')
     domain = pyclaw.Domain([r,theta])
+    domain.grid.mapc2p = mapc2p_annulus
 
-    state = pyclaw.State(domain,3)
+    state = pyclaw.State(domain,3,7)
     
     rc, thetac = state.p_centers
     
@@ -273,7 +251,18 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     state.problem_data['F_bdy'] = F_bdy
     state.problem_data['cf'] = friction_coeff
 
-    state.q[0,:,:] = h0
+    a_x, a_y, length_left, b_x, b_y, length_bottom, area = compute_geometry(state.grid)
+
+    state.aux[0,:,:] = a_x
+    state.aux[1,:,:] = a_y
+    state.aux[2,:,:] = length_left
+    state.aux[3,:,:] = b_x
+    state.aux[4,:,:] = b_y
+    state.aux[5,:,:] = length_bottom
+    state.aux[6,:,:] = area
+    state.index_capa = 6 # aux[6,:,:] holds the capacity function
+
+    state.q[0,:,:] = 0.15
     state.q[1,:,:] = 0.
     state.q[2,:,:] = 0.
 
@@ -286,7 +275,7 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     claw.solver = solver
     claw.num_output_times = num_output_times
     claw.outdir = outdir
-    if num_cells < 400:
+    if num_cells_r < 400:
         claw.keep_copy = True
         #claw.output_format = None
     else:
