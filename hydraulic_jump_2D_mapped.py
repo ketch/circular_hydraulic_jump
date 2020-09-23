@@ -18,7 +18,7 @@ from mapc2p import mapc2p, mapc2p_annulus
 #from clawpack.visclaw.JSAnimation import IPython_display
 
 # Mapped grid parameters
-r_lower = 0.2
+r_lower = 0.1
 r_upper = 1.0
 theta_lower = 0.0
 theta_upper = 2*np.pi
@@ -139,11 +139,14 @@ def jet(state, dim, _, qbc, __, num_ghost):
     "Jet inflow BC at inner boundary."
     h0 =  state.problem_data['h0']
     u0 =  state.problem_data['u0']
+
+    xc, yc = state.grid.p_centers_with_ghost(num_ghost)
+    rc = np.sqrt(xc**2 + yc**2)
     
     if dim.name == 'r':
         qbc[0,:num_ghost,:] = h0
-        qbc[1,:num_ghost,:] = h0*u0
-        qbc[2,:num_ghost,:] = 0.
+        qbc[1,:num_ghost,:] = h0*u0*xc[:num_ghost,:]/r_lower
+        qbc[2,:num_ghost,:] = h0*u0*yc[:num_ghost,:]/r_lower
 
 def subsonic_boundary_upper(state, dim, _, qbc, __, num_ghost):
     "Subsonic outflow BC at fixed Froude number."
@@ -162,8 +165,8 @@ def subsonic_boundary_upper(state, dim, _, qbc, __, num_ghost):
     
     if dim.name == 'r':
         qbc[0,-num_ghost:,:] = h[-num_ghost:,:]
-        qbc[1,-num_ghost:,:] = h[-num_ghost:,:]*unorm[-num_ghost:,:]
-        qbc[2,-num_ghost:,:] = 0.
+        qbc[1,-num_ghost:,:] = h[-num_ghost:,:]*unorm[-num_ghost:,:]*xc[-num_ghost:,:]/(rc[-num_ghost:,:]+1.e-7)
+        qbc[2,-num_ghost:,:] = h[-num_ghost:,:]*unorm[-num_ghost:,:]*yc[-num_ghost:,:]/(rc[-num_ghost:,:]+1.e-7)
     else:
         raise Exception(dim)
         
@@ -261,7 +264,7 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     state.aux[6,:,:] = area
     state.index_capa = 6 # aux[6,:,:] holds the capacity function
 
-    state.q[0,:,:] = 0.15
+    state.q[0,:,:] = 0.15 + 0.1*np.random.rand(*state.q[0,:,:].shape)
     state.q[1,:,:] = 0.
     state.q[2,:,:] = 0.
 
@@ -280,7 +283,6 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     else:
         claw.keep_copy = False
     claw.setplot = setplot
-    print(claw.setplot)
 
     return claw
 
