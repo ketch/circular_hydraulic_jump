@@ -24,7 +24,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! ------------
 
     double precision, dimension(mwaves) :: splus, sminus
-    integer :: depth, mu, mv
+    integer :: depth
     integer :: i, m, mw
     integer :: inx, iny, ilenrat
     double precision :: ffroude, a1, a2, a3
@@ -32,7 +32,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     integer, parameter :: maxm2 = 1602  ! assumes at most 1000x1000 grid with mbc=2
     double precision, dimension(3) :: delta
     logical :: efix, cfix
-    double precision, dimension(-1:maxm2) :: u, v, a, h, unorl, unorr, utanl, utanr, alf, beta
+    double precision, dimension(-1:maxm2) :: u, v, a, h, unorl, unorr, utanl, utanr, alpha, beta
     double precision :: h_l, h_r, u_l, u_r, v_l, v_r, hsqrt_l, hsqrt_r, hsq2, c_l, c_r
     double precision :: grav
     double precision :: s1l, s3r, saux, sm1fix, sm1roe, sp3fix, sp3roe, zfroude
@@ -69,18 +69,18 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     endif
 
     ! Compute the rotation matrix:
-    ! [ alf beta ]
-    ! [-beta alf ]
+    ! [ alpha beta ]
+    ! [-beta alpha ]
     ! Then compute the normal and tangential momentum components to the right and left.
     ! The variable names here are potentially confusing and should be changed.
 
     do i=2-mbc, mx+mbc
-        alf(i) = auxl(i, inx)
-        beta(i) = auxl(i, iny)
-        unorl(i) = alf(i)*ql(i,2) + beta(i)*ql(i,3)
-        unorr(i-1) = alf(i)*qr(i-1,2) + beta(i)*qr(i-1,3)
-        utanl(i) = -beta(i)*ql(i,2) + alf(i)*ql(i,3)
-        utanr(i-1) = -beta(i)*qr(i-1,2) + alf(i)*qr(i-1,3)
+        alpha(i) = auxl(inx,i)
+        beta(i) = auxl(iny,i)
+        unorl(i) = alpha(i)*ql(2,i) + beta(i)*ql(3,i)
+        unorr(i-1) = alpha(i)*qr(2,i-1) + beta(i)*qr(3,i-1)
+        utanl(i) = -beta(i)*ql(2,i) + alpha(i)*ql(3,i)
+        utanr(i-1) = -beta(i)*qr(2,i-1) + alpha(i)*qr(3,i-1)
     enddo
 
     ! compute the Roe-averaged variables needed in the Roe solver.
@@ -88,11 +88,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! later used in routine rpt2 to do the transverse wave splitting.
 
     do i = 2-mbc, mx+mbc
-        !u_l = qr(mu,i-1) / qr(depth,i-1)
-        !u_r = ql(mu,i  ) / ql(depth,i  )
-        !v_l = qr(mv,i-1) / qr(depth,i-1)
-        !v_r = ql(mv,i  ) / ql(depth,i  )
-
         hsqrt_l = dsqrt(qr(depth,i-1))
         hsqrt_r = dsqrt(ql(depth,i))
         hsq2 = hsqrt_l + hsqrt_r
@@ -118,19 +113,19 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
        ! Compute the waves.
 
         wave(1,1,i) = a1
-        wave(2,1,i) = alf(i)a1*(u(i)-a(i)) - beta(i)*a1*v(i)
-        wave(3,1,i) = beta(i)*a1*(u(i)-a(i)) + alf(i)*a1*v(i)
-        s(1,i) = (u(i)-a(i)) * auxl(i, ilenrat)
+        wave(2,1,i) = alpha(i)*a1*(u(i)-a(i)) - beta(i)*a1*v(i)
+        wave(3,1,i) = beta(i)*a1*(u(i)-a(i)) + alpha(i)*a1*v(i)
+        s(1,i) = (u(i)-a(i)) * auxl(ilenrat,i)
 
         wave(1,2,i) = 0.0d0
         wave(2,2,i) = -beta(i)*a2
-        wave(3,2,i) = alf(i)*a2
-        s(2,i) = u(i) * auxl(i, ilenrat)
+        wave(3,2,i) = alpha(i)*a2
+        s(2,i) = u(i) * auxl(ilenrat,i)
 
         wave(1,3,i) = a3
-        wave(2,3,i) = alf(i)*a3*(u(i)+a(i)) - beta(i)*a3*v(i)
-        wave(3,3,i) = beta(i)*a3*(u(i)+a(i)) + alf(i)*a3*v(i)
-        s(3,i) = (u(i)+a(i)) * auxl(i, ilenrat)
+        wave(2,3,i) = alpha(i)*a3*(u(i)+a(i)) - beta(i)*a3*v(i)
+        wave(3,3,i) = beta(i)*a3*(u(i)+a(i)) + alpha(i)*a3*v(i)
+        s(3,i) = (u(i)+a(i)) * auxl(ilenrat,i)
     enddo
 
     ! compute flux differences amdq and apdq.
@@ -148,8 +143,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
             ! modified wave speeds to use HLLEM-entropy fix
 
-            !u_l = qr(mu,i-1) / qr(depth,i-1)
-            !u_r = ql(mu,i  ) / ql(depth,i  )
             h_l = qr(depth,i-1)
             h_r = ql(depth,i)
             u_l = unorr(i-1)
@@ -157,8 +150,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
             c_l = dsqrt(grav*h_l)
             c_r = dsqrt(grav*h_r)
 
-            s1l  = (u_l - c_l) * auxl(i,ilenrat) ! u-c in left state (cell i-1)
-            s3r  = (u_r + c_r) * auxl(i,ilenrat) ! u+c in right state  (cell i)
+            s1l  = (u_l - c_l) * auxl(ilenrat,i) ! u-c in left state (cell i-1)
+            s3r  = (u_r + c_r) * auxl(ilenrat,i) ! u+c in right state  (cell i)
 
             sm1fix     = dmin1(s(1,i),0.0,s1l)
             sm1roe     = dmin1(s(1,i),0.0)
@@ -178,8 +171,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
             if(cfix) then
                 ! residual relative to acoustic speed
                 rere1  = wave(1,3,i)-wave(1,1,i)
-                reremu = wave(mu,3,i)-wave(mu,1,i)
-                reremv = wave(mv,3,i)-wave(mv,1,i)
+                reremu = wave(2,3,i)-wave(2,1,i)
+                reremv = wave(3,3,i)-wave(3,1,i)
                 ! norm of relative residual
                 renore = dsqrt(rere1*rere1 + reremu*reremu + reremv*reremv)
                 ! rhind = a(i) * max(kepsilon*renore,1.)

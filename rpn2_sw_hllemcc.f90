@@ -170,8 +170,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
                 sminus(2)  = .5*(s(2,i) - saux)
                 splus(2)   = s(2,i) - sminus(2)
             else
-                sminus(2) = s(2,i)
-                splus(2) = s(2,i)
+                sminus(2) = dmin1(s(2,i),0.d0)
+                splus(2)  = dmax1(s(2,i),0.d0)
             endif
 
             do m=1,meqn
