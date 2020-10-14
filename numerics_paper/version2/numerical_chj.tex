@@ -1,0 +1,219 @@
+\documentclass[preprint, 11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[hmargin=0.9in, vmargin=1.25in]{geometry}
+\usepackage[babel,german=quotes]{csquotes}
+\usepackage{subfig}
+\usepackage{graphicx}
+\usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage{caption}
+\usepackage{amsmath}          % writing mathematical formulas
+\usepackage{amsthm}           % writing mathematical theorems 
+\usepackage{amssymb}          % writing mathematical symbols
+\usepackage{bm, amsfonts}     % writing bold mathematical symbols
+\usepackage{xcolor}
+\usepackage{fixmath}
+\usepackage{tikz}
+\usepackage{bm}
+\usepackage{makecell}
+\usepackage{mathdots}
+\usepackage{algpseudocode}
+\usepackage{algorithm}
+
+\newcommand{\W}{{\mathcal W}}
+\newcommand{\A}{{\mathcal A}}
+
+\title{Numerical simulation and entropy dissipative cure of the 
+  carbuncle instability for the shallow water circular hydraulic jump}
+
+\author{
+    David I. Ketcheson \and
+    Manuel Quezada de Luna
+}
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+
+\end{abstract}
+
+
+\section{Introduction}
+
+\subsection{The circular hydraulic jump}
+
+\begin{itemize}
+  \item Describe the formation of the circular hydraulic jump, some properties, etc. 
+  \item Close this section stating that for some flow regimes, the CHJ becmes unstable and its 
+    shape deviates from a circular shape. For high viscosity flows polygonal shapes are observed 
+    and for low viscosity flows the shape appears to be chaotic. 
+  \item We can use section 1.1 in the original version of the paper.
+\end{itemize}
+
+\subsection{Numerical shock instabilities}
+
+\begin{itemize}
+  \item Describe the carbuncle instability starting with Euler and going to SWEs. 
+  \item Mention that we observe the cc instability for the CHJ as well. 
+  \item Describe that in this case, the situation is more complicated than in other problems since we 
+    expect the correct solution to have physical instabilities triggered by round off error. 
+  \item Based on existing literature we know that we can use highly dissipative and robust methods to 
+    avoid the formation of carbuncle instabilities. However, in this case, these methods also tend to 
+    dissipate other important features of the solution unless the mesh is highly refined. 
+  \item We are interested in methods that prevent the formation of cc instability in the CHJ 
+    but preserve other features and physical instabilities. 
+  \item There are multiple ideas and methods proposed to fix the cc insitability for the Euler 
+    and recently for the SWEs. 
+  \item It is believed that the cc instability occurs due to lack or reduced viscosity in the shear contact waves. 
+  \item Some methods also propose to improve the entropy stability properties of the method. In particular, to induce or guarantee that the entropy is dissipated at shocks. 
+  \item Based on some of these ideas we start with Rusanov's method using the cell averages of the solution. 
+    This is a first-order method that is entropy stable and positivity preserving. We enhance its robustness by 
+    overestimating the wave speed when strong shear is present in the solution. The result is a robust solver 
+    that do not develop cc instabilities. However, the method is highly dissipative and, as a result, 
+    many other important features of the solution are dissipated. 
+  \item We then blend this highly dissipative method with a FV method based on Roe's average. 
+  \item After this we introduce the second order corrections from Law-Wendroff's method. 
+\end{itemize}
+
+\subsection{Our contribution}
+\begin{itemize}
+\item We present a new problem where the cc instability occurs. In our opinion, this is a more challenging 
+  problem than the standard bow problem since we expect the solution to be non-steady. 
+  We aim to preserve instabilities that are inherently present in the CHJ for certain regimes. And, 
+  at the same time, we aim to prevent the cc instability. 
+\item We explore the use of entropy dissipation and stability as cure of the cc instability for the SWEs. 
+\item We propose specific methods to blend the highly dissipative and robust Rusanov's RP and the 
+  accurate 3-wave Roe's solver for the SWEs. In particular we propose methods that induce dissipation of entropy
+  near the shocks and other methods that guarantee entropy stability. 
+\item We demonstrate that these schemes prevent the formation of cc instabilities not only 
+  in the well known bow shock problem, but also in the CHJ while preserving other important features of 
+  the solution. 
+\end{itemize}
+
+
+\section{The shallow water circular hydraulic jump}
+The shallow water equations in two (horizontal) dimensions are
+\begin{subequations} \label{eq:sw}
+\begin{align}
+    h_t + (hu)_x + (hv)_y & = 0 \\
+    (hu)_t + \left(hu^2 + \frac{1}{2}gh^2\right)_x + (huv)_y & = 0 \\
+    (hv)_t + (huv)_x + \left(hv^2 + \frac{1}{2}gh^2\right)_y & = 0.
+\end{align}
+\end{subequations}
+These can be written in vector form as
+\begin{align}
+    q_t + f(q)_x + g(q)_y & = 0.
+\end{align}
+
+\subsection{Semi-analytical steady solution under rotational symmetry}
+
+By assuming rotational symmetry in \eqref{eq:sw}, one obtains the
+system (in one spatial variable)
+\begin{subequations} \label{eq:rsw}
+\begin{align}
+    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
+    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
+\end{align}
+\end{subequations}
+Steady-state solutions of \eqref{eq:rsw} satisfy
+\begin{subequations}
+\begin{align}
+    rhu & = C \\
+    h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
+\end{align}
+\end{subequations}
+for some $C$ independent of $r$.  Here $F=|u|/\sqrt{gh}$ is the Froude number.
+We see that two types of steady profiles exist, depending on whether the flow
+is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
+include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
+
+The steady, rotationally-symmetric circular hydraulic jump involves supercritical
+flow for $r<r_0$ and subcritical flow for $r>r_0$, where $r_0$ is the jump radius.
+The jump itself takes the form of a stationary shock wave.  The Rankine-Hugoniot jump
+conditions specify that for such a shock,
+\begin{align} \label{eq:RH}
+    h_+ - h_- & = \frac{-3h_- + \sqrt{h_-^2 + 8 h_- u_-^2/g}}{2} = \frac{3h_-}{2}\left(\sqrt{1+\frac{8}{9}(F_-^2-1)}-1\right),
+\end{align}
+where the subscripts $+, -$ denote states just inside or outside the jump radius, respectively.
+
+A steady-state, rotationally symmetric solution can be given for an annular region as follows:
+
+\begin{enumerate}
+    \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
+    \item Integrate \eqref{eq:dh} from both boundaries.
+    \item Find a radius $r_0$ where the matching condition \eqref{eq:RH} is satisfied.
+\end{enumerate}
+Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the required jump
+radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
+and subcritical at the outer boundary.
+
+Numerical tests suggest that the solution obtained in this way is a stable equilibrium
+of the reduced one-dimensional shallow water equations \eqref{eq:rsw}.  This
+solution provides a useful starting point for testing the stability of the CHJ
+as a solution of the full two-dimensional shallow water equations \eqref{eq:sw}.
+
+\subsection{Formation of the CHJ}
+
+\section{Numerical methods}
+We consider the implementation of the Lax-Wendroff method in Clawpack. 
+For a one-dimensional problem, the method can be written as follows:
+\begin{align*}
+  U_i^{n+1}=U_i^n-\frac{\Delta t}{\Delta x}\left[\A\Delta Q_{i-1/2}]
+\end{align*}
+where XX. In this section we focus on the first order method; i.e., we consider 
+
+XX 
+
+and propose different Riemann solvers. Once the Riemann solvers are defined for the low-order method, 
+the second order corrections are incorporated following the same steps for all cases. Therefore, we focus our 
+attention to design of the Riemann solvers. 
+
+\subsection{Roe's Riemann solver}
+
+\subsection{Rusanov's Riemann solver}
+
+\subsection{Blended Rusanov's and Roe's solver based on entropy residual}
+
+\subsection{Blended Rusanov's and Roe's solver based on Tadmor's entropy stability condition}
+
+\subsection{Entropy stable enhancement of Roe's Riemann solver}
+
+\subsection{Other alternatives}
+
+\section{Numerical results}
+
+We consider two regimes. In the first regime, the physical instabilities are mild. 
+By increasing the strength of the jump and other parameters, we consider a second 
+and more strongly unstable regime. In both cases, we generate the CHJ as described in 
+Section XX; that is, we impose supersonic inflow boundary conditions for the jet and 
+subsonic outflow boundary conditions. 
+
+We consider two types of domain and two corresponding computational grids. 
+The two types of domains are two-dimensional squares and circular domains. 
+For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX, 
+respectively.
+
+\subsection{Regime 1: midly unstable flow}
+
+Show the results with Roe's and Rusanov's solver. 
+Show the results with the three proposed methodologies. 
+
+\subsection{Regime 2: strongly unstable flow}
+
+Show the results with Roe's and Rusanov's solver. 
+Show the results with the three proposed methodologies. 
+
+\section{Conclusions}
+
+\appendix
+\section{Bow shock problem for the shallow water equations}
+
+\section{Other numerical studies}
+
+\bibliographystyle{apalike}
+\bibliography{refs}
+
+\end{document}
+
