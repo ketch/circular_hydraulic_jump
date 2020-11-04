@@ -374,8 +374,8 @@ By doing this, equation XX can be written as
   \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}|\hat\lambda_{i-1/2}^p|^2 \right)\W_{i-1/2}^p\right] \\
   &-\frac{\Delta t}{2\Delta x}
   \sum_p 
-  \left[-\left(\lambda_{i+1/2}^{\max}-|\hat\lambda_{i+1/2}^p|\right)R_{i+1/2}\W_{i+1/2}^p
-    +\left(\lambda_{i-1/2}^{\max}-|\hat\lambda_{i-1/2}^p|\right)R_{i-1/2}\W_{i-1/2}^p\right],
+  \left[-R_{i+1/2}\left(\lambda_{i+1/2}^{\max}-|\hat\lambda_{i+1/2}^p|\right)\W_{i+1/2}^p
+    +R_{i-1/2}\left(\lambda_{i-1/2}^{\max}-|\hat\lambda_{i-1/2}^p|\right)\W_{i-1/2}^p\right],
 \end{align*}
 where the first row corresponds to the standard Lax-Wendroff method written in terms of 
 fluctuation-like quantities. 
@@ -389,7 +389,7 @@ $R_{i\pm 1/2}\approx 0$ in smooth regions.
 Also note that if $R_{i\pm 1/2}\approx 1$, which we expect to happen near steep gradients, 
 we do not recover the Lax-Wendroff method based on Rusanov's Riemann solver. 
 Instead, we obtain the first-order method XX with a flux correction. Assuming 
-the CFL-like condition $\Delta t/\Delta x|\hat\lambda_{i+1/2}^p|-1\leq 0$, the flux correction is anti-diffusive, 
+the CFL-like condition $\Delta t/\Delta x|\hat\lambda_{i\pm1/2}^p|-1\leq 0$, the flux correction is anti-diffusive, 
 which slightly improves the accuracy of the first-order Rusanov's method. 
 In our numerical experiments 
 with smooth solutions, we obtain first-order EOC if we set $R_{i\pm1/2}=1$, $\forall i$. 
@@ -398,8 +398,9 @@ Therefore, the accuracy properties of method XX depend upon the behavior of $R_{
 In smooth regions, where $R_{i\pm 1/2}\approx 0$, we recover second-order convergence;
 near discontinuities, where $R_{i\pm 1/2}\approx 1$, we add extra dissipation that decreases the convergence 
 to first-order. It is this extra dissipation that reduces the occurance of carbuncle instabilities 
-in our numerical experiments. In smooth regions, the accuracy of the underlying Lax-Wendroff-LeVeque method 
-based on Roe's Riemann solver is preserved.
+in our numerical experiments.
+%In smooth regions, the accuracy of the underlying Lax-Wendroff-LeVeque method 
+%based on Roe's Riemann solver is preserved.
 
 \subsection{Entropy stable Riemann solver}
 
