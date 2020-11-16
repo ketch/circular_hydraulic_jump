@@ -92,14 +92,13 @@
 \subsection{Our contribution}
 \begin{itemize}
 \item We present a new problem where the cc instability occurs. In our opinion, this is a more challenging 
-  problem than the standard bow problem since we expect the solution to be non-steady. 
+  problem than the standard bow shock problem since we expect the solution to be non-steady. 
   We aim to preserve instabilities that are inherently present in the CHJ for certain regimes. And, 
   at the same time, we aim to prevent the cc instability. 
-\item We explore the use of entropy dissipation and stability as cure of the cc instability for the SWEs. 
-\item We propose specific methods to blend the highly dissipative and robust Rusanov's RP and the 
-  accurate 3-wave Roe's solver for the SWEs. In particular we propose methods that induce dissipation of entropy
-  near the shocks and other methods that guarantee entropy stability. 
-\item We demonstrate that these schemes prevent the formation of cc instabilities not only 
+\item We explore the use of entropy dissipation and entropy stability as cure of the cc instability for the SWEs. 
+\item We propose a specific method to blend the highly dissipative and robust Rusanov's RP and the 
+  accurate 3-wave Roe's solver for the SWEs. 
+\item We demonstrate that this scheme prevents the formation of cc instabilities not only 
   in the well-known bow shock problem, but also in the CHJ while preserving other important features of 
   the solution. 
 \end{itemize}
@@ -119,7 +118,7 @@ These can be written in vector form as
     q_t + f(q)_x + g(q)_y & = 0.
 \end{align}
 
-\subsection{Semi-analytical steady solution under rotational symmetry}
+\subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
 
 By assuming rotational symmetry in \eqref{eq:sw}, one obtains the
 system (in one spatial variable)
@@ -130,7 +129,7 @@ system (in one spatial variable)
 \end{align}
 \end{subequations}
 Steady-state solutions of \eqref{eq:rsw} satisfy
-\begin{subequations}
+\begin{subequations}\label{steady}
 \begin{align}
     rhu & = C \\
     h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
@@ -166,7 +165,7 @@ of the reduced one-dimensional shallow water equations \eqref{eq:rsw}.  This
 solution provides a useful starting point for testing the stability of the CHJ
 as a solution of the full two-dimensional shallow water equations \eqref{eq:sw}.
 
-\subsection{Formation of the CHJ}
+\subsection{Formation of the CHJ}\label{sec:formation}
 
 \clearpage
 \section{Numerical methods}
@@ -221,12 +220,20 @@ the solution are dissipated, unless the grid is highly refined.
 Our main objective is to study the CHJ and to propose a Riemann solver
 that is carbuncle free but do not dissipate important features of the solution. 
 To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers. 
-Our blending criteria is based on the residual of the entropy (in)equality. 
-Similar ideas have been explored before to solve the Euler equations XX 
-and the shallow water equations XX. In these references, the authors use different 
-blending criteria. 
+Our blending criteria is based on the residual of the entropy (in)equality,
+which induces dissipation of entropy near discontinuities. 
+Blending these Riemann solvers has been proposed before
+to solve the Euler equations, see e.g.
+\cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy},
+the shallow water equations, see e.g. \cite{bader2014carbuncle,kemm2014note},
+and even the Navier-Stokes equations, see e.g. \cite{nishikawa2008very,ohwada2018simple}.
+In these references, the authors use blending criteria different than ours.
+Nevertheless, fixing the carbuncle instability by imposing entropy stability is not new.
+For example, in \cite{ismail2009affordable,ismail2009proposed},
+the authors developed carbuncle free solvers for the Euler equations
+via dissipation of entropy. 
 
-\subsection{Lax-Wendroff-LeVeque method}
+\subsection{Lax-Wendroff-LeVeque method}\label{sec:lax-wendroff-leveque}
 Let us now review the second-order correction to method \eqref{first-order_FV} implemented in 
 Clawpack \cite{clawpack} and PyClaw \cite{pyclaw-sisc}.
 We refer to \cite{leveque1997wave, leveque2002finite} for a detailed description of the method. 
@@ -606,8 +613,7 @@ Similarly, if $R_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusa
 which is clear by writting the fluctuations in Rusanov's method in terms of Roe's waves and speeds, 
 see \eqref{fluct_rus}.
 
-
-\subsection{Entropy stable Riemann solver}
+\subsection{Entropy stable Riemann solver}\label{sec:entropy_stable}
 The Riemann solver presented in the previous section blends Rusanov's and Roe's solver based on a
 measurement of the entropy residual. The objective is to induce dissipation of entropy 
 near discontinuities. However, we have no guarantee that methods \eqref{first-order_via_fluct} 
@@ -679,39 +685,142 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
 \end{align*}
 \end{remark}
 
-
+\begin{remark}[About the effect of $\lambda_{i\pm 1/2}^{\min}$ for Roe's solver.]
+  If we set $R_{i\pm 1/2}=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes the Roe's solver.
+  In this case, it is well known that transonic rarefactions develop non-physical shocks,
+  a phenomenon known as `entropy-glitch'. To fix this problem, many entropy fixes to the Roe's
+  solver have been developed. Enhancing the dissipation via \eqref{lambda_min} behaves as an entropy fix for
+  the Roe's solver, which we demonstrate via a numerical experiment in \S \ref{sec:rp_dry_bed}. 
+\end{remark}
 
 \clearpage
 \section{Numerical results}\label{sec:num}
-Description of the methods. We consider either the first-order method XX or the second-order Lax-Wendroff
-type method XX. For each of these methods we use one of the following three Riemann solvers: 
-\begin{itemize}
-  \item LLF: Rusanov's or Local Lax Friederichs 2-wave Riemann solver reviewed in \S XX.
-  \item Roe: standard Roe's average based 3-wave Riemann solver reviewed in \S XX. 
-  \item Roe-fix: Roe's solver with entropy fix based on XX. 
-  \item EV:  entropy dissipative 3-wave Riemann solver described in \S XX.
-\end{itemize}
+In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
+blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}. 
+We compare the behavior of the blended solver against the standard Roe's and Rusanov's solvers.
+In most of the experiments we use these Riemann solvers with the Lax-Wendroff-LeVeque method reviewed in \S\ref{sec:lax-wendroff-leveque}.
+When the exact solution is available, we report a convergence test based on the $L^1$-error for the water height
+\begin{align*}
+  E_1=\sum_i|K_i|~|h_i-h^e(\bfx_i)|,
+\end{align*}
+where $|K_i|$ is the length or area of cell $i$,
+$h_i$ is the cell average of the water height at cell $i$,
+and $h^e(\bfx_i)$ is the exact water height evaluated at the center of cell $i$.
 
-\subsection{Dam break problem on a dry bed}
+We consider a total of six problems. We start with a one-dimensional Riemann problem over a dry bed. 
+For this problem we use the first-order method \eqref{first-order_via_fluct},
+which helps preventing violations of positivity. Although, only the Rusanov's solver guarantees
+positivity, we do not get negative values for the water height with this method and the other Riemann solvers.
+In \S \ref{sec:steady_outflow} we consider a one-dimensional problem with a smooth steady state solution. We observe the expected
+second-order accuracy of method \eqref{second-order_via_fluct} with Roe's and the blended solvers. Using
+the Rusanov's Riemann solver degrades the accuracy to first-order. The overall accuracy of the blended solver
+is not degraded since the extra dissipation is not applied in smooth regions. 
+In \S\ref{sec:rp_wet_bed} and \S\ref{sec:1D_chj} we consider one-dimensional problems with strong shocks. We observe similar accuracy with the
+blended solver than with Roe's solver; that is, inducing entropy dissipation near the shocks do not degrade the accuracy
+of the underlying Roe's solver. This extra dissipation, however, prevents the formation of carbuncles in other experiments,
+which we demonstrate in \S \ref{sec:bow_shock} and \S\ref{sec:2D_chj}. 
+The main focus of this work is in the formation of carbuncle instabilities in the two-dimensional CHJ. We present
+an extensive set of experiments about this problem in \S \ref{sec:2D_chj}.
+We consider not only Roe's, Rusanov's and the blended solvers, but also the HLLE solver and a solver proposed in \cite{kemm2014note},
+which is designed to remove the carbuncle instabilities in the shallow water equations. 
+
+\subsection{Dam break problem on a dry bed}\label{sec:rp_dry_bed}
 We start with the one-dimensional dam break problem on a dry bed. 
 This problem is a canonical example that demonstrates the `entropy glitch' of Roe's solver 
-at transonic rarefactions. Since the baseline Roe's solver we use (see \S XX) does not contain 
-an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch, 
-at least for this benchmark. 
-We follow the setup in XX. The domain is given by XX, and the initial condition is XX and XX. 
-The exact solution, which can be found in XX and references therein, is 
+at transonic rarefactions. Since the baseline Roe's solver we use (see \S\ref{sec:roe}) does not contain 
+an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch.
+We follow the setup in \cite[\S 4.1.2]{delestre2013swashes}.
+The domain is given by $\Omega=(0,L=10)$, and the initial condition is $hu(x,0)=0$ and
+\begin{align*}
+  h(x,0)=
+  \begin{cases}
+    h_l, & \mbox{ if }, x\leq x_0=5 \\
+    h_r, &\mbox{ otherwise},
+  \end{cases}
+\end{align*}
+with $h_l=5\times 10^{-3}$ and $h_r=0$. In our experiments we use $h_r=1\times 10^{-15}$ to avoid division by zero.
+The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is 
+\begin{align*}
+  h(x,t) = 
+  \begin{cases}
+    h_l, \\
+    \frac{4}{9g}\left(\sqrt{gh_l}-\frac{x-x_0}{2t}\right)^2, \\
+    0,
+  \end{cases}
+\quad 
+  u(x,t) = 
+  \begin{cases}
+    0, &\mbox{ if } x\leq x_A(t), \\
+    \frac{2}{3}\left(\sqrt{gh_l}+\frac{x-x_0}{t}\right), & \mbox{ if } x_A(t) < x\leq x_B(t), \\
+    0, &\mbox{ if } x_B(t)\leq x,
+  \end{cases}
+\end{align*}
+with $x_A(t)=x_0-t\sqrt{gh_l}$ and $x_B(t)=x_0+2t\sqrt{gh_l}$.
+We use $g=1$ and solve the problem up to $t=10$.
+In figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
+we show the solution using method \eqref{first-order_via_fluct} 
+with Roe's solver, Rusanov's solver and the blended solver, respectively.
+The entropy glitch, which is manifested as a non-physical shock at $x=x_0$,
+is present with Roe's solver. Using Rusanov's and the blended solvers
+fixes the entropy glitch.
+In Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test. 
+Note that using the blended solver leads to more accurate results. 
 
-XX 
+\begin{figure}[!h]
+  {\scriptsize
+    \subfloat[Roe's Riemann solver.\label{fig:rp_dry_bed_roe}]{
+      \includegraphics[scale=0.36]{figures/rp_dry_roe.png}}
+    ~
+    \subfloat[Rusanov's Riemann solver.\label{fig:rp_dry_bed_llf}]{
+        \includegraphics[scale=0.36]{figures/rp_dry_llf.png}}
+    
+    \subfloat[Blended Riemann solver. \label{fig:rp_dry_bed_blended}]{
+      \includegraphics[scale=0.36]{figures/rp_dry_blended.png}}
+    ~
+    \subfloat[Roe's Riemann solver with $\lambda_{i\pm 1/2}^{\min}$.\label{fig:rp_dry_bed_roe_with_lmin}]{
+      \includegraphics[scale=0.36]{figures/rp_dry_roe_with_lmin.png}}    
+  }
+  \caption{
+    Dam break problem over a dry bed using method \eqref{first-order_via_fluct} with different
+    Riemann solvers. We show the numerical solution and the exact solution (in dashed black) at $t=10$.
+    We consider different refinements with
+    (cyan) $\Delta x=1/400$, (red) $\Delta x=1/800$, (blue) $\Delta x=1/1600$.
+    \label{fig:rp_dry_bed}}
+\end{figure}
 
-We use g=1 and solve the problem up to T=10. In Figure XX we show the solution using method XX 
-with Roe's solver, Rusanov's solver and the blended solver. The entropy glitch, which is manifested 
-as a non-physical show at x=XX, is clearly shown with Roe's solver. Using Rusanov's solver and the 
-blended solver fix the entropy glitch. Using the blended solver leads to more accurate results. 
-In Table XX, we summarize the results of a convergence test. 
+For this particular problem, using method \eqref{first-order_via_fluct} with the blended Riemann solver
+leads to $\lambda_{i\pm 1/2}^{\min}=0$ for all the experiments, but this is not true in general.
+Finally, let us demonstrate the effect of $\lambda_{i\pm 1/2}^{\min}$ by imposing $R_{i}=0$ in \eqref{lambda_p},
+which is equivalent to using Roe's solver with extra dissipation given by $\lambda_{i\pm 1/2}^{\min}$.
+In Figure \ref{fig:rp_dry_bed_roe_with_lmin}, we show the solution using different refinements,
+and in the last column of Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
+Note that the entropy glitch is highly reduced. 
+To remove completely the entropy glitch we could add high-order entropy dissipation following \cite{tadmor2003entropy}
+and references therein.
 
-\subsection{Dam break problem on a wet bed}
-We consider a one-dimensional dam break problem on a wet domain. 
-We follow the setup in XX. 
+\begin{table}[!ht]\scriptsize
+  \begin{center}
+    \begin{tabular}{||c||c|c||c|c||c|c||c|c||} \hline
+      & \multicolumn{2}{c||}{Roe's solver}  
+      &\multicolumn{2}{c||}{Rusanov's solver} 
+      &\multicolumn{2}{c||}{Blended solver}
+      &\multicolumn{2}{c||}{Roe's with $\lambda_{i\pm 1/2}^{\min}$} \\ \cline{2-9}
+      $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
+      1/50   & 6.21E-04 &  --  & 6.95E-04 &   -- & 5.10E-04 &  --  & 5.95E-04 & --   \\
+      1/100  & 4.70E-04 & 0.40 & 5.27E-04 & 0.40 & 3.53E-04 & 0.52 & 4.06E-04 & 0.55 \\
+      1/200  & 3.91E-04 & 0.26 & 3.88E-04 & 0.44 & 2.38E-04 & 0.56 & 2.83E-04 & 0.52 \\
+      1/400  & 3.16E-04 & 0.30 & 2.64E-04 & 0.55 & 1.51E-04 & 0.65 & 1.89E-04 & 0.58 \\
+      1/800  & 2.35E-04 & 0.42 & 1.67E-04 & 0.66 & 9.43E-05 & 0.68 & 1.20E-04 & 0.65 \\
+      1/1600 & 2.00E-04 & 0.23 & 1.01E-04 & 0.72 & 5.70E-05 & 0.72 & 7.42E-05 & 0.68 \\ \hline
+    \end{tabular}
+    \caption{Grid convergence study for the dam break problem over a dry bed
+      using method \eqref{first-order_via_fluct} with different Riemann solvers.\label{table:rp_dry_bed}}
+  \end{center}
+\end{table}
+
+\subsection{Dam break problem on a wet bed}\label{sec:rp_wet_bed}
+We consider now a one-dimensional dam break problem on a wet domain. 
+We follow the setup in \cite[\S 4.1.1]{delestre2013swashes}. 
 The domain is $\Omega=(0,L)$ with $L=10$, the initial condition is given by 
 $hu(x,0)=0$ and 
 \begin{align*}
@@ -722,7 +831,8 @@ $hu(x,0)=0$ and
   \end{cases}
 \end{align*}
 with $x_0=5$, $h_l=0.005$ and $h_r=0.001$. 
-The exact solution, which can be found in XX and references therein, is given by 
+The exact solution, which can be found in \cite{delestre2013swashes} and references therein,
+is given by 
 \begin{align*}
   h(x,t) = 
   \begin{cases}
@@ -744,60 +854,210 @@ where $x_A(t)=x_0-t\sqrt{gh_l}$, $x_B(t)=x_0+t\left(2\sqrt{gh_l}-3c_m\right)$,
 $x_C(t)=x_0+t\frac{2c_m^2\left(\sqrt{gh_l}-c_m\right)}{c_m^2-gh_r}$ and 
 $c_m$ is the solution of 
 $-8gh_rc_m^2\left(\sqrt{gh_l}-c_m\right)^2+\left(c_m^2-gh_r\right)^2\left(c_m^2+gh_r\right)=0$.
-We use $g=1$ and solve the problem up to the final time $T=5$ considering the 2nd-order Lax-Wendroff 
-type method XX with the LLF, Roe and EV Riemann solvers. The solution with different refinement levels 
-and each Riemann solver is shown in Figure XX. In Table XX, we summarize the results of a convergence test. 
+We use $g=1$ and solve the problem up to the final time $t=5$ considering method \eqref{second-order_via_fluct}
+with Roe's, Rusanov's and the blended solvers. The solution with different refinement levels 
+and each Riemann solver is shown in Figure \ref{fig:rp_wet_bed}.
+In Table \ref{table:rp_wet_bed}, we summarize the results of a convergence test. 
 Since the solution is non-smooth, we expect no more than first order convergence rates. Note that the 
-results with the entropy dissipative solver EV are comparable against the results using Roe's solver. 
-That is, inducing entropy dissipation via the EV Riemann solver does not degrade the high-order accuracy 
-properties of the Roe's solver. 
-In contrast, the accuracy and convergence rates using the LLF solver are clearly degraded.  
+results with the entropy dissipative blended solver are comparable against the results using Roe's solver. 
+That is, inducing entropy dissipation via the blended Riemann solver does not degrade the high-order
+accuracy properties of the Roe's solver. 
+In contrast, the accuracy and convergence rates using Rusanov's solver are clearly degraded.  
 
-\subsection{The circular hydraulic jump in one dimension}
+\begin{figure}[!h]
+  {\scriptsize
+    \subfloat[Roe's Riemann solver.]{
+      \includegraphics[scale=0.29]{figures/rp_wet_roe.png}}
+    \quad
+    \subfloat[Rusanov's Riemann solver.]{
+        \includegraphics[scale=0.29]{figures/rp_wet_llf.png}}
+    \quad
+    \subfloat[Blended Riemann solver.]{
+      \includegraphics[scale=0.29]{figures/rp_wet_blended.png}}
+  }
+  \caption{
+    Dam break problem over a wet bed using method \eqref{second-order_via_fluct} with different
+    Riemann solvers. We show the numerical solution and the exact solution (in dashed black) at $t=10$.
+    We consider different refinements with
+    (cyan) $\Delta x=1/400$, (red) $\Delta x=1/800$, (blue) $\Delta x=1/1600$.
+    \label{fig:rp_wet_bed}}
+\end{figure}
 
-\subsection{Steady outflow}
+\begin{table}[!ht]\scriptsize
+  \begin{center}
+    \begin{tabular}{||c||c|c||c|c||c|c||} \hline
+      & \multicolumn{2}{c||}{Roe's solver}  
+      &\multicolumn{2}{c||}{Rusanov's solver} 
+      &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
+      $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
+      1/50   & 4.22E-04 &  --  & 5.73E-04 &  --  & 4.34E-04 & --   \\
+      1/100  & 2.00E-04 & 1.07 & 3.35E-04 & 0.78 & 2.08E-04 & 1.05 \\
+      1/200  & 1.11E-04 & 0.85 & 2.01E-04 & 0.74 & 1.13E-04 & 0.88 \\
+      1/400  & 5.05E-05 & 1.13 & 1.18E-04 & 0.77 & 5.26E-05 & 1.10 \\
+      1/800  & 2.60E-05 & 0.95 & 7.08E-05 & 0.74 & 2.73E-05 & 0.94 \\
+      1/1600 & 1.29E-05 & 1.01 & 3.79E-05 & 0.90 & 1.32E-05 & 1.04 \\ \hline
+    \end{tabular}
+    \caption{Grid convergence study for the dam break problem over a wet bed
+      using method \eqref{second-order_via_fluct} with different Riemann solvers.\label{table:rp_wet_bed}}
+  \end{center}
+\end{table}
+
+\subsection{The circular hydraulic jump in one-dimension}\label{sec:1D_chj}
+In this section we consider for the first time a CHJ. We start with a one-dimensional problem
+embedded into the two-dimensional domain $\Omega=(0.1,1)\times(0,0.1)$.
+A semi-analytical solution at steady state is available as described in \S \ref{sec:steady_chj};
+therefore, we can perform a convergence test. 
+We consider the initial condition $h(x,t=0)=0.1$, $hu(x,t=0)=0$ and $hv(x,t=0)=0$.
+At the left boundary, we impose $h(0.1,t)=0.3$, $hu(0.1,t)=0.225$ and $hv(0.1,t)=0$.
+At the right boundary we impose $h(1,t)=0.37387387318873766$, $hu(1,t)=\beta/h(1,t)$ and $hv(1,t)=0$ where $\beta=0.0225$.
+The values on the right boundary are chosen so that the CHJ is located at $x=0.3$, as described in \S \ref{sec:formation}.
+%
+In the first row of Figure \ref{fig:rp_wet_bed}, we show (slices of) the solution (at $y=0.05$)
+at different times using the second-order method \eqref{second-order_via_fluct} with Roe's, Rusanov's and the blended Riemann solvers. 
+In the second row of the same figure, we plot $R_i$ \eqref{Ri}, which is a (normalized) measurement of the
+entropy residual. Note that $R_i$ accurately locates the shocks and is (nearly) zero in smooth regions. 
+In Table \ref{table:chj_1D}, we summarize the results of a convergence study. 
+We remark that the convergence with Roe's solver is erratic.
+Moreover, for the finer grids, the solution appears to become worse.
+Using Rusanov's and the blended Riemann solvers delivers cleaner convergence rates. 
+In \cite[\S 5]{kemm2018heuristical} and \cite{bader2014carbuncle}, the authors consider one-dimensional problems embedded into
+two-dimensional domains and observe different instabilities for the
+Euler and the shallow water equations, respectively.
+The authors attributed the problem to a manifestation of the carbuncle instability
+that lead to an unstable location of the steady shock with certain Riemann solvers, including Roe's solver. 
+
+\begin{figure}[!h]
+  {\scriptsize
+    \includegraphics[scale=0.29]{figures/chj_1D_t0p5.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/chj_1D_t1p3.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/chj_1D_t10p0.png}
+
+    \vspace{15pt}
+    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t0p5.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t1p3.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t10p0.png}
+  }
+  \caption{
+    One-dimensional CHJ using method \eqref{second-order_via_fluct} with 
+    (cyan) Roe's, (red) Rusanov's and (blue) the blended Riemann solvers.
+    In the second row we plot $R_i$, which is given by \eqref{Ri}.
+    In all simulations we consider $\Delta x=1/400$.
+    \label{fig:1D_chj}}
+\end{figure}
+
+\begin{table}[!ht]\scriptsize
+  \begin{center}
+    \begin{tabular}{||c||c|c||c|c||c|c||} \hline
+      & \multicolumn{2}{c||}{Roe's solver}  
+      &\multicolumn{2}{c||}{Rusanov's solver} 
+      &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
+      $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
+      1/50  & 1.56E-04 &  --   & 8.80E-04 &  --  & 3.56E-04 &  --  \\
+      1/100 & 1.06E-04 & 0.55  & 5.09E-04 & 0.79 & 1.95E-04 & 0.86 \\
+      1/200 & 7.77E-05 & 0.45  & 2.96E-04 & 0.78 & 1.07E-04 & 0.87 \\
+      1/400 & 7.50E-06 & 3.37  & 1.49E-04 & 0.99 & 3.68E-05 & 1.53 \\
+      1/800 & 9.07E-06 & -0.27 & 7.98E-05 & 0.90 & 1.67E-05 & 1.14 \\ \hline
+    \end{tabular}
+    \caption{Grid convergence study for the one-dimensional CHJ at $t=10$
+      using method \eqref{second-order_via_fluct} with different Riemann solvers.\label{table:chj_1D}}
+  \end{center}
+\end{table}
+
+\subsection{Steady outflow}\label{sec:steady_outflow}
 Let us consider a problem similar to that in the previous section, but with an outflow boundary condition. 
-That is, we consider the one-dimensional domain $\Omega=(0.1,1)$, the initial condition is 
-$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$, 
-and the right boundary condition is set to outflow, see the details in XX. 
-If the flow is supercritical ($|F|>1$), the exact solution converges to a 
-steady state profile given by the solution of the ODE XX. 
+That is, we consider the one-dimensional domain $\Omega=(0.1,1)$, the initial condition 
+$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$, 
+and set the right boundary condition to outflow.
+We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition. 
+If the flow is supercritical ($|F|>1$ where $F$ is the Froude number), the exact solution converges to a 
+steady state profile given by the solution of \eqref{steady}. 
 Depending on the initial condition, shocks might develop before the steady state is reached. 
 Nevertheless, the steady state profile is smooth. 
-In Figure XX, we show the solution at different times based on the secnd-order method XX with 
-the EV Riemann solver. Additionally, in Table XX we summarize the result of a convergence study 
-based on the first- and second-order methods XX and XX, respectively. 
-We consider the Riemann solver in \S XX with Ri=0, Ri=1 and Ri computed via XX. 
+In Figure \ref{fig:steady_outflow}, we show the solution and $R_i$ at different times using
+the second-order method \eqref{second-order_via_fluct}
+with Roe's, Rusanov's and the blended Riemann solvers.
+Additionally, in Table \ref{table:steady_outflow}, we summarize the results of a convergence study 
+based on methods \eqref{first-order_via_fluct} and
+\eqref{second-order_via_fluct}, using the same Riemann solvers.  
 
+\begin{figure}[!h]
+  {\scriptsize
+    \includegraphics[scale=0.29]{figures/outflow_1D_t0p5.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/outflow_1D_t1p3.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/outflow_1D_t10p0.png}
 
-\subsection{The circular hydraulic jump in two dimensions}
-We consider two regimes. In the first regime, the physical instabilities are mild. 
-By increasing the strength of the jump and other parameters, we consider a second 
-and more strongly unstable regime. In both cases, we generate the CHJ as described in 
-Section XX; that is, we impose supersonic inflow boundary conditions for the jet and 
-subsonic outflow boundary conditions. 
+    \vspace{15pt}
+    \includegraphics[scale=0.29]{figures/outflow_1D_Ri_t0p5.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/outflow_1D_Ri_t1p3.png}
+    \qquad
+    \includegraphics[scale=0.29]{figures/outflow_1D_Ri_t10p0.png}
+  }
+  \caption{
+    Steady outflow problem using method \eqref{second-order_via_fluct} with 
+    (cyan) Roe's, (red) Rusanov's and (dashed blue) the blended Riemann solvers.
+    In the second row we plot $R_i$, which is given by \eqref{Ri}.
+    In all simulations we consider $\Delta x=1/400$.
+    \label{fig:steady_outflow}}
+\end{figure}
 
-We consider two types of domain and two corresponding computational grids. 
-The two types of domains are two-dimensional squares and circular domains. 
-For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX, 
-respectively.
+\begin{table}[!ht]\scriptsize
+  \begin{center}
+    \begin{tabular}{||c||c|c||c|c||c|c||c|c||c|c||c|c||} \hline
+      & \multicolumn{6}{c||}{First-order method \eqref{first-order_via_fluct}}
+      & \multicolumn{6}{c||}{Second-order method \eqref{second-order_via_fluct}} \\ \cline{2-13}
+      & \multicolumn{2}{c||}{Roe's solver}  
+      &\multicolumn{2}{c||}{Rusanov's solver} 
+      &\multicolumn{2}{c||}{Blended solver}
+      & \multicolumn{2}{c||}{Roe's solver}  
+      &\multicolumn{2}{c||}{Rusanov's solver} 
+      &\multicolumn{2}{c||}{Blended solver}
+      \\ \cline{2-13}
+      $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate\\ \hline
+      1/50   & 2.16E-4 &  --  & 9.97E-4 &   -- & 2.20E-4 & --   & 4.13E-5 &   -- & 7.32E-4 &  --  & 4.97E-5 & --   \\
+      1/100  & 1.14E-4 & 0.92 & 6.38E-4 & 0.64 & 1.16E-4 & 0.92 & 1.47E-5 & 1.48 & 4.43E-4 & 0.73 & 1.89E-5 & 1.39 \\
+      1/200  & 5.86E-5 & 0.95 & 3.88E-4 & 0.72 & 5.93E-5 & 0.96 & 4.81E-6 & 1.61 & 2.57E-4 & 0.79 & 6.36E-6 & 1.57 \\
+      1/400  & 2.98E-5 & 0.97 & 2.26E-4 & 0.78 & 3.00E-5 & 0.98 & 1.42E-6 & 1.76 & 1.44E-4 & 0.83 & 1.92E-6 & 1.72 \\
+      1/800  & 1.50E-5 & 0.98 & 1.27E-4 & 0.83 & 1.51E-5 & 0.99 & 4.16E-7 & 1.76 & 7.81E-5 & 0.88 & 5.61E-7 & 1.77 \\
+      1/1600 & 7.53E-6 & 0.99 & 6.90E-5 & 0.88 & 7.55E-6 & 0.99 & 1.14E-7 & 1.86 & 4.12E-5 & 0.92 & 1.54E-7 & 1.86 \\ \hline
+    \end{tabular}
+    \caption{Grid convergence study for the steady outflow problem
+      using methods \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}
+      with different Riemann solvers.\label{table:steady_outflow}}
+  \end{center}
+\end{table}
 
-\subsection{Regime 1: midly unstable flow}
+%\clearpage
+\subsection{Steady shock around a cylinder}\label{sec:bow_shock}
+\subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
+%We consider two regimes. In the first regime, the physical instabilities are mild. 
+%By increasing the strength of the jump and other parameters, we consider a second 
+%and more strongly unstable regime. In both cases, we generate the CHJ as described in 
+%Section XX; that is, we impose supersonic inflow boundary conditions for the jet and 
+%subsonic outflow boundary conditions. 
 
-Show the results with Roe's and Rusanov's solver. 
-Show the results with the three proposed methodologies. 
+%We consider two types of domain and two corresponding computational grids. 
+%The two types of domains are two-dimensional squares and circular domains. 
+%For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX, 
+%respectively.
 
-\subsection{Regime 2: strongly unstable flow}
+%\subsection{Regime 1: midly unstable flow}
 
-Show the results with Roe's and Rusanov's solver. 
-Show the results with the three proposed methodologies. 
+%Show the results with Roe's and Rusanov's solver. 
+%Show the results with the three proposed methodologies. 
+
+%\subsection{Regime 2: strongly unstable flow}
+
+%Show the results with Roe's and Rusanov's solver. 
+%Show the results with the three proposed methodologies. 
 
 \section{Conclusions}
-
-\appendix
-\section{Bow shock problem for the shallow water equations}
-
-\section{Other numerical studies}
 
 %\bibliographystyle{apalike}
 \bibliographystyle{plain}
