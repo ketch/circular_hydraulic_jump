@@ -49,22 +49,88 @@
 \maketitle
 
 \begin{abstract}
-
+We study numerical discretizations of the shallow water equations
+for the simulation of the circular hydraulic jump formed
+when a vertical fluid jet impacts a horizontal plate.  
+This is a challenging problem that includes a curved steady shock
+that can be physically unstable.  We show that numerical methods are prone to
+either suppress the instability completely or form artificial carbuncles.
+We test existing cures for the carbuncle as well as a new method,
+and show results that exhibit the shock instability without unphysical carbuncles.
 \end{abstract}
+
+
 
 \section{Introduction}
 
 \subsection{The circular hydraulic jump}
 
-\begin{itemize}
-  \item Describe the formation of the circular hydraulic jump, some properties, etc. 
-  \item Close this section stating that for some flow regimes, the CHJ becmes unstable and its 
-    shape deviates from a circular shape. For high viscosity flows polygonal shapes are observed 
-    and for low viscosity flows the shape appears to be chaotic. 
-  \item We can use section 1.1 in the original version of the paper.
-\end{itemize}
+Perhaps the first reference to the observation of the circular hydraulic jump
+comes from Lord Rayleigh \cite{rayleigh1914theory}, who wrote that it
+``may usually be seen whenever a stream of water from a tap strikes a horizontal
+surface".  This phenomenon that is familiar in the everyday kitchen sink, is in
+fact highly nonlinear and complex.  Near the jet, the flow is shallow and
+supercritical, while further away it is deeper and subcritical.  The transition from supercritical
+to subcritical flow
+occurs in a very narrow region and takes the form of a \emph{jump} or \emph{bore}
+that is roughly circular if the surface is flat; we refer to it herein as a
+circular hydraulic jump (CHJ).
+
+Early experimental work on the CHJ began some time later
+\cite{kurihara1946hydraulic,tani1949water,watson1964radial}.
+Watson \cite{watson1964radial} derived the jump radius
+implied by Rayleigh's approach and the vertical
+velocity profile in the supercritical region, assuming a no-slip
+boundary condition at the bottom.  He also studied the turbulent
+flow case and performed experiments.
+More detailed experiments revealed different qualitative classification
+of jumps  \cite{ishigai1977heat,craik1981circular}.
+Although later work incorporated more physical details (such as surface tension) into the models
+\cite{bush2003influence}, Bohr et. al. showed that important properties of the jump
+(particularly its radius) could be reasonably predicted using a simple shallow water
+model \cite{bohr1993shallow}.
+
+While the jump is roughly circular, under appropriate conditions it may deviate
+from this shape and deform rapidly and chaotically in time.
+Instability of the jump was observed from fairly early on \cite{craik1981circular}.
+Under special circumstances with more viscous fluids, the jump instability may lead to
+the formation of curious shapes such as polygons \cite{ellegaard1998creating}, but
+for a low-viscosity fluid like water the behavior is generally chaotic.
+The strength of the instability increases with the jet velocity and with the
+depth at the outside of the jump.  For fluids with finite viscosity, the flow
+can also be completely steady for sufficiently small velocities and depths.
+
 
 \subsection{Numerical shock instabilities}
+
+In \cite{peery1988blunt} a numerical instability was observed to
+appear near the symmetry plane in the simulation of a bow shock.
+This phenomenon, subsequently dubbed ``carbuncle", has been observed by many researchers
+in similar numerical experiments for the Euler equations, and many remedies
+have been proposed, mainly in the form of additional numerical dissipation
+\cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
+Most notably, the HLLE Riemann solver suppresses the carbuncle instability \cite{quirk1997contribution}.
+For a recent review of numerical shock instability and work to alleviate it,
+we refer to \cite[Section 2.5]{simonnumerical}.
+
+Given the similarity of structure between the Euler equations and the shallow
+water equations, it is not surprising that carbuncles appear in numerical
+solutions of the latter as well \cite{kemm2014note}.
+The shallow water carbuncle behaves similarly to the
+Euler carbuncle: it appears when the Roe solver is used, but not when
+the HLL solver is used, and can be suppressed by similar numerical methods
+\cite{kemm2014note,bader2014carbuncle}.
+
+As we will see, carbuncles also appear in the numerical solution of the shallow
+water circular hydraulic jump.  This is natural, since the solution involves a
+standing shock wave.  Dealing with the carbuncle in this context is particularly
+interesting and challenging, since this standing shock should (at least in an
+appropriate flow regime) be unstable, and some research has suggested that the
+carbuncle is the manifestation of a true physical
+instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
+
+
+
 
 \begin{itemize}
   \item Describe the carbuncle instability starting with Euler and going to SWEs. 
