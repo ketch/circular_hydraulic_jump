@@ -23,6 +23,10 @@
 
 \newcommand{\W}{{\mathcal W}}
 \newcommand{\A}{{\mathcal A}}
+\newcommand{\apdq}{\A^+ \!\!{\Delta} Q}
+\newcommand{\amdq}{\A^- \!\!{\Delta} Q}
+\newcommand{\imh}{{i-1/2}}
+\newcommand{\iph}{{i+1/2}}
 \newcommand{\bff}{{\bf f}}
 \newcommand{\bfr}{{\bf r}}
 \newcommand{\bfF}{{\bf F}}
@@ -171,7 +175,7 @@ instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 
 \section{The shallow water circular hydraulic jump}
-The shallow water equations in two (horizontal) dimensions are
+We consider the shallow water model in two horizontal dimensions:
 \begin{subequations} \label{eq:sw}
 \begin{align}
     h_t + (hu)_x + (hv)_y & = 0 \\
@@ -179,21 +183,31 @@ The shallow water equations in two (horizontal) dimensions are
     (hv)_t + (huv)_x + \left(hv^2 + \frac{1}{2}gh^2\right)_y & = 0.
 \end{align}
 \end{subequations}
-These can be written in vector form as
-\begin{align}
-    q_t + f(q)_x + g(q)_y & = 0.
-\end{align}
+Here $h, u,$ and $v$ are respectively the depth and the $x$- and $y$-components of
+velocity, which are functions of the two spatial coordinates $(x,y)$ as well as time $t$.
+The gravitational force is proportional to $g$.
+%The system \eqref{eq:sw} can be written in vector form as
+%\begin{align}
+%    q_t + f(q)_x + g(q)_y & = 0.
+%\end{align}
 
 \subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
-
-By assuming rotational symmetry in \eqref{eq:sw}, one obtains the
-system (in one spatial variable)
+In this work, we consider the initial boundary value problem consisting of the
+shallow water model \eqref{eq:sw} in an annular domain
+\begin{align}
+r_\textup{jet} \le r \le r_\infty
+\end{align}
+where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
+and prescribed outflow at $r=r_\infty$.
+The domain and boundary conditions are rotationally symmetric.
+By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
 \begin{subequations} \label{eq:rsw}
 \begin{align}
     (rh)_t + (rhu)_r & = 0 \label{mass1} \\
     (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
 \end{align}
 \end{subequations}
+where the depth $h$ and radial velocity $u$ are functions of the single spatial coordinate $r$.
 Steady-state solutions of \eqref{eq:rsw} satisfy
 \begin{subequations}\label{steady}
 \begin{align}
@@ -215,7 +229,8 @@ conditions specify that for such a shock,
 \end{align}
 where the subscripts $+, -$ denote states just inside or outside the jump radius, respectively.
 
-A steady-state, rotationally symmetric solution can be given for an annular region as follows:
+A steady-state, rotationally symmetric solution can be given for an annular region with prescribed
+flow at the inner and outer boundaries as follows:
 
 \begin{enumerate}
     \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
@@ -226,14 +241,17 @@ Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the requir
 radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
 and subcritical at the outer boundary.
 
-Numerical tests suggest that the solution obtained in this way is a stable equilibrium
-of the reduced one-dimensional shallow water equations \eqref{eq:rsw}.  This
-solution provides a useful starting point for testing the stability of the CHJ
-as a solution of the full two-dimensional shallow water equations \eqref{eq:sw}.
+Numerical tests suggest that the solution of \eqref{eq:rsw} tends rapidly approaches that
+just described under general initial conditions as long as the flow at the jet is
+supercritical and the outer outflow is subcritical.  This solution remains steady
+if the rate of inflow and outflow are matched.  The stability of this solution in
+the face of non-rotationally-symmetric perturbations is an important question not
+only in the shallow water context but for more realistic fluid models and physically.
+It will play an important role in the results we present later.
+The rotationally-symmetric steady state is a useful initial condition for studies
+of CHJ stability.
 
-\subsection{Formation of the CHJ}\label{sec:formation}
 
-\clearpage
 \section{Numerical methods}
 In this work, we consider Riemann-based finite volume methods.
 Considering a one dimensional hyperbolic conservation law,
@@ -260,7 +278,7 @@ Method \eqref{first-order_FV} with Rusanov's flux \eqref{rusanov_num_flux}
 is positivity preserving and entropy stable, see for instance 
 \cite{perthame1996positivity,tadmor2003entropy,guermond2016invariant}
 However, the accuracy of the numerical flux, and hence of the method, is 
-limited to first-order. 
+limited to first order. 
 Two alternatives are common to improve the accuracy properties of Rusanov's method.
 The numerical flux $\bfF_{i+1/2}$ can be approximated based on high-order polynomial 
 reconstructions (or combinations of them) around the interface $i+1/2$. 
@@ -286,7 +304,7 @@ the solution are dissipated, unless the grid is highly refined.
 Our main objective is to study the CHJ and to propose a Riemann solver
 that is carbuncle free but do not dissipate important features of the solution. 
 To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers. 
-Our blending criteria is based on the residual of the entropy (in)equality,
+Our blending criterion is based on the residual of the entropy (in)equality,
 which induces dissipation of entropy near discontinuities. 
 Blending these Riemann solvers has been proposed before
 to solve the Euler equations, see e.g.
@@ -315,8 +333,8 @@ the fluctuations are given by
 \begin{align}\label{fluct}
   %\A^+\Delta Q_{i-1/2} := \frac{1}{2}\sum_p\left(s_{i-1/2}^p+|s_{i-1/2}^p|\right)\W_{i-1/2}^p, \quad
   %\A^-\Delta Q_{i+1/2} := \frac{1}{2}\sum_p\left(s_{i+1/2}^p-|s_{i+1/2}^p|\right)\W_{i+1/2}^p,
-  \A^+\Delta Q_{i-1/2} := \sum_p\left(s_{i-1/2}^p\right)^+\W_{i-1/2}^p, \qquad
-  \A^-\Delta Q_{i+1/2} := \sum_p\left(s_{i+1/2}^p\right)^-\W_{i+1/2}^p,
+  \apdq_\imh := \sum_p\left(s_{i-1/2}^p\right)^+\W_{i-1/2}^p, \qquad
+  \amdq_\iph := \sum_p\left(s_{i+1/2}^p\right)^-\W_{i+1/2}^p, \\
 \end{align}
 where $\W_{i\pm 1/2}^p$ and $s_{i\pm 1/2}^2$ are the waves and their corresponding speeds, respectively. 
 The waves and their speed of propagation (to compute the fluctuations) are tightly related to Riemann solvers. 
@@ -324,7 +342,7 @@ In \S\ref{sec:riemann_solvers} we review the definition of the waves and speeds 
 Rusanov's and Roe's Riemann solvers.
 Based on fluctuations, method \eqref{first-order_FV} can be written as 
 \begin{align}\label{first-order_via_fluct}
-  u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left[\A^+\Delta Q_{i-1/2}+\A^-\Delta Q_{i+1/2}\right].
+  u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right].
 \end{align}
 
 The second-order Lax-Wendroff-LeVeque method removes some of the numerical dissipation in 
@@ -341,7 +359,7 @@ are the flux corrections at the interfaces $i\pm 1/2$. Here $\tilde{\W}_{i\pm 1/
 TVD-limited version of $\W_{i\pm 1/2}^p$. 
 In this work, we consider the min-mod limiters, we refer to \cite{leveque1997wave} for more details. 
 If no limiters are used 
-($\tilde \W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$), \eqref{second-order_via_fluct} becomes
+($\tilde \W_{i\pm 1/2}^p = \W_{i\pm 1/2}^p$), \eqref{second-order_via_fluct} becomes
 the standard second-order Lax-Wendroff scheme, which in terms of fluctuation-like quantities 
 is given by
 \begin{align*}
@@ -356,8 +374,8 @@ To implement method \eqref{second-order_via_fluct},
 we need to choose a Riemann solver. Although the scheme is second-order 
 regardless of the Riemann solver, the accuracy and robustness depends upon the 
 Riemann solver. The approximate Riemann solver based on Rusanov's flux is robust and known to be carbuncle free. 
-However, it adds large amounts of numerical diffusion that, for relative coarse grids, 
-might dissipate other physical and important features of the solution. If the apprroximate Riemann solver 
+However, it adds large amounts of numerical diffusion that, for relatively coarse grids, 
+might dissipate other physical and important features of the solution. If the approximate Riemann solver 
 is based on the Roe's average, the amount of numerical diffusion is highly reduced; however, 
 such an approach is prone to develop the carbuncle instability for certain problems. 
 Many carbuncle fixes to the Roe's solver have been proposed for the Euler equations. 
@@ -538,7 +556,7 @@ The HLLEMCC solver follows the ideas of the Harten-Hyman entropy fix by splittin
     \label{HLLEMCC}
 \end{figure}
 
-\section{Entropy dissipative Riemann solver}\label{sec:ent_diss_rs}
+\section{Entropy-dissipative Riemann solver}\label{sec:ent_diss_rs}
 Consider a hyperbolic system of conservation laws 
 \begin{align}\label{cons_law}
   \frac{\partial \bfu(\bfx)}{\partial t} + \nabla\cdot \bff(\bfu(\bfx))=0, \quad \bfx\in\Omega,
@@ -550,7 +568,7 @@ A weak solution of \eqref{cons_law} is called an entropy solution if
 \end{align}
 holds, in a distribution sense, for any entropy pair.
 It is desirable for a numerical method to satisfy a discrete version of the entropy inequality 
-\eqref{ent_inequality}. This is, however, not true for many standard numerical discretizations. 
+\eqref{ent_inequality}, but many widely-used discretizations do not.
 In general, an entropy stable scheme introduces nonlinear stabilization, which is 
 particularly important for solutions with strong discontinuities that might converge to non-physical 
 weak solutions. 
@@ -679,7 +697,7 @@ Similarly, if $R_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusa
 which is clear by writting the fluctuations in Rusanov's method in terms of Roe's waves and speeds, 
 see \eqref{fluct_rus}.
 
-\subsection{Entropy stable Riemann solver}\label{sec:entropy_stable}
+\subsection{Entropy-stable Riemann solver}\label{sec:entropy_stable}
 The Riemann solver presented in the previous section blends Rusanov's and Roe's solver based on a
 measurement of the entropy residual. The objective is to induce dissipation of entropy 
 near discontinuities. However, we have no guarantee that methods \eqref{first-order_via_fluct} 
