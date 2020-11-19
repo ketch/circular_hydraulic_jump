@@ -181,7 +181,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
                 ! Alternative if cbrt for cubic root is available:
                 ! ffroude  = dmax1(0.0d0,(1.0d0 - dcbrt(zfroude)))
                
-                rhind = a(i)
+                rhind = a(i) * auxl(ilenrat,i)
                 rhind = rhind*dmin1(kepsilon*renore*ffroude,1.0d0)**kbeta 
                 ! Alternative if cbrt for cubic root is available:
                 ! rhind = rhind*dcbrt(dmin1(kepsilon*renore*ffroude,1.0d0))
