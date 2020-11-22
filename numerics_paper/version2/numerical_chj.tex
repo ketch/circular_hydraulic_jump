@@ -287,7 +287,7 @@ methods. Alternatively, second-order accuracy can be obtained by removing some o
 numerical dissipation introduced by the stabilization component of the numerical flux.
 The second-order Lax-Wendroff method \cite{lax1959systems} is a popular example of this approach.
 In this work we consider an adaptation of Lax-Wendroff method,
-sometimes known as Lax-Wendroff-LeVeque \cite{leveque1997wave,leveque2002finite},
+sometimes known as Lax-Wendroff-LeVeque (LWL) \cite{leveque1997wave,leveque2002finite},
 that incorporates limiters into the second-order correction.
 These high-order corrections to Rusanov's method require careful treatment to guarantee
 the solution is still positivity preserving and/or entropy stable.
@@ -345,7 +345,7 @@ Based on fluctuations, method \eqref{first-order_FV} can be written as
   u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right].
 \end{align}
 
-The second-order Lax-Wendroff-LeVeque method removes some of the numerical dissipation in
+The second-order LWL method removes some of the numerical dissipation in
 \eqref{first-order_via_fluct} via a flux correction at each interface. The method is written as follows:
 \begin{align}\label{second-order_via_fluct}
   u_i^{n+1} = u_i^n-\frac{\Delta t}{\Delta x}\left[\A^+\Delta Q_{i-1/2}+\A^-\Delta Q_{i+1/2}\right]
@@ -570,7 +570,7 @@ holds, in a distribution sense, for any entropy pair.
 It is desirable for a numerical method to satisfy a discrete version of the entropy inequality
 \eqref{ent_inequality}, but many widely-used discretizations do not.
 In this work, we propose an entropy stable approximate Riemann solver for the one dimensional
-shallow water equations. We use this Riemann solver as building block within the Lax-Wendroff-LeVeque
+shallow water equations. We use this Riemann solver as building block within the LWL
 method, as described in \cite{leveque1997wave,leveque2002finite} and implemented in Clawpack.
 
 \subsection{Entropy residual}
@@ -644,7 +644,7 @@ The fluctuations are then given by
 \end{subequations}
 
 To implement a second-order LWL scheme based on this solver, in addition to
-these fluctuations we must define a set of waves corresponding speeds.
+these fluctuations we must define a set of waves and corresponding speeds.
 Using only the waves from the Roe solver, it is in general not possible
 to choose speeds that yield the fluctuations \eqref{ev_fluctuations}.
 %In the framework of LeVeque, for a given interface $i+1/2$,
@@ -658,7 +658,7 @@ Instead, we consider
 $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
  and study the consequences of this choice once the second-order corrections are applied.
 Here $\sgn(z)$ is the sign function of $z$.
-The second-order Lax-Wendroff-LeVeque method for the one-dimensional problem is given by
+The second-order LWL method for the one-dimensional problem is given by
 \begin{align}\label{second-order}
   u_i^{n+1}=u_i^n
   -\frac{\Delta t}{\Delta x}\left[\A^-\Delta Q_{i+1/2}+\A^+\Delta Q_{i-1/2}\right]
@@ -738,13 +738,13 @@ We set
 \begin{align}\label{lambda_min}
   \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\left[\bff(\bfu_{i+1})+\bff(\bfu_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\psi_{i+1}-\psi_i)}{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}
 \end{align}
-which guarantees \eqref{es_cond} and, therefore, \eqref{ent_ineq}.
+which guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
 
 Since the blended Riemann solver described in Section \ref{sec:blended_rs} already
 tends to introduce entropy dissipation,
 we expect condition \eqref{es_cond} to be fulfilled most of the time even with $\lambda_{i+1/2}^{\min}=0$.
 But \eqref{lambda_min} is used as a safeguard to guarantee entropy stability of the first-order method.
-Extra modifications would be needed to guarantee entropy stability of the second-order Lax-Wendroff-LeVeque method
+Extra modifications would be needed to guarantee entropy stability of the second-order LWL method
 \eqref{second-order_via_fluct} and its multidimensional extension via Strang splitting.
 We do not pursue such modifications in this work.
 
@@ -774,7 +774,7 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
 blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}.
 We compare the behavior of the blended solver against the standard Roe's and Rusanov's solvers.
-In most of the experiments we use these Riemann solvers with the Lax-Wendroff-LeVeque method reviewed in \S\ref{sec:lax-wendroff-leveque}.
+In most of the experiments we use these Riemann solvers with the LWL method reviewed in \S\ref{sec:lax-wendroff-leveque}.
 When the exact solution is available, we report a convergence test based on the $L^1$-error for the water height
 \begin{align*}
   E_1=\sum_i|K_i|~|h_i-h^e(\bfx_i)|,

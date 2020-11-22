@@ -277,7 +277,7 @@ def setup(
         elif riemann_solver == 'llf':
             solver = pyclaw.ClawSolver2D(shallow_llf_2D)
             solver.num_eqn = 3
-            solver.num_waves = 3
+            solver.num_waves = 2
             solver.fwave = False
         else:
             raise Exception('Unrecognized Riemann solver') 
@@ -413,7 +413,7 @@ if __name__ == "__main__":
     grav=1.0
     
     # ***** numerics ***** #
-    num_cells = 500
+    num_cells = 200
     solver_type = 'classic'
     #riemann_solver = 'hlle'
     riemann_solver = 'llf'
@@ -469,7 +469,7 @@ if __name__ == "__main__":
         num_cells=num_cells,
         solver_type = solver_type,
         riemann_solver=riemann_solver,        
-        use_petsc=True)
+        use_petsc=False)
     #
     
     claw.run()
