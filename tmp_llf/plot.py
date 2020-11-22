@@ -1,4 +1,4 @@
-from clawpack.petclaw.solution import Solution
+from clawpack.pyclaw.solution import Solution
 #from petclaw.io.petsc import read_petsc
 import matplotlib
 matplotlib.use('Agg')
@@ -63,7 +63,6 @@ def sumIntOverPatch(I):
 
 def plot_q(frame,
            bathymetry=False,
-           file_prefix='claw',
            path='./_output/',
            plot_pcolor=True,
            plot_ent_residual=False,
@@ -73,7 +72,7 @@ def plot_q(frame,
     import sys
     sys.path.append('.')
 
-    sol=Solution(frame,file_format='petsc',read_aux=False,path=path,file_prefix=file_prefix)
+    sol=Solution(frame,read_aux=False,path=path)
     x=sol.state.grid.x.centers; y=sol.state.grid.y.centers
     mx=len(x); my=len(y)
 
@@ -90,7 +89,7 @@ def plot_q(frame,
 
     # old solution 
     if plot_ent_residual:
-        old_sol = Solution(frame,file_format='petsc',read_aux=False,path=path,file_prefix='old_soln')
+        old_sol = Solution(frame,read_aux=False,path=path,file_prefix='old_soln')
         old_h = old_sol.state.q[0,:,:]
         if bathymetry:
             old_eta = old_h + b
@@ -208,7 +207,7 @@ def plot_q(frame,
         pl.close()
     if plot_slices:
         pl.figure(figsize=(8,3))
-        pl.plot(x,eta[:,my/2],'-r',lw=1)
+        pl.plot(x,eta[:,my//2],'-r',lw=1)
         #pl.plot(x,qMag[:,my/2],'-r',lw=1)
         pl.title("t= "+str(sol.state.t),fontsize=20)
         pl.xlabel('x',fontsize=20)
@@ -225,11 +224,11 @@ if __name__== "__main__":
     if not os.path.exists('./_plots/slices'): os.mkdir('_plots/slices')
     from_frame = 0
     to_frame   = 1000
-    frames=xrange(from_frame,to_frame+1)
+    frames=range(from_frame,to_frame+1)
 
     ##########################################
     # Get min and max values for color plots #
-    sol=Solution(0,file_format='petsc',read_aux=False,path='./_output/',file_prefix='claw')
+    sol=Solution(0,read_aux=False,path='./_output/')
     hMin = sol.state.q[0,:,:].min(); hMax = sol.state.q[0,:,:].max()
     print (hMin, hMax)
     q1=sol.state.q[1,:,:]; q2=sol.state.q[2,:,:]
@@ -244,7 +243,7 @@ if __name__== "__main__":
     for i in frames:
         plot_q(frame=i,
                plot_pcolor=True,
-               plot_ent_residual=True,
+               plot_ent_residual=False,
                #hLim=[hMin,hMax],
                #momMagLim=[momMagMin,momMagMax],
                plot_slices=True)

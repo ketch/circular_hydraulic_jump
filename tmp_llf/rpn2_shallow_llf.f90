@@ -51,7 +51,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     common /cparam/ grav
     logical :: use_llf
 
-    data use_llf /.true./    !# Use LLF solver
+    data use_llf /.false./    !# Use LLF solver
 
 !   # Set mu to point to  the component of the system that corresponds
 !   # to momentum in the direction of this slice, mv to the orthogonal

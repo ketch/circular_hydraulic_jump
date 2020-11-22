@@ -9,7 +9,7 @@
 \usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{caption}
 \usepackage{amsmath}          % writing mathematical formulas
-\usepackage{amsthm}           % writing mathematical theorems 
+\usepackage{amsthm}           % writing mathematical theorems
 \usepackage{amssymb}          % writing mathematical symbols
 \usepackage{bm, amsfonts}     % writing bold mathematical symbols
 \usepackage{xcolor}
@@ -41,7 +41,7 @@
 %\newdefinition{rmk}{Remark}
 \newtheorem{remark}{Remark}
 
-\title{Numerical simulation and entropy dissipative cure of the 
+\title{Numerical simulation and entropy dissipative cure of the
   carbuncle instability for the shallow water circular hydraulic jump}
 
 \author{
@@ -55,7 +55,7 @@
 \begin{abstract}
 We study numerical discretizations of the shallow water equations
 for the simulation of the circular hydraulic jump formed
-when a vertical fluid jet impacts a horizontal plate.  
+when a vertical fluid jet impacts a horizontal plate.
 This is a challenging problem that includes a curved steady shock
 that can be physically unstable.  We show that numerical methods are prone to
 either suppress the instability completely or form artificial carbuncles.
@@ -137,40 +137,40 @@ instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 
 \begin{itemize}
-  \item Describe the carbuncle instability starting with Euler and going to SWEs. 
-  \item Mention that we observe the cc instability for the CHJ as well. 
-  \item Describe that in this case, the situation is more complicated than in other problems since we 
-    expect the correct solution to have physical instabilities triggered by round off error. 
-  \item Based on existing literature we know that we can use highly dissipative and robust methods to 
-    avoid the formation of carbuncle instabilities. However, in this case, these methods also tend to 
-    dissipate other important features of the solution unless the mesh is highly refined. 
-  \item We are interested in methods that prevent the formation of cc instability in the CHJ 
-    but preserve other features and physical instabilities. 
-  \item There are multiple ideas and methods proposed to fix the cc insitability for the Euler 
-    and recently for the SWEs. 
-  \item It is believed that the cc instability occurs due to lack or reduced viscosity in the shear contact waves. 
-  \item Some methods also propose to improve the entropy stability properties of the method. In particular, to induce or guarantee that the entropy is dissipated at shocks. 
-  \item Based on some of these ideas we start with Rusanov's method using the cell averages of the solution. 
-    This is a first-order method that is entropy stable and positivity preserving. We enhance its robustness by 
-    overestimating the wave speed when strong shear is present in the solution. The result is a robust solver 
-    that do not develop cc instabilities. However, the method is highly dissipative and, as a result, 
-    many other important features of the solution are dissipated. 
-  \item We then blend this highly dissipative method with a FV method based on Roe's average. 
-  \item After this we introduce the second order corrections from Law-Wendroff's method. 
+  \item Describe the carbuncle instability starting with Euler and going to SWEs.
+  \item Mention that we observe the cc instability for the CHJ as well.
+  \item Describe that in this case, the situation is more complicated than in other problems since we
+    expect the correct solution to have physical instabilities triggered by round off error.
+  \item Based on existing literature we know that we can use highly dissipative and robust methods to
+    avoid the formation of carbuncle instabilities. However, in this case, these methods also tend to
+    dissipate other important features of the solution unless the mesh is highly refined.
+  \item We are interested in methods that prevent the formation of cc instability in the CHJ
+    but preserve other features and physical instabilities.
+  \item There are multiple ideas and methods proposed to fix the cc insitability for the Euler
+    and recently for the SWEs.
+  \item It is believed that the cc instability occurs due to lack or reduced viscosity in the shear contact waves.
+  \item Some methods also propose to improve the entropy stability properties of the method. In particular, to induce or guarantee that the entropy is dissipated at shocks.
+  \item Based on some of these ideas we start with Rusanov's method using the cell averages of the solution.
+    This is a first-order method that is entropy stable and positivity preserving. We enhance its robustness by
+    overestimating the wave speed when strong shear is present in the solution. The result is a robust solver
+    that do not develop cc instabilities. However, the method is highly dissipative and, as a result,
+    many other important features of the solution are dissipated.
+  \item We then blend this highly dissipative method with a FV method based on Roe's average.
+  \item After this we introduce the second order corrections from Law-Wendroff's method.
 \end{itemize}
 
 \subsection{Our contribution}
 \begin{itemize}
-\item We present a new problem where the cc instability occurs. In our opinion, this is a more challenging 
-  problem than the standard bow shock problem since we expect the solution to be non-steady. 
-  We aim to preserve instabilities that are inherently present in the CHJ for certain regimes. And, 
-  at the same time, we aim to prevent the cc instability. 
-\item We explore the use of entropy dissipation and entropy stability as cure of the cc instability for the SWEs. 
-\item We propose a specific method to blend the highly dissipative and robust Rusanov's RP and the 
-  accurate 3-wave Roe's solver for the SWEs. 
-\item We demonstrate that this scheme prevents the formation of cc instabilities not only 
-  in the well-known bow shock problem, but also in the CHJ while preserving other important features of 
-  the solution. 
+\item We present a new problem where the cc instability occurs. In our opinion, this is a more challenging
+  problem than the standard bow shock problem since we expect the solution to be non-steady.
+  We aim to preserve instabilities that are inherently present in the CHJ for certain regimes. And,
+  at the same time, we aim to prevent the cc instability.
+\item We explore the use of entropy dissipation and entropy stability as cure of the cc instability for the SWEs.
+\item We propose a specific method to blend the highly dissipative and robust Rusanov's RP and the
+  accurate 3-wave Roe's solver for the SWEs.
+\item We demonstrate that this scheme prevents the formation of cc instabilities not only
+  in the well-known bow shock problem, but also in the CHJ while preserving other important features of
+  the solution.
 \end{itemize}
 
 
@@ -255,57 +255,57 @@ of CHJ stability.
 \section{Numerical methods}
 In this work, we consider Riemann-based finite volume methods.
 Considering a one dimensional hyperbolic conservation law,
-the cell average of the numerical solution given by a 
+the cell average of the numerical solution given by a
 finite volume scheme (with forward Euler) can be written as follows:
 \begin{align}\label{first-order_FV}
   \bfu_i^{n+1}=\bfu_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
 \end{align}
-where $\bfF_{i+1/2}=\bfF_{i+1/2}(u^n)$ is a numerical flux; i.e., $\bfF_{i+1/2}$ is 
-a discretization of the flux $\bff(\bfu(x_{i+1/2},t^n))$. 
-This numerical flux is composed of two parts, a consistent term that approximates 
-the physical flux at the interface between cells $i$ and $i+1$, and a stabilization term. 
-For instance, the well-known Rusanov's numerical flux is given by 
+where $\bfF_{i+1/2}=\bfF_{i+1/2}(u^n)$ is a numerical flux; i.e., $\bfF_{i+1/2}$ is
+a discretization of the flux $\bff(\bfu(x_{i+1/2},t^n))$.
+This numerical flux is composed of two parts, a consistent term that approximates
+the physical flux at the interface between cells $i$ and $i+1$, and a stabilization term.
+For instance, the well-known Rusanov's numerical flux is given by
 \begin{align}\label{rusanov_num_flux}
   \bfF_{i+1/2}(\bfu)=\frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2} - \lambda_{i+1/2}(\bfu_{i+1}-\bfu_i),
 \end{align}
-where $\lambda_{i+1/2}$ is an upper bound on the wave speed associated with the Riemann problem 
-composed of the states $\bfu_i$ and $\bfu_{i+1}$. 
+where $\lambda_{i+1/2}$ is an upper bound on the wave speed associated with the Riemann problem
+composed of the states $\bfu_i$ and $\bfu_{i+1}$.
 %If $z=u$ in \eqref{rusanov_num_flux}
-%; i.e., if the Rusanov's numerical flux is obtained considering 
-%the cell averages of the solution 
-%and if the time step is small enough, 
+%; i.e., if the Rusanov's numerical flux is obtained considering
+%the cell averages of the solution
+%and if the time step is small enough,
 Method \eqref{first-order_FV} with Rusanov's flux \eqref{rusanov_num_flux}
-is positivity preserving and entropy stable, see for instance 
+is positivity preserving and entropy stable; see for instance
 \cite{perthame1996positivity,tadmor2003entropy,guermond2016invariant}
-However, the accuracy of the numerical flux, and hence of the method, is 
-limited to first order. 
+However, the accuracy of the numerical flux, and hence of the method, is
+limited to first order.
 Two alternatives are common to improve the accuracy properties of Rusanov's method.
-The numerical flux $\bfF_{i+1/2}$ can be approximated based on high-order polynomial 
-reconstructions (or combinations of them) around the interface $i+1/2$. 
+The numerical flux $\bfF_{i+1/2}$ can be approximated based on high-order polynomial
+reconstructions (or combinations of them) around the interface $i+1/2$.
 For smooth solutions, this strategy leads to arbitrarily high-order
-methods. Alternatively, second-order accuracy can be obtained by removing some of the 
-numerical dissipation introduced by the stabilization component of the numerical flux. 
-The second-order Lax-Wendroff method \cite{lax1959systems} is a popular example of this approach. 
+methods. Alternatively, second-order accuracy can be obtained by removing some of the
+numerical dissipation introduced by the stabilization component of the numerical flux.
+The second-order Lax-Wendroff method \cite{lax1959systems} is a popular example of this approach.
 In this work we consider an adaptation of Lax-Wendroff method,
-sometimes known as Lax-Wendroff-LeVeque \cite{leveque1997wave,leveque2002finite}, 
-that incorporates limiters into the second-order correction. 
-These high-order corrections to Rusanov's method require careful treatment to guarantee 
-the solution is still positivity preserving and/or entropy stable. 
+sometimes known as Lax-Wendroff-LeVeque (LWL) \cite{leveque1997wave,leveque2002finite},
+that incorporates limiters into the second-order correction.
+These high-order corrections to Rusanov's method require careful treatment to guarantee
+the solution is still positivity preserving and/or entropy stable.
 
-The accuracy of a given first- or second-order method depends heavily on the Riemann solver. 
-In particular, the Rusanov's Riemann solver is highly dissipative. In contrast, the well-known 
-Roe's Riemann solver produces more accurate solutions. 
+The accuracy of a given first- or second-order method depends heavily on the Riemann solver.
+In particular, Rusanov's Riemann solver is highly dissipative. In contrast, the well-known
+Roe's Riemann solver produces more accurate solutions.
 %
-As we discussed in the introduction, finite volume methods with 
-Roe's Riemann solvers are prone to the carbuncle instability for the CHJ. 
-In contrast, if we use the Rusanov's 
-Riemann solver, no carbuncles appear; however, many other important and physical features of 
-the solution are dissipated, unless the grid is highly refined. 
+As we discussed in the introduction, finite volume methods with
+Roe's Riemann solvers are prone to the carbuncle instability for the CHJ.
+In contrast, if we use Rusanov's
+Riemann solver, no carbuncles appear; however, many other important and physical features of
+the solution are dissipated, unless the grid is highly refined.
 Our main objective is to study the CHJ and to propose a Riemann solver
-that is carbuncle free but do not dissipate important features of the solution. 
-To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers. 
+that is carbuncle free but do not dissipate important features of the solution.
+To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers.
 Our blending criterion is based on the residual of the entropy (in)equality,
-which induces dissipation of entropy near discontinuities. 
+which induces dissipation of entropy near discontinuities.
 Blending these Riemann solvers has been proposed before
 to solve the Euler equations, see e.g.
 \cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy},
@@ -315,20 +315,20 @@ In these references, the authors use blending criteria different than ours.
 Nevertheless, fixing the carbuncle instability by imposing entropy stability is not new.
 For example, in \cite{ismail2009affordable,ismail2009proposed},
 the authors developed carbuncle free solvers for the Euler equations
-via dissipation of entropy. 
+via dissipation of entropy.
 
 \subsection{Lax-Wendroff-LeVeque method}\label{sec:lax-wendroff-leveque}
-Let us now review the second-order correction to method \eqref{first-order_FV} implemented in 
+Let us now review the second-order correction to method \eqref{first-order_FV} implemented in
 Clawpack \cite{clawpack} and PyClaw \cite{pyclaw-sisc}.
-We refer to \cite{leveque1997wave, leveque2002finite} for a detailed description of the method. 
-We consider only a one-dimensional problem; in the 
-numerical experiments in \S\ref{sec:num} we use second-order Strang's splitting \cite{strang1968construction} 
-to extend the method to multiple dimensions. 
+We refer to \cite{leveque1997wave, leveque2002finite} for a detailed description of the method.
+We consider only a one-dimensional problem; in the
+numerical experiments in \S\ref{sec:num} we use second-order Strang's splitting \cite{strang1968construction}
+to extend the method to multiple dimensions.
 
-The finite volume method \eqref{first-order_FV} can be written in terms of right- 
-and left-going waves emanating from the interfaces $i-1/2$ and $i+1/2$, respectively. 
-The net contribution of these waves is called right- and left-going fluctuations. 
-Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$, 
+The finite volume method \eqref{first-order_FV} can be written in terms of right-
+and left-going waves emanating from the interfaces $i-1/2$ and $i+1/2$, respectively.
+The net contribution of these waves is called right- and left-going fluctuations.
+Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$,
 the fluctuations are given by
 \begin{align}\label{fluct}
   %\A^+\Delta Q_{i-1/2} := \frac{1}{2}\sum_p\left(s_{i-1/2}^p+|s_{i-1/2}^p|\right)\W_{i-1/2}^p, \quad
@@ -336,31 +336,31 @@ the fluctuations are given by
   \apdq_\imh := \sum_p\left(s_{i-1/2}^p\right)^+\W_{i-1/2}^p, \qquad
   \amdq_\iph := \sum_p\left(s_{i+1/2}^p\right)^-\W_{i+1/2}^p, \\
 \end{align}
-where $\W_{i\pm 1/2}^p$ and $s_{i\pm 1/2}^2$ are the waves and their corresponding speeds, respectively. 
-The waves and their speed of propagation (to compute the fluctuations) are tightly related to Riemann solvers. 
-In \S\ref{sec:riemann_solvers} we review the definition of the waves and speeds associated with 
+where $\W_{i\pm 1/2}^p$ and $s_{i\pm 1/2}^2$ are the waves and their corresponding speeds, respectively.
+The waves and their speed of propagation (to compute the fluctuations) are tightly related to Riemann solvers.
+In \S\ref{sec:riemann_solvers} we review the definition of the waves and speeds associated with
 Rusanov's and Roe's Riemann solvers.
-Based on fluctuations, method \eqref{first-order_FV} can be written as 
+Based on fluctuations, method \eqref{first-order_FV} can be written as
 \begin{align}\label{first-order_via_fluct}
   u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right].
 \end{align}
 
-The second-order Lax-Wendroff-LeVeque method removes some of the numerical dissipation in 
+The second-order LWL method removes some of the numerical dissipation in
 \eqref{first-order_via_fluct} via a flux correction at each interface. The method is written as follows:
 \begin{align}\label{second-order_via_fluct}
   u_i^{n+1} = u_i^n-\frac{\Delta t}{\Delta x}\left[\A^+\Delta Q_{i-1/2}+\A^-\Delta Q_{i+1/2}\right]
   -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
 \end{align}
-where 
+where
 \begin{align*}
   \tilde{F}_{i\pm 1/2}=\frac{1}{2}\sum_p|s_{i\pm 1/2}^p|\left(1-\frac{\Delta t}{\Delta x}|s_{i\pm 1/2}^p|\right)\tilde\W_{i\pm 1/2}^p
 \end{align*}
-are the flux corrections at the interfaces $i\pm 1/2$. Here $\tilde{\W}_{i\pm 1/2}^p$ is a 
-TVD-limited version of $\W_{i\pm 1/2}^p$. 
-In this work, we consider the min-mod limiters, we refer to \cite{leveque1997wave} for more details. 
-If no limiters are used 
+are the flux corrections at the interfaces $i\pm 1/2$. Here $\tilde{\W}_{i\pm 1/2}^p$ is a
+TVD-limited version of $\W_{i\pm 1/2}^p$.
+In this work, we consider the min-mod limiters, we refer to \cite{leveque1997wave} for more details.
+If no limiters are used
 ($\tilde \W_{i\pm 1/2}^p = \W_{i\pm 1/2}^p$), \eqref{second-order_via_fluct} becomes
-the standard second-order Lax-Wendroff scheme, which in terms of fluctuation-like quantities 
+the standard second-order Lax-Wendroff scheme, which in terms of fluctuation-like quantities
 is given by
 \begin{align*}
   u_i^{n+1}=u_i^n-\frac{\Delta t}{\Delta x}
@@ -370,39 +370,39 @@ is given by
   \frac{1}{2}\left(s_{i+1/2}^p-\frac{\Delta t}{\Delta x}|s_{i+1/2}^p|^2\right)\W_{i+1/2}^p
 \right].
 \end{align*}
-To implement method \eqref{second-order_via_fluct}, 
-we need to choose a Riemann solver. Although the scheme is second-order 
-regardless of the Riemann solver, the accuracy and robustness depends upon the 
-Riemann solver. The approximate Riemann solver based on Rusanov's flux is robust and known to be carbuncle free. 
-However, it adds large amounts of numerical diffusion that, for relatively coarse grids, 
-might dissipate other physical and important features of the solution. If the approximate Riemann solver 
-is based on the Roe's average, the amount of numerical diffusion is highly reduced; however, 
-such an approach is prone to develop the carbuncle instability for certain problems. 
-Many carbuncle fixes to the Roe's solver have been proposed for the Euler equations. 
-In the context of the shallow water equations, we review in \S\ref{sec:riemann_solvers} 
+To implement method \eqref{second-order_via_fluct},
+we need to choose a Riemann solver. Although the scheme is second-order
+regardless of the Riemann solver, the accuracy and robustness depends upon the
+Riemann solver. The approximate Riemann solver based on Rusanov's flux is robust and known to be carbuncle free.
+However, it adds large amounts of numerical diffusion that, for relatively coarse grids,
+might dissipate other physical and important features of the solution. If the approximate Riemann solver
+is based on Roe's average, the amount of numerical diffusion is highly reduced; however,
+such an approach is prone to develop the carbuncle instability for certain problems.
+Many carbuncle fixes to Roe's solver have been proposed for the Euler equations.
+In the context of the shallow water equations, we review in \S\ref{sec:riemann_solvers}
 the Riemann solver proposed in \cite{kemm2014note}.
 
 \section{Riemann solvers}\label{sec:riemann_solvers}
 
-For the shallow water equations in two-dimensions, the structure of the exact (and some 
-approximated) Riemann solvers contains three waves. This is the case, for example, of the well-known 
-Roe's Riemann solver, see for instance \cite{roe1981approximate} and 
-\cite[\S 15.3.3 and \S 21.7]{leveque2002finite}. 
-Simpler approaches are also possible. 
+For the shallow water equations in two-dimensions, the structure of the exact (and some
+approximated) Riemann solvers contains three waves. This is the case, for example, of the well-known
+Roe's Riemann solver, see for instance \cite{roe1981approximate} and
+\cite[\S 15.3.3 and \S 21.7]{leveque2002finite}.
+Simpler approaches are also possible.
 For instance, methods \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}
-with the Rusanov's numerical flux are based on only two waves that 
+with Rusanov's numerical flux are based on only two waves that
 propagate with the same speed in opposite directions.
-We refer to \cite{ketcheson2020riemann} and references therein for 
-a full and detailed review of these two Riemann solvers. 
+We refer to \cite{ketcheson2020riemann} and references therein for
+a full and detailed review of these two Riemann solvers.
 
 \subsection{Roe's average}\label{sec:roe}
-The Roe's Riemann solver is based on evaluating the flux Jacobian using the Roe's average
+The Roe's Riemann solver is based on evaluating the flux Jacobian using Roe's average
 \begin{align}\label{roe_average}
-  \bar h_{i-1/2}=\frac{1}{2}(h_{i-1}+h_i), \qquad 
+  \bar h_{i-1/2}=\frac{1}{2}(h_{i-1}+h_i), \qquad
   \hat u_{i-1/2}=\frac{\sqrt{h_{i-1}}u_{i-1}+\sqrt{h_i}u_i}{\sqrt{h_{i-1}}+\sqrt{h_i}}, \qquad
   \hat v_{i-1/2}=\frac{\sqrt{h_{i-1}}v_{i-1}+\sqrt{h_i}v_i}{\sqrt{h_{i-1}}+\sqrt{h_i}}.
 \end{align}
-Let 
+Let
 \begin{align*}
 \hat A_{i-1/2} =
 \begin{bmatrix}
@@ -411,37 +411,37 @@ Let
   -\hat u_{i-1/2} \hat v_{i-1/2} & \hat v_{i-1/2} & \hat u_{i-1/2}
 \end{bmatrix}
 \end{align*}
-be the flux Jacobian evaluated using the Roe's average at the interface $i-1/2$.
-The average \eqref{roe_average} is designed to guarantee: 
-i)  consistency of the approximate flux Jacobian 
-($\hat A_{i-1/2}\rightarrow \bff^\prime(\bfu(x_{i-1/2}))$ as $\bfu_i, \bfu_{i-1}\rightarrow \bfu(x_{i-1/2})$); 
+be the flux Jacobian evaluated using Roe's average at the interface $i-1/2$.
+The average \eqref{roe_average} is designed to guarantee:
+i)  consistency of the approximate flux Jacobian
+($\hat A_{i-1/2}\rightarrow \bff^\prime(\bfu(x_{i-1/2}))$ as $\bfu_i, \bfu_{i-1}\rightarrow \bfu(x_{i-1/2})$);
 ii) hyperbolicity ($\hat A_{i-1/2}$ is diagonalizable with real eigenvalues);
-and iii) conservation ($\hat A_{i-1/2}(\bfu_i-\bfu_{i-1})=\bff(\bfu_i)-\bff(\bfu_{i-1})$). 
+and iii) conservation ($\hat A_{i-1/2}(\bfu_i-\bfu_{i-1})=\bff(\bfu_i)-\bff(\bfu_{i-1})$).
 Let
 \begin{align*}
-  \hat \bfr^1_{i-1/2} = 
+  \hat \bfr^1_{i-1/2} =
   \begin{bmatrix}
-    1 \\ 
+    1 \\
     \hat u_{i-1/2}-\sqrt{g\bar h_{i-1/2}}\\
     \hat v_{i-1/2}
   \end{bmatrix},
-  \qquad 
-  \hat \bfr^2_{i-1/2} = 
+  \qquad
+  \hat \bfr^2_{i-1/2} =
   \begin{bmatrix}
-    0\\ 
-    0\\ 
+    0\\
+    0\\
     1
   \end{bmatrix},
   \qquad
-  \hat \bfr^3_{i-1/2} = 
+  \hat \bfr^3_{i-1/2} =
   \begin{bmatrix}
-    1 \\ 
+    1 \\
     \hat u_{i-1/2}+\sqrt{g\bar h_{i-1/2}}\\
     \hat v_{i-1/2}
   \end{bmatrix}
 \end{align*}
 be the eigenvectors of $\hat A_{i-1/2}$.
-The waves for the two-dimensional Riemann solver based on the Roe's average are 
+The waves for the two-dimensional Riemann solver based on Roe's average are
 $\W_{i-1/2}^p=\alpha_{i-1/2}^p\hat r_{i-1/2}^p$, with $p=1,2,3$. Here $\alpha_{i-1/2}^p$ is given by
 \begin{align}\label{system_for_alphas}
   \left[\hat \bfr^1_{i-1/2} ~\hat \bfr^2_{i-1/2} ~\hat \bfr^3_{i-1/2}\right]
@@ -451,8 +451,8 @@ $\W_{i-1/2}^p=\alpha_{i-1/2}^p\hat r_{i-1/2}^p$, with $p=1,2,3$. Here $\alpha_{i
     \alpha^3_{i-1/2}
   \end{bmatrix}
   =\Delta Q_{i-1/2}:=\bfu_i-\bfu_{i-1}.
-\end{align} 
-%where $\alpha_{i-1/2}^p$ is the $p$-th entry from the solution of 
+\end{align}
+%where $\alpha_{i-1/2}^p$ is the $p$-th entry from the solution of
 %\end{align*}
 The speed of the waves is given by the eigenvalues of $\hat A_{i-1/2}$
 \begin{align*}
@@ -461,41 +461,41 @@ The speed of the waves is given by the eigenvalues of $\hat A_{i-1/2}$
   \hat\lambda_{i-1/2}^3=\hat u_{i-1/2}+g\sqrt{g\bar h_{i-1/2}}. \\
 \end{align*}
 
-The waves and speeds at interface $i+1/2$ are computed similarly. 
-The fluctuations are given by \eqref{fluct} with $s_{i\pm 1/2}^p=\hat\lambda_{i\pm 1/2}^p$ 
-Finally, the first- and second-order methods based on Roe's Riemann solver are given by 
-\eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}, respectively. 
-We close this review by remarking that the conservation property 
-$\hat A_{i-1/2}(\bfu_i-\bfu_{i-1})=\bff(\bfu_i)-\bff(\bfu_{i-1})$ implies that 
+The waves and speeds at interface $i+1/2$ are computed similarly.
+The fluctuations are given by \eqref{fluct} with $s_{i\pm 1/2}^p=\hat\lambda_{i\pm 1/2}^p$
+Finally, the first- and second-order methods based on Roe's Riemann solver are given by
+\eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}, respectively.
+We close this review by remarking that the conservation property
+$\hat A_{i-1/2}(\bfu_i-\bfu_{i-1})=\bff(\bfu_i)-\bff(\bfu_{i-1})$ implies that
 \begin{align}\label{cons_roe}
   \A^-\Delta Q_{i-1/2}+\A^+\Delta Q_{i-1/2}=\sum_p \hat\lambda_{i-1/2}^p\W_{i-1/2}^p=\bff(\bfu_{i})-\bff(\bfu_{i-1}),
 \end{align}
-a property we will use in the next section. 
+a property we will use in the next section.
 
 \subsection{Rusanov's Riemann solver}\label{sec:rusanov}
-The Rusanov's Riemann solver considers only two waves that emanate from each interface, 
-say for instance interface $i-1/2$, and travel with the same speed $\lambda_{i-1/2}^{\max}\geq 0$ 
-but in opposite directions. 
+The Rusanov's Riemann solver considers only two waves that emanate from each interface,
+say for instance interface $i-1/2$, and travel with the same speed $\lambda_{i-1/2}^{\max}\geq 0$
+but in opposite directions.
 The speed of propagation $\lambda_{i-1/2}^{\max}$ is an upper bound on the maximum wave speed
-associated with the corresponding Riemann problem between the states $\bfu_{i-1}$ and $\bfu_{i}$. 
-In this work, we define $\lambda_{i-1/2}^{\max}$ via the guaranteed upper bound from \cite[Prop. 3.7]{azerad2017well}. 
-The waves are given by 
+associated with the corresponding Riemann problem between the states $\bfu_{i-1}$ and $\bfu_{i}$.
+In this work, we define $\lambda_{i-1/2}^{\max}$ via the guaranteed upper bound from \cite[Prop. 3.7]{azerad2017well}.
+The waves are given by
 \begin{align}\label{rusanov_waves}
-  \W_{i-1/2}^{1,\Rus}=\bfu_{i-1/2}-\bfu_{i-1}, \qquad 
-  \W_{i-1/2}^{2,\Rus}=\bfu_{i}-\bfu_{i-1/2}, 
+  \W_{i-1/2}^{1,\Rus}=\bfu_{i-1/2}-\bfu_{i-1}, \qquad
+  \W_{i-1/2}^{2,\Rus}=\bfu_{i}-\bfu_{i-1/2},
 \end{align}
 where $\bfu_{i-1/2}$ is a middle state in the solution of the Riemann problem. The middle state is obtained
 by imposing
 \begin{align}\label{rus_cons}
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{1,\Rus}+\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus} = \bff(\bfu_{i})-\bff(\bfu_{i-1}),
 \end{align}
-which guarantees the solver is conservative. 
+which guarantees the solver is conservative.
 The fluctuations are given by \eqref{fluct} with $s_{i-1/2}^1=-\lambda_{i-1/2}^{\max}$
-and $s_{i-1/2}^2=\lambda_{i-1/2}^{\max}$, and the first- and second-order methods based 
+and $s_{i-1/2}^2=\lambda_{i-1/2}^{\max}$, and the first- and second-order methods based
 on Rusanov's solver are given by \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}, respectively.
 
-We close this section by remarking that the fluctuations associated with Rusanov's solver 
-can be expressed in terms of waves and speeds from the Roe's solver. To see this, first consider \eqref{rus_cons}
+We close this section by remarking that the fluctuations associated with Rusanov's solver
+can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
 and rewrite the right-going fluctuation as follows:
 \begin{align}\label{rus_rs_aux}
   \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
@@ -503,20 +503,20 @@ and rewrite the right-going fluctuation as follows:
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}.
   %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
 \end{align}
-From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get 
-$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$. 
-Using \eqref{cons_roe}, \eqref{rus_rs_aux} becomes 
+From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
+$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
+Using \eqref{cons_roe}, \eqref{rus_rs_aux} becomes
 \begin{align*}
   \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
   = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus},
 \end{align*}
-which implies that 
+which implies that
 \begin{subequations}\label{fluct_rus}
 \begin{align}
   \A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p,
 \end{align}
-and similarly, 
+and similarly,
 \begin{align}
   \A^{-,\Rus}\Delta Q_{i+1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i+1/2}^p - \lambda_{i+1/2}^{\max}\right)\W_{i+1/2}^p.
 \end{align}
@@ -557,128 +557,124 @@ The HLLEMCC solver follows the ideas of the Harten-Hyman entropy fix by splittin
 \end{figure}
 
 \section{Entropy-dissipative Riemann solver}\label{sec:ent_diss_rs}
-Consider a hyperbolic system of conservation laws 
+Consider a hyperbolic system of conservation laws
 \begin{align}\label{cons_law}
   \frac{\partial \bfu(\bfx)}{\partial t} + \nabla\cdot \bff(\bfu(\bfx))=0, \quad \bfx\in\Omega,
 \end{align}
-with a en entropy pair $\left(\eta(\bfu), \bfq(\bfu)\right)$. 
-A weak solution of \eqref{cons_law} is called an entropy solution if 
+with a en entropy pair $\left(\eta(\bfu), \bfq(\bfu)\right)$.
+A weak solution of \eqref{cons_law} is called an entropy solution if
 \begin{align}\label{ent_inequality}
   \frac{\partial \eta(\bfu(\bfx))}{\partial t} + \nabla\cdot \bfq(\bfu(\bfx))\leq 0, \quad \bfx\in\Omega,
 \end{align}
 holds, in a distribution sense, for any entropy pair.
-It is desirable for a numerical method to satisfy a discrete version of the entropy inequality 
+It is desirable for a numerical method to satisfy a discrete version of the entropy inequality
 \eqref{ent_inequality}, but many widely-used discretizations do not.
-In general, an entropy stable scheme introduces nonlinear stabilization, which is 
-particularly important for solutions with strong discontinuities that might converge to non-physical 
-weak solutions. 
-In this work, we propose an entropy stable approximate Riemann solver for the one dimensional 
-shallow water equations. We use this Riemann solver as building block within the Lax-Wendroff-LeVeque 
+In this work, we propose an entropy stable approximate Riemann solver for the one dimensional
+shallow water equations. We use this Riemann solver as building block within the LWL
 method, as described in \cite{leveque1997wave,leveque2002finite} and implemented in Clawpack.
 
 \subsection{Entropy residual}
-Let $S_i$ be the set of cells containing cell $i$ and those that share a face with it. 
-Also let $\bfv(\bfu)=\eta^\prime(\bfu)$ be the entropy variable. 
-Based on \cite{guermond2011entropy}, we consider 
+Let $S_i$ be the set of cells containing cell $i$ and those that share a face with it.
+Also let $\bfv(\bfu)=\eta^\prime(\bfu)$ be the entropy variable.
+Based on \cite{guermond2011entropy}, we consider
 \begin{align}\label{ent_residual}
   \int_{S_i} \bfv(\bfu) \cdot \left[ \frac{\partial \bfu}{\partial t} + \nabla\cdot \bff(\bfu)\right]d\bfx
   =\int_{S_i} \left[\frac{\partial \eta(\bfu)}{\partial t} + \bfv(\bfu) \cdot \nabla\cdot \bff(\bfu)\right] d\bfx
 \end{align}
-as a measurement of the entropy production in $S_i$. 
-To avoid approximating the time derivative of the entropy, we follow 
-\cite{guermond2018second, guermond2018well} and use 
-$\int_{K_i} \frac{\partial\eta(\bfu)}{\partial t}d\bfx=-\int_{K_i} \nabla\cdot\bfq(\bfu) d\bfx$, 
-which holds in smooth regions. Then we define 
+as a measurement of the entropy production in $S_i$.
+To avoid approximating the time derivative of the entropy, we follow
+\cite{guermond2018second, guermond2018well} and use
+$\int \frac{\partial\eta(\bfu)}{\partial t}d\bfx=-\int \nabla\cdot\bfq(\bfu) d\bfx$,
+which holds in smooth regions. Then we define
 \begin{align}\label{Ri}
-  R_i := \frac{N_i}{D_i}, 
+  \theta_i := \frac{R_i}{D_i},
 \end{align}
 with
 \begin{align*}
-  N_i=
+  R_i=
   \left|\int_{S_i} \left[\bfv(\bfu) \cdot \nabla\cdot \bff(\bfu) - \nabla\cdot\bfq(\bfu) \right] d\bfx\right|,
 \end{align*}
-and $D_i$ being an upper bound of $N_i$ that acts as normalization so that $0\leq R_i\leq 1$.
-Note that $N_i\approx 0$ if $\bfu$ is smooth in $S_i$. 
+and $D_i$ being an upper bound of $R_i$ that acts as normalization so that $0\leq \theta_i\leq 1$.
+Note that $R_i\approx 0$ if $\bfu$ is smooth in $S_i$.
 In our implementation, we use
 \begin{align*}
-  N_i\approx \left|\bfv(\bfu_i)\cdot \int_{S_i}\nabla\cdot \bff(\bfu)d\bfx 
+  R_i\approx \left|\bfv(\bfu_i)\cdot \int_{S_i}\nabla\cdot \bff(\bfu)d\bfx
   -\int_{S_i}\nabla\cdot\bfq(\bfu) d\bfx\right|,
-  \quad 
+  \quad
   %D_i = ||\bfv(\bfu_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfu)d\bfx\right|\right|_{\ell^2}
   %+\left|\int_{S_i}\nabla\cdot\bfq(\bfu)d\bfx\right|.
   D_i = \sum_{k=1}^{d+1}|\bfv_k(\bfu_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(\bfu)\right)_kd\bfx\right|
   +\left|\int_{S_i}\nabla\cdot\bfq(\bfu)d\bfx\right|,
 \end{align*}
-where $({\bf z})_k$ denotes the $k$-th component of ${\bf z}\in\mathbb{R}^{d+1}$ and $d$ is the number of physical 
-dimensions. In the next section, we use $R_i$ to blend Rusanov's and Roe's Riemann solvers. 
+where $({\bf z})_k$ denotes the $k$-th component of ${\bf z}\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
+dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's Riemann solvers.
 
 \subsection{Blended Riemann solver}\label{sec:blended_rs}
-In this section, we use \eqref{Ri}, which is a normalized measurement of the entropy residual \eqref{ent_residual}, 
-to blend the Rusanov's and the Roe's Riemann solvers. To do this, we define the following numerical flux:
+In this section, we use \eqref{Ri}, which is a normalized measurement of the entropy residual \eqref{ent_residual},
+to blend Rusanov's and Roe's Riemann solvers. To do this, we define the following numerical flux:
 \begin{align}\label{num_flux_ev}
-  F_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2} 
-  - \frac{1}{2} \left( R_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-R_{i+1/2})|\hat A_{i+1/2}| \right)(\bfu_{i+1}-\bfu_{i}),
+  F_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max} I + (1-\theta_{i+1/2})|\hat A_{i+1/2}| \right)(\bfu_{i+1}-\bfu_{i}),
 \end{align}
-and similarly for $F_{i-1/2}$. Here $\mathbb{I}\in\mathbb{R}^{3\times 3}$ is the identity matrix,
-$R_{i+1/2}=\max\{R_{i+1},R_i\}$, $\lambda_{i+1/2}^{\max}$ is the 
-upper bound on the wave speed used in the Rusanov's Riemann solver, see \S \ref{sec:rusanov}, 
-and $\hat A_{i+1/2}$ is the Roe's averaged flux Jacobian, see \S \ref{sec:roe}. 
+and similarly for $F_{i-1/2}$. Here $I\in\mathbb{R}^{3\times 3}$ is the identity matrix,
+$\theta_{i+1/2}=\max\{\theta_{i+1},\theta_i\}$, $\lambda_{i+1/2}^{\max}$ is the
+upper bound on the wave speed used in Rusanov's Riemann solver (see \S \ref{sec:rusanov}),
+and $\hat A_{i+1/2}$ is Roe's averaged flux Jacobian (see \S \ref{sec:roe}).
 
-%In terms of fluctuations, 
-The first-order method is given simply by \eqref{first-order_FV} 
-with the numerical flux $F_{i+1/2}$ given by \eqref{num_flux_ev}. 
-In smooth regions $R_{i+1/2}\approx 0$ so the numerical flux is essentially the Roe's numerical flux. 
-Near discontinuities or steep gradients, $R_{i+1/2}$ becomes large. If, in particular, $R_{i+1/2}\approx 1$, 
-then the numerical flux is essentially the Rusanov's numerical flux.  
-%
-The first-order method can also be written in terms of fluctuations via \eqref{first-order_via_fluct}. 
-To do this we consider the waves ($\W^p_{i\pm 1/2}$, with $p=1,2,3$) 
-from the Roe's solver and define 
+The first-order method is given simply by \eqref{first-order_FV}
+with the numerical flux $F_{i+1/2}$ given by \eqref{num_flux_ev}.
+In smooth regions $\theta_{i+1/2}\approx 0$ so the numerical flux is essentially Roe's flux.
+Near discontinuities or steep gradients, $\theta_{i+1/2}$ becomes large. In the limit $\theta_{i+1/2}\approx 1$
+the numerical flux is essentially Rusanov's flux.
+
+The first-order method can also be written in terms of fluctuations via \eqref{first-order_via_fluct}.
+To do this we consider the waves ($\W^p_{i\pm 1/2}$, with $p=1,2,3$)
+from Roe's solver and define
 \begin{align}\label{lambda_p}
-  \lambda_{i+1/2}^p := R_{i+1/2}\lambda_{i+1/2}^{\max} + (1-R_{i+1/2})|\hat \lambda_{i+1/2}^p|,
+  \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p|,
 \end{align}
-where $\hat\lambda_{i+1/2}^p$ is the $p$-th eigenvalue of the Roe's solver corresponding to the 
+where $\hat\lambda_{i+1/2}^p$ is the $p$-th eigenvalue of Roe's solver corresponding to the
 interface $i+1/2$. Note that $\lambda_{i+1/2}^p\geq 0$.
-The fluctuations are then given by 
+The fluctuations are then given by
 \begin{subequations}\label{ev_fluctuations}
 \begin{align}
-  \A^+\Delta Q_{i-1/2}&=\frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^p, \\
-  \A^-\Delta Q_{i+1/2}&=\frac{1}{2}\sum_p \left(\hat\lambda_{i+1/2}^p - \lambda_{i+1/2}^p\right)\W_{i+1/2}^p.
+  \apdq_\imh & = \frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^p, \\
+  \amdq_\iph & = \frac{1}{2}\sum_p \left(\hat\lambda_{i+1/2}^p - \lambda_{i+1/2}^p\right)\W_{i+1/2}^p.
 \end{align}
 \end{subequations}
 
-To implement the second-order Lax-Wendroff-LeVeque type method in Clawpack, the Riemann solver must provide 
-the fluctuations, the waves and their speed. The fluctuations are simply \eqref{ev_fluctuations} 
-and the waves are the Roe's waves $\W_{i+1/2}^p$, with $p=1,2,3$. 
-In the framework of LeVeque, for a given interface $i+1/2$, 
-we would need to consider a wave speed $s_{i+1/2}^p$ so that 
-\begin{align*}
-  \hat \lambda_{i+1/2}^p+\lambda_{i+1/2}^p = s_{i+1/2}^p+|s_{i+1/2}^p|, \qquad 
-  \hat \lambda_{i+1/2}^p-\lambda_{i+1/2}^p = s_{i+1/2}^p-|s_{i+1/2}^p|,
-\end{align*}
-which is not possible to obtain in general (since the problem is overdetermined). 
-Instead, we consider 
-$s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$ 
+To implement a second-order LWL scheme based on this solver, in addition to
+these fluctuations we must define a set of waves and corresponding speeds.
+Using only the waves from the Roe solver, it is in general not possible
+to choose speeds that yield the fluctuations \eqref{ev_fluctuations}.
+%In the framework of LeVeque, for a given interface $i+1/2$,
+%we would need to consider a wave speed $s_{i+1/2}^p$ so that
+%\begin{align*}
+%  \hat \lambda_{i+1/2}^p+\lambda_{i+1/2}^p = s_{i+1/2}^p+|s_{i+1/2}^p|, \qquad
+%  \hat \lambda_{i+1/2}^p-\lambda_{i+1/2}^p = s_{i+1/2}^p-|s_{i+1/2}^p|,
+%\end{align*}
+%which is not possible to obtain in general (since the problem is overdetermined).
+Instead, we consider
+$s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
  and study the consequences of this choice once the second-order corrections are applied.
-Here $\sgn(z)$ is the sign function of $z$. 
-The second-order Lax-Wendroff-LeVeque method for the one-dimensional problem is given by 
+Here $\sgn(z)$ is the sign function of $z$.
+The second-order LWL method for the one-dimensional problem is given by
 \begin{align}\label{second-order}
   u_i^{n+1}=u_i^n
   -\frac{\Delta t}{\Delta x}\left[\A^-\Delta Q_{i+1/2}+\A^+\Delta Q_{i-1/2}\right]
   -\frac{\Delta t}{\Delta x}\left[\tilde F_{i+1/2}-\tilde F_{i-1/2}\right],
 \end{align}
-where 
+where
 \begin{align*}
   \tilde F_{i+1/2} = \frac{1}{2}\sum_p\lambda_{i+1/2}^p
-  \left(1-\frac{\Delta t}{\Delta x}\lambda_{i+1/2}^p\right)\tilde\W_{i+1/2}^p,
+  \left(1-\frac{\Delta t}{\Delta x}\lambda_{i+1/2}^p\right)\tilde\W_{i+1/2}^p
 \end{align*}
-and similarly for $\tilde F_{i-1/2}$, are the flux corrections with $\tilde\W_{i+1/2}^p$ 
-being a TVD-limited version of $\W_{i+1/2}^p$. 
+are the flux corrections with $\tilde\W_{i+1/2}^p$ being a limited version of $\W_{i+1/2}^p$.
 
-To understand the effect of choosing $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$ 
-as the speed of $\W_{i+1/2}^p$, 
+To understand the effect of choosing $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
+as the speed of $\W_{i+1/2}^p$,
 let us assume that no limiters are applied; i.e., $\tilde\W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$.
-By doing this, equation \eqref{second-order} can be written as 
+By doing this, equation \eqref{second-order} can be written as
 \begin{align*}
   u_i^{n+1}=u_i^n
   &-\frac{\Delta t}{2 \Delta x}
@@ -687,46 +683,26 @@ By doing this, equation \eqref{second-order} can be written as
   +
   \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^p\right],
 \end{align*}
-which corresponds to the standard Lax-Wendroff method written in terms of fluctuation-like quantities. 
-Note that if $R_{i\pm 1/2}=0$, we recover the standard second-order Lax-Wendroff method based on 
-Roe's Riemann solver. 
-In the numerical experiments in \S\ref{sec:num}, we obtain second-order experimental 
-order of convergence (EOC) for problems with smooth solution, which is expected since 
-$R_{i\pm 1/2}\approx 0$ in smooth regions.
-Similarly, if $R_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusanov's Riemann solver, 
-which is clear by writting the fluctuations in Rusanov's method in terms of Roe's waves and speeds, 
+which corresponds to the standard Lax-Wendroff method written in terms of fluctuation-like quantities.
+Note that if $\theta_{i\pm 1/2}=0$, we recover the standard second-order Lax-Wendroff method based on
+Roe's Riemann solver.
+In the numerical experiments in \S\ref{sec:num}, we obtain second-order experimental
+order of convergence (EOC) for problems with smooth solution, which is expected since
+$\theta_{i\pm 1/2}\approx 0$ in smooth regions.
+Similarly, if $\theta_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusanov's Riemann solver,
+which is clear by writing the fluctuations in Rusanov's method in terms of Roe's waves and speeds;
 see \eqref{fluct_rus}.
 
 \subsection{Entropy-stable Riemann solver}\label{sec:entropy_stable}
-The Riemann solver presented in the previous section blends Rusanov's and Roe's solver based on a
-measurement of the entropy residual. The objective is to induce dissipation of entropy 
-near discontinuities. However, we have no guarantee that methods \eqref{first-order_via_fluct} 
-or \eqref{second-order_via_fluct} based on this Riemann solver are (locally) entropy stable. 
-In this section, we consider the one-dimensional problem and increase the numerical dissipation 
-to guarantee entropy stability for \eqref{first-order_via_fluct}. 
-To this end we follow the work by Tadmor, see for instance \cite{tadmor1987numerical, tadmor2003entropy} 
-and references therein. 
+The Riemann solver presented in the previous section blends the solvers of Rusanov and Roe based on a
+local measurement of the entropy residual. The objective is to induce dissipation of entropy
+near discontinuities. However, we have no guarantee that methods \eqref{first-order_via_fluct}
+or \eqref{second-order_via_fluct} based on this Riemann solver are (locally) entropy stable.
+In this section, we further modify the first-order method
+\eqref{first-order_via_fluct} in order to guarantee local entropy stability.
 
-Recall method \eqref{first-order_FV}
-\begin{align*}
-  \bfu_i^{n+1}=\bfu_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
-\end{align*}
-with the numerical fluxes given by 
-\begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2} 
-  - \frac{1}{2} \left( R_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-R_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfu_{i+1}-\bfu_{i}),
-\end{align*}
-and similarly for $\bfF_{i-1/2}$. Here $\lambda_{i+1/2}^{\min}$ is yet to be defined.
-We can write the numerical fluxes in terms of $\lambda^p_{i\pm 1/2}$ \eqref{lambda_p}
-and the Roe's waves $\W_{i\pm 1/2}^p$.
-Doing so, we get
-\begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2} 
-  - \frac{1}{2}\sum_p(\lambda_{i+1/2}^p+\lambda_{i+1/2}^{\min})\W_{i+1/2}^p,
-\end{align*}
-and similarly for $\bfF_{i-1/2}$.
-Let $\bfv_i=\bfv(\bfu_i)$ and $q_i=q(\bfu_i)$ denote the entropy variable and the 
-(one-dimensional) entropy potential at cell $i$, respectively. 
+Let $\bfv_i=\bfv(\bfu_i)$ and $q_i=q(\bfu_i)$ denote the entropy variable and the
+(one-dimensional) entropy potential at cell $i$, respectively.
 Also let $\psi_i=\bfv(\bfu_i)\cdot \bff(\bfu_i)-q(\bfu_i)$ be the entropy potential at cell $i$.
 From \cite[\S 4]{tadmor1987numerical}, if the numerical fluxes satisfy
 \begin{align}\label{es_cond}
@@ -734,55 +710,71 @@ From \cite[\S 4]{tadmor1987numerical}, if the numerical fluxes satisfy
   \qquad
   (\bfv_{i+1}-\bfv_i)\cdot \bfF_{i+1/2}\leq \psi_{i+1}-\psi_i,
 \end{align}
-then the following entropy inequality holds 
+then the following entropy inequality holds
 \begin{align}\label{ent_ineq}
   \frac{d\eta(\bfu_i)}{dt}+\frac{1}{\Delta x}\left[G_{i+1/2}-G_{i-1/2}\right]\leq 0,
 \end{align}
-where 
+where
 \begin{align*}
     G_{i+1/2} &= \frac{1}{2}\left(\bfv_i+\bfv_{i+1}\right)\bfF_{i+1/2}-\frac{1}{2}(\psi_{i}+\psi_{i+1}),
 \end{align*}
-and similarly for $G_{i-1/2}$, are discretizations of the entropy flux. 
+is the discrete entropy flux.
 
-Based on \eqref{es_cond}, we choose
+To enforce \eqref{es_cond} we further modify the flux \eqref{num_flux_ev}:
+\begin{align*}
+  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfu_{i+1}-\bfu_{i}).
+\end{align*}
+Here $\lambda_{i+1/2}^{\min}$ is yet to be defined.
+We can write the numerical fluxes in terms of $\lambda^p_{i\pm 1/2}$ \eqref{lambda_p}
+and Roe's waves $\W_{i\pm 1/2}^p$.
+Doing so, we get
+\begin{align*}
+  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
+  - \frac{1}{2}\sum_p(\lambda_{i+1/2}^p+\lambda_{i+1/2}^{\min})\W_{i+1/2}^p.
+\end{align*}
+
+We set
 \begin{align}\label{lambda_min}
   \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\left[\bff(\bfu_{i+1})+\bff(\bfu_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\psi_{i+1}-\psi_i)}{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}
 \end{align}
-which guarantees \eqref{es_cond} and, therefore, \eqref{ent_ineq}. 
-Since the blended Riemann solver induces dissipation of entropy, 
-we expect condition \eqref{es_cond} to be fulfilled most of the times even with $\lambda_{i+1/2}^{\min}=0$. 
-Therefore, \eqref{lambda_min} is used as a safeguard to guarantee entropy stability
-for the one-dimensional problem using method \eqref{first-order_FV} or \eqref{first-order_via_fluct}. 
-Extra modifications are needed to guarantee entropy stability of Lax-Wendroff-LeVeque method 
-\eqref{second-order_via_fluct} and its multidimensional extension via Strang's splitting. 
-We do not pursue these modifications in this work. 
+which guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
+
+Since the blended Riemann solver described in Section \ref{sec:blended_rs} already
+tends to introduce entropy dissipation,
+we expect condition \eqref{es_cond} to be fulfilled most of the time even with $\lambda_{i+1/2}^{\min}=0$.
+But \eqref{lambda_min} is used as a safeguard to guarantee entropy stability of the first-order method.
+Extra modifications would be needed to guarantee entropy stability of the second-order LWL method
+\eqref{second-order_via_fluct} and its multidimensional extension via Strang splitting.
+We do not pursue such modifications in this work.
 
 \begin{remark}
-In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be written as 
+In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be written as
 \begin{align*}
-  (\bfv_{i}-\bfv_{i-1})\cdot 
+  (\bfv_{i}-\bfv_{i-1})\cdot
   \Big(
   \underbrace{\bff(\bfu_i)-\A^+\Delta Q_{i-1/2}}_{=\bfF_{i-1/2}}\Big)\leq \psi_{i}-\psi_{i-1},
   \quad
-  (\bfv_{i+1}-\bfv_i)\cdot 
+  (\bfv_{i+1}-\bfv_i)\cdot
   \Big(\underbrace{\bff(\bfu_i)+\A^-\Delta Q_{i+1/2}}_{=\bfF_{i+1/2}}\Big)\leq \psi_{i+1}-\psi_i.
 \end{align*}
 \end{remark}
 
 \begin{remark}[About the effect of $\lambda_{i\pm 1/2}^{\min}$ for Roe's solver.]
-  If we set $R_{i\pm 1/2}=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes the Roe's solver.
+  If we set $\theta_{i\pm 1/2}=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes Roe's solver.
   In this case, it is well known that transonic rarefactions develop non-physical shocks,
-  a phenomenon known as `entropy-glitch'. To fix this problem, many entropy fixes to the Roe's
-  solver have been developed. Enhancing the dissipation via \eqref{lambda_min} behaves as an entropy fix for
-  the Roe's solver, which we demonstrate via a numerical experiment in \S \ref{sec:rp_dry_bed}. 
+  a phenomenon known as `entropy glitch'. To fix this problem, many entropy fixes to Roe's
+  solver have been developed. Enhancing the dissipation via \eqref{lambda_min}
+  also serves as a transonic entropy fix for Roe's solver, which we demonstrate
+  via a numerical experiment in \S \ref{sec:rp_dry_bed}.
 \end{remark}
 
 \clearpage
 \section{Numerical results}\label{sec:num}
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
-blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}. 
+blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}.
 We compare the behavior of the blended solver against the standard Roe's and Rusanov's solvers.
-In most of the experiments we use these Riemann solvers with the Lax-Wendroff-LeVeque method reviewed in \S\ref{sec:lax-wendroff-leveque}.
+In most of the experiments we use these Riemann solvers with the LWL method reviewed in \S\ref{sec:lax-wendroff-leveque}.
 When the exact solution is available, we report a convergence test based on the $L^1$-error for the water height
 \begin{align*}
   E_1=\sum_i|K_i|~|h_i-h^e(\bfx_i)|,
@@ -791,27 +783,27 @@ where $|K_i|$ is the length or area of cell $i$,
 $h_i$ is the cell average of the water height at cell $i$,
 and $h^e(\bfx_i)$ is the exact water height evaluated at the center of cell $i$.
 
-We consider a total of six problems. We start with a one-dimensional Riemann problem over a dry bed. 
+We consider a total of six problems. We start with a one-dimensional Riemann problem over a dry bed.
 For this problem we use the first-order method \eqref{first-order_via_fluct},
-which helps preventing violations of positivity. Although, only the Rusanov's solver guarantees
+which helps preventing violations of positivity. Although, only Rusanov's solver guarantees
 positivity, we do not get negative values for the water height with this method and the other Riemann solvers.
 In \S \ref{sec:steady_outflow} we consider a one-dimensional problem with a smooth steady state solution. We observe the expected
 second-order accuracy of method \eqref{second-order_via_fluct} with Roe's and the blended solvers. Using
-the Rusanov's Riemann solver degrades the accuracy to first-order. The overall accuracy of the blended solver
-is not degraded since the extra dissipation is not applied in smooth regions. 
+Rusanov's Riemann solver degrades the accuracy to first-order. The overall accuracy of the blended solver
+is not degraded since the extra dissipation is not applied in smooth regions.
 In \S\ref{sec:rp_wet_bed} and \S\ref{sec:1D_chj} we consider one-dimensional problems with strong shocks. We observe similar accuracy with the
 blended solver than with Roe's solver; that is, inducing entropy dissipation near the shocks do not degrade the accuracy
 of the underlying Roe's solver. This extra dissipation, however, prevents the formation of carbuncles in other experiments,
-which we demonstrate in \S \ref{sec:bow_shock} and \S\ref{sec:2D_chj}. 
+which we demonstrate in \S \ref{sec:bow_shock} and \S\ref{sec:2D_chj}.
 The main focus of this work is in the formation of carbuncle instabilities in the two-dimensional CHJ. We present
 an extensive set of experiments about this problem in \S \ref{sec:2D_chj}.
 We consider not only Roe's, Rusanov's and the blended solvers, but also the HLLE solver and a solver proposed in \cite{kemm2014note},
-which is designed to remove the carbuncle instabilities in the shallow water equations. 
+which is designed to remove the carbuncle instabilities in the shallow water equations.
 
 \subsection{Dam break problem on a dry bed}\label{sec:rp_dry_bed}
-We start with the one-dimensional dam break problem on a dry bed. 
-This problem is a canonical example that demonstrates the `entropy glitch' of Roe's solver 
-at transonic rarefactions. Since the baseline Roe's solver we use (see \S\ref{sec:roe}) does not contain 
+We start with the one-dimensional dam break problem on a dry bed.
+This problem is a canonical example that demonstrates the `entropy glitch' of Roe's solver
+at transonic rarefactions. Since the baseline Roe's solver we use (see \S\ref{sec:roe}) does not contain
 an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch.
 We follow the setup in \cite[\S 4.1.2]{delestre2013swashes}.
 The domain is given by $\Omega=(0,L=10)$, and the initial condition is $hu(x,0)=0$ and
@@ -823,16 +815,16 @@ The domain is given by $\Omega=(0,L=10)$, and the initial condition is $hu(x,0)=
   \end{cases}
 \end{align*}
 with $h_l=5\times 10^{-3}$ and $h_r=0$. In our experiments we use $h_r=1\times 10^{-15}$ to avoid division by zero.
-The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is 
+The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is
 \begin{align*}
-  h(x,t) = 
+  h(x,t) =
   \begin{cases}
     h_l, \\
     \frac{4}{9g}\left(\sqrt{gh_l}-\frac{x-x_0}{2t}\right)^2, \\
     0,
   \end{cases}
-\quad 
-  u(x,t) = 
+\quad
+  u(x,t) =
   \begin{cases}
     0, &\mbox{ if } x\leq x_A(t), \\
     \frac{2}{3}\left(\sqrt{gh_l}+\frac{x-x_0}{t}\right), & \mbox{ if } x_A(t) < x\leq x_B(t), \\
@@ -842,13 +834,13 @@ The exact solution, which can also be found in \cite{delestre2013swashes} and re
 with $x_A(t)=x_0-t\sqrt{gh_l}$ and $x_B(t)=x_0+2t\sqrt{gh_l}$.
 We use $g=1$ and solve the problem up to $t=10$.
 In figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
-we show the solution using method \eqref{first-order_via_fluct} 
+we show the solution using method \eqref{first-order_via_fluct}
 with Roe's solver, Rusanov's solver and the blended solver, respectively.
 The entropy glitch, which is manifested as a non-physical shock at $x=x_0$,
 is present with Roe's solver. Using Rusanov's and the blended solvers
 fixes the entropy glitch.
-In Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test. 
-Note that using the blended solver leads to more accurate results. 
+In Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
+Note that using the blended solver leads to more accurate results.
 
 \begin{figure}[!h]
   {\scriptsize
@@ -857,12 +849,12 @@ Note that using the blended solver leads to more accurate results.
     ~
     \subfloat[Rusanov's Riemann solver.\label{fig:rp_dry_bed_llf}]{
         \includegraphics[scale=0.36]{figures/rp_dry_llf.png}}
-    
+
     \subfloat[Blended Riemann solver. \label{fig:rp_dry_bed_blended}]{
       \includegraphics[scale=0.36]{figures/rp_dry_blended.png}}
     ~
     \subfloat[Roe's Riemann solver with $\lambda_{i\pm 1/2}^{\min}$.\label{fig:rp_dry_bed_roe_with_lmin}]{
-      \includegraphics[scale=0.36]{figures/rp_dry_roe_with_lmin.png}}    
+      \includegraphics[scale=0.36]{figures/rp_dry_roe_with_lmin.png}}
   }
   \caption{
     Dam break problem over a dry bed using method \eqref{first-order_via_fluct} with different
@@ -874,19 +866,19 @@ Note that using the blended solver leads to more accurate results.
 
 For this particular problem, using method \eqref{first-order_via_fluct} with the blended Riemann solver
 leads to $\lambda_{i\pm 1/2}^{\min}=0$ for all the experiments, but this is not true in general.
-Finally, let us demonstrate the effect of $\lambda_{i\pm 1/2}^{\min}$ by imposing $R_{i}=0$ in \eqref{lambda_p},
+Finally, let us demonstrate the effect of $\lambda_{i\pm 1/2}^{\min}$ by imposing $\theta_{i}=0$ in \eqref{lambda_p},
 which is equivalent to using Roe's solver with extra dissipation given by $\lambda_{i\pm 1/2}^{\min}$.
 In Figure \ref{fig:rp_dry_bed_roe_with_lmin}, we show the solution using different refinements,
 and in the last column of Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
-Note that the entropy glitch is highly reduced. 
+Note that the entropy glitch is highly reduced.
 To remove completely the entropy glitch we could add high-order entropy dissipation following \cite{tadmor2003entropy}
 and references therein.
 
 \begin{table}[!ht]\scriptsize
   \begin{center}
     \begin{tabular}{||c||c|c||c|c||c|c||c|c||} \hline
-      & \multicolumn{2}{c||}{Roe's solver}  
-      &\multicolumn{2}{c||}{Rusanov's solver} 
+      & \multicolumn{2}{c||}{Roe's solver}
+      &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver}
       &\multicolumn{2}{c||}{Roe's with $\lambda_{i\pm 1/2}^{\min}$} \\ \cline{2-9}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
@@ -903,30 +895,30 @@ and references therein.
 \end{table}
 
 \subsection{Dam break problem on a wet bed}\label{sec:rp_wet_bed}
-We consider now a one-dimensional dam break problem on a wet domain. 
-We follow the setup in \cite[\S 4.1.1]{delestre2013swashes}. 
-The domain is $\Omega=(0,L)$ with $L=10$, the initial condition is given by 
-$hu(x,0)=0$ and 
+We consider now a one-dimensional dam break problem on a wet domain.
+We follow the setup in \cite[\S 4.1.1]{delestre2013swashes}.
+The domain is $\Omega=(0,L)$ with $L=10$, the initial condition is given by
+$hu(x,0)=0$ and
 \begin{align*}
-  h(x,0) = 
+  h(x,0) =
   \begin{cases}
     h_l & \mbox{ if } x\in(0,x_0], \\
     h_r & \mbox{ if } x\in(x_0,L),
   \end{cases}
 \end{align*}
-with $x_0=5$, $h_l=0.005$ and $h_r=0.001$. 
+with $x_0=5$, $h_l=0.005$ and $h_r=0.001$.
 The exact solution, which can be found in \cite{delestre2013swashes} and references therein,
-is given by 
+is given by
 \begin{align*}
-  h(x,t) = 
+  h(x,t) =
   \begin{cases}
     h_l, \\
     \frac{4}{9g}\left(\sqrt{gh_l}-\frac{x-x_0}{2t}\right)^2, \\
     \frac{c_m^2}{g}, \\
-    h_r, 
+    h_r,
   \end{cases}
-\quad 
-  u(x,t) = 
+\quad
+  u(x,t) =
   \begin{cases}
     0, &\mbox{ if } x\leq x_A(t), \\
     \frac{2}{3}\left(\sqrt{gh_l}+\frac{x-x_0}{t}\right), & \mbox{ if } x_A(t) < x\leq x_B(t), \\
@@ -934,19 +926,19 @@ is given by
     0, &\mbox{ if } x\leq x_C(t),
   \end{cases}
 \end{align*}
-where $x_A(t)=x_0-t\sqrt{gh_l}$, $x_B(t)=x_0+t\left(2\sqrt{gh_l}-3c_m\right)$, 
-$x_C(t)=x_0+t\frac{2c_m^2\left(\sqrt{gh_l}-c_m\right)}{c_m^2-gh_r}$ and 
-$c_m$ is the solution of 
+where $x_A(t)=x_0-t\sqrt{gh_l}$, $x_B(t)=x_0+t\left(2\sqrt{gh_l}-3c_m\right)$,
+$x_C(t)=x_0+t\frac{2c_m^2\left(\sqrt{gh_l}-c_m\right)}{c_m^2-gh_r}$ and
+$c_m$ is the solution of
 $-8gh_rc_m^2\left(\sqrt{gh_l}-c_m\right)^2+\left(c_m^2-gh_r\right)^2\left(c_m^2+gh_r\right)=0$.
 We use $g=1$ and solve the problem up to the final time $t=5$ considering method \eqref{second-order_via_fluct}
-with Roe's, Rusanov's and the blended solvers. The solution with different refinement levels 
+with Roe's, Rusanov's and the blended solvers. The solution with different refinement levels
 and each Riemann solver is shown in Figure \ref{fig:rp_wet_bed}.
-In Table \ref{table:rp_wet_bed}, we summarize the results of a convergence test. 
-Since the solution is non-smooth, we expect no more than first order convergence rates. Note that the 
-results with the entropy dissipative blended solver are comparable against the results using Roe's solver. 
+In Table \ref{table:rp_wet_bed}, we summarize the results of a convergence test.
+Since the solution is non-smooth, we expect no more than first order convergence rates. Note that the
+results with the entropy dissipative blended solver are comparable against the results using Roe's solver.
 That is, inducing entropy dissipation via the blended Riemann solver does not degrade the high-order
-accuracy properties of the Roe's solver. 
-In contrast, the accuracy and convergence rates using Rusanov's solver are clearly degraded.  
+accuracy properties of Roe's solver.
+In contrast, the accuracy and convergence rates using Rusanov's solver are clearly degraded.
 
 \begin{figure}[!h]
   {\scriptsize
@@ -970,8 +962,8 @@ In contrast, the accuracy and convergence rates using Rusanov's solver are clear
 \begin{table}[!ht]\scriptsize
   \begin{center}
     \begin{tabular}{||c||c|c||c|c||c|c||} \hline
-      & \multicolumn{2}{c||}{Roe's solver}  
-      &\multicolumn{2}{c||}{Rusanov's solver} 
+      & \multicolumn{2}{c||}{Roe's solver}
+      &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
       1/50   & 4.22E-04 &  --  & 5.73E-04 &  --  & 4.34E-04 & --   \\
@@ -990,25 +982,25 @@ In contrast, the accuracy and convergence rates using Rusanov's solver are clear
 In this section we consider for the first time a CHJ. We start with a one-dimensional problem
 embedded into the two-dimensional domain $\Omega=(0.1,1)\times(0,0.1)$.
 A semi-analytical solution at steady state is available as described in \S \ref{sec:steady_chj};
-therefore, we can perform a convergence test. 
+therefore, we can perform a convergence test.
 We consider the initial condition $h(x,t=0)=0.1$, $hu(x,t=0)=0$ and $hv(x,t=0)=0$.
 At the left boundary, we impose $h(0.1,t)=0.3$, $hu(0.1,t)=0.225$ and $hv(0.1,t)=0$.
 At the right boundary we impose $h(1,t)=0.37387387318873766$, $hu(1,t)=\beta/h(1,t)$ and $hv(1,t)=0$ where $\beta=0.0225$.
 The values on the right boundary are chosen so that the CHJ is located at $x=0.3$, as described in \S \ref{sec:formation}.
 %
 In the first row of Figure \ref{fig:rp_wet_bed}, we show (slices of) the solution (at $y=0.05$)
-at different times using the second-order method \eqref{second-order_via_fluct} with Roe's, Rusanov's and the blended Riemann solvers. 
-In the second row of the same figure, we plot $R_i$ \eqref{Ri}, which is a (normalized) measurement of the
-entropy residual. Note that $R_i$ accurately locates the shocks and is (nearly) zero in smooth regions. 
-In Table \ref{table:chj_1D}, we summarize the results of a convergence study. 
+at different times using the second-order method \eqref{second-order_via_fluct} with Roe's, Rusanov's and the blended Riemann solvers.
+In the second row of the same figure, we plot $\theta_i$ \eqref{Ri}, which is a (normalized) measurement of the
+entropy residual. Note that $\theta_i$ accurately locates the shocks and is (nearly) zero in smooth regions.
+In Table \ref{table:chj_1D}, we summarize the results of a convergence study.
 We remark that the convergence with Roe's solver is erratic.
 Moreover, for the finer grids, the solution appears to become worse.
-Using Rusanov's and the blended Riemann solvers delivers cleaner convergence rates. 
+Using Rusanov's and the blended Riemann solvers delivers cleaner convergence rates.
 In \cite[\S 5]{kemm2018heuristical} and \cite{bader2014carbuncle}, the authors consider one-dimensional problems embedded into
 two-dimensional domains and observe different instabilities for the
 Euler and the shallow water equations, respectively.
 The authors attributed the problem to a manifestation of the carbuncle instability
-that lead to an unstable location of the steady shock with certain Riemann solvers, including Roe's solver. 
+that lead to an unstable location of the steady shock with certain Riemann solvers, including Roe's solver.
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1026,9 +1018,9 @@ that lead to an unstable location of the steady shock with certain Riemann solve
     \includegraphics[scale=0.29]{figures/chj_1D_Ri_t10p0.png}
   }
   \caption{
-    One-dimensional CHJ using method \eqref{second-order_via_fluct} with 
+    One-dimensional CHJ using method \eqref{second-order_via_fluct} with
     (cyan) Roe's, (red) Rusanov's and (blue) the blended Riemann solvers.
-    In the second row we plot $R_i$, which is given by \eqref{Ri}.
+    In the second row we plot $\theta_i$, which is given by \eqref{Ri}.
     In all simulations we consider $\Delta x=1/400$.
     \label{fig:1D_chj}}
 \end{figure}
@@ -1036,8 +1028,8 @@ that lead to an unstable location of the steady shock with certain Riemann solve
 \begin{table}[!ht]\scriptsize
   \begin{center}
     \begin{tabular}{||c||c|c||c|c||c|c||} \hline
-      & \multicolumn{2}{c||}{Roe's solver}  
-      &\multicolumn{2}{c||}{Rusanov's solver} 
+      & \multicolumn{2}{c||}{Roe's solver}
+      &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
       1/50  & 1.56E-04 &  --   & 8.80E-04 &  --  & 3.56E-04 &  --  \\
@@ -1052,21 +1044,21 @@ that lead to an unstable location of the steady shock with certain Riemann solve
 \end{table}
 
 \subsection{Steady outflow}\label{sec:steady_outflow}
-Let us consider a problem similar to that in the previous section, but with an outflow boundary condition. 
-That is, we consider the one-dimensional domain $\Omega=(0.1,1)$, the initial condition 
-$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$, 
+Let us consider a problem similar to that in the previous section, but with an outflow boundary condition.
+That is, we consider the one-dimensional domain $\Omega=(0.1,1)$, the initial condition
+$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
 and set the right boundary condition to outflow.
-We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition. 
-If the flow is supercritical ($|F|>1$ where $F$ is the Froude number), the exact solution converges to a 
-steady state profile given by the solution of \eqref{steady}. 
-Depending on the initial condition, shocks might develop before the steady state is reached. 
-Nevertheless, the steady state profile is smooth. 
-In Figure \ref{fig:steady_outflow}, we show the solution and $R_i$ at different times using
+We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition.
+If the flow is supercritical ($|F|>1$ where $F$ is the Froude number), the exact solution converges to a
+steady state profile given by the solution of \eqref{steady}.
+Depending on the initial condition, shocks might develop before the steady state is reached.
+Nevertheless, the steady state profile is smooth.
+In Figure \ref{fig:steady_outflow}, we show the solution and $\theta_i$ at different times using
 the second-order method \eqref{second-order_via_fluct}
 with Roe's, Rusanov's and the blended Riemann solvers.
-Additionally, in Table \ref{table:steady_outflow}, we summarize the results of a convergence study 
+Additionally, in Table \ref{table:steady_outflow}, we summarize the results of a convergence study
 based on methods \eqref{first-order_via_fluct} and
-\eqref{second-order_via_fluct}, using the same Riemann solvers.  
+\eqref{second-order_via_fluct}, using the same Riemann solvers.
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1084,9 +1076,9 @@ based on methods \eqref{first-order_via_fluct} and
     \includegraphics[scale=0.29]{figures/outflow_1D_Ri_t10p0.png}
   }
   \caption{
-    Steady outflow problem using method \eqref{second-order_via_fluct} with 
+    Steady outflow problem using method \eqref{second-order_via_fluct} with
     (cyan) Roe's, (red) Rusanov's and (dashed blue) the blended Riemann solvers.
-    In the second row we plot $R_i$, which is given by \eqref{Ri}.
+    In the second row we plot $\theta_i$, which is given by \eqref{Ri}.
     In all simulations we consider $\Delta x=1/400$.
     \label{fig:steady_outflow}}
 \end{figure}
@@ -1096,11 +1088,11 @@ based on methods \eqref{first-order_via_fluct} and
     \begin{tabular}{||c||c|c||c|c||c|c||c|c||c|c||c|c||} \hline
       & \multicolumn{6}{c||}{First-order method \eqref{first-order_via_fluct}}
       & \multicolumn{6}{c||}{Second-order method \eqref{second-order_via_fluct}} \\ \cline{2-13}
-      & \multicolumn{2}{c||}{Roe's solver}  
-      &\multicolumn{2}{c||}{Rusanov's solver} 
+      & \multicolumn{2}{c||}{Roe's solver}
+      &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver}
-      & \multicolumn{2}{c||}{Roe's solver}  
-      &\multicolumn{2}{c||}{Rusanov's solver} 
+      & \multicolumn{2}{c||}{Roe's solver}
+      &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver}
       \\ \cline{2-13}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate\\ \hline
@@ -1120,26 +1112,26 @@ based on methods \eqref{first-order_via_fluct} and
 %\clearpage
 \subsection{Steady shock around a cylinder}\label{sec:bow_shock}
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
-%We consider two regimes. In the first regime, the physical instabilities are mild. 
-%By increasing the strength of the jump and other parameters, we consider a second 
-%and more strongly unstable regime. In both cases, we generate the CHJ as described in 
-%Section XX; that is, we impose supersonic inflow boundary conditions for the jet and 
-%subsonic outflow boundary conditions. 
+%We consider two regimes. In the first regime, the physical instabilities are mild.
+%By increasing the strength of the jump and other parameters, we consider a second
+%and more strongly unstable regime. In both cases, we generate the CHJ as described in
+%Section XX; that is, we impose supersonic inflow boundary conditions for the jet and
+%subsonic outflow boundary conditions.
 
-%We consider two types of domain and two corresponding computational grids. 
-%The two types of domains are two-dimensional squares and circular domains. 
-%For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX, 
+%We consider two types of domain and two corresponding computational grids.
+%The two types of domains are two-dimensional squares and circular domains.
+%For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX,
 %respectively.
 
 %\subsection{Regime 1: midly unstable flow}
 
-%Show the results with Roe's and Rusanov's solver. 
-%Show the results with the three proposed methodologies. 
+%Show the results with Roe's and Rusanov's solver.
+%Show the results with the three proposed methodologies.
 
 %\subsection{Regime 2: strongly unstable flow}
 
-%Show the results with Roe's and Rusanov's solver. 
-%Show the results with the three proposed methodologies. 
+%Show the results with Roe's and Rusanov's solver.
+%Show the results with the three proposed methodologies.
 
 \section{Conclusions}
 
@@ -1151,8 +1143,8 @@ based on methods \eqref{first-order_via_fluct} and
 
 %Random perturbation only in the jet
 %Turn off the perturbation after some time
-%Reduce the amplitude of the perturbation 
-%Non-rotationally sym. IC 
-%Consider Kemm's solver. 
+%Reduce the amplitude of the perturbation
+%Non-rotationally sym. IC
+%Consider Kemm's solver.
 
 
