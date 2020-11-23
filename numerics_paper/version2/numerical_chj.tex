@@ -260,6 +260,7 @@ solvers in the context of a 1-dimensional mesh.
 In the numerical experiments in \S\ref{sec:num} we use second-order Strang
 splitting \cite{strang1968construction} to extend the method to multiple dimensions.
 
+\subsection{Wave propagation methods}\label{sec:waveprop}
 The numerical solution $u_i$
 represents the average value over cell $i$, which extends from $x_\imh$ to $x_\iph$.
 At each time step and at each interface $x_\imh$, we approximately solve the
@@ -305,7 +306,11 @@ also suppress related real instabilities, while Roe's solver exhibits carbuncles
 Later we will combine these two solvers in order to better deal with shock instability.
 We refer to \cite{ketcheson2020riemann} and references therein for
 a full and detailed description of these two Riemann solvers in the context of
-the shallow water equations.
+the shallow water equations.  Both of these solvers satisfy the conservation
+property
+\begin{align} \label{rs_conservation}
+    \amdq_\imh + \apdq_\imh = \bff(\bfu_i) - \bff(\bfu_{i-1}).
+\end{align}
 
 
 \subsection{Rusanov's Riemann solver}\label{sec:rusanov}
@@ -413,7 +418,7 @@ via dissipation of entropy.
 %\end{align}
 %From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
 %$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
-%Using \eqref{cons_roe}, \eqref{rus_rs_aux} becomes
+%Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
 %\begin{align*}
 %  \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
 %  = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
@@ -592,7 +597,7 @@ To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctua
 \end{align}
 From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
 $\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
-Using \eqref{cons_roe}, \eqref{rus_rs_aux} becomes
+Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
 \begin{align*}
   \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
   = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
@@ -691,7 +696,7 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
 blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}.
 We compare the behavior of the blended solver against the standard Roe's and Rusanov's solvers.
-In most of the experiments we use these Riemann solvers with the LWL method reviewed in \S\ref{sec:lax-wendroff-leveque}.
+In most of the experiments we use these Riemann solvers with the LWL method reviewed in \S\ref{sec:waveprop}.
 When the exact solution is available, we report a convergence test based on the $L^1$-error for the water height
 \begin{align*}
   E_1=\sum_i|K_i|~|h_i-h^e(\bfx_i)|,
