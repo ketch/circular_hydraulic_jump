@@ -581,8 +581,34 @@ In the numerical experiments in \S\ref{sec:num}, we obtain second-order experime
 order of convergence (EOC) for problems with smooth solution, which is expected since
 $\theta_{i\pm 1/2}\approx 0$ in smooth regions.
 Similarly, if $\theta_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusanov's Riemann solver,
-which is clear by writing the fluctuations in Rusanov's method in terms of Roe's waves and speeds;
-see \eqref{fluct_rus}.
+which can be seen by writing the fluctuations in Rusanov's method in terms of Roe's waves and speeds.
+
+To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctuation as follows:
+\begin{align}\label{rus_rs_aux}
+  \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
+  = \bff(\bfu_{i})-\bff(\bfu_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
+  -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}.
+  %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
+\end{align}
+From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
+$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
+Using \eqref{cons_roe}, \eqref{rus_rs_aux} becomes
+\begin{align*}
+  \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
+  = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
+  -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus},
+\end{align*}
+which implies that
+\begin{subequations}\label{fluct_rus}
+\begin{align}
+  \A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p,
+\end{align}
+and similarly,
+\begin{align}
+  \A^{-,\Rus}\Delta Q_{i+1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i+1/2}^p - \lambda_{i+1/2}^{\max}\right)\W_{i+1/2}^p.
+\end{align}
+\end{subequations}
+
 
 \subsection{Entropy-stable Riemann solver}\label{sec:entropy_stable}
 The Riemann solver presented in the previous section blends the solvers of Rusanov and Roe based on a
