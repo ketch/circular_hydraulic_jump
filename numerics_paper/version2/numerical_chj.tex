@@ -32,12 +32,14 @@
 \newcommand{\bfr}{{\bf r}}
 \newcommand{\bfF}{{\bf F}}
 \newcommand{\bfu}{{\bf u}}
-\newcommand{\bfv}{{\bf v}}
+\newcommand{\entvar}{\eta'}
 \newcommand{\bfq}{{\bf q}}
 \newcommand{\bfx}{{\bf x}}
 \newcommand{\sgn}{{\rm sgn}}
 \newcommand{\Rus}{{\rm Rus}}
 \newcommand{\Roe}{{\rm Roe}}
+\newcommand{\efp}{\Psi}
+\newcommand{\entflux}{\psi}
 
 %\newdefinition{rmk}{Remark}
 \newtheorem{remark}{Remark}
@@ -261,16 +263,16 @@ In the numerical experiments in \S\ref{sec:num} we use second-order Strang
 splitting \cite{strang1968construction} to extend the method to multiple dimensions.
 
 \subsection{Wave propagation methods}\label{sec:waveprop}
-The numerical solution $u_i$
-represents the average value over cell $i$, which extends from $x_\imh$ to $x_\iph$.
+The numerical solution $q_i$ represents the average value of the set of
+conserved quantities over cell $i$, which extends from $x_\imh$ to $x_\iph$.
 At each time step and at each interface $x_\imh$, we approximately solve the
-Riemann problem with initial states $(u^n_{i-1},u^n_i)$.  The approximate
+Riemann problem with initial states $(q^n_{i-1},q^n_i)$.  The approximate
 solution consists of a set of traveling discontinuities or waves $\W^p_\imh$
 and corresponding speeds $s^p_\imh$.
 We use the wave propagation framework developed by LeVeque \cite{leveque1997wave, leveque2002finite}
 and employed in the Clawpack software \cite{clawpack,pyclaw-sisc}, which implements the LWL scheme
 \begin{align}\label{second-order_via_fluct}
-  u_i^{n+1} = u_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
+  q_i^{n+1} = q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
   -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
 \end{align}
 Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$,
@@ -290,12 +292,12 @@ Here $\tilde{\W}_{i\pm 1/2}^p$ is a TVD-limited version of $\W_{i\pm 1/2}^p$.
 We will sometimes work with
 the first-order method obtained by setting the correction fluxes to zero:
 \begin{align}\label{first-order_via_fluct}
-  u_i^{n+1} = u_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
+  q_i^{n+1} = q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
 \end{align}
 which, for the conservative Riemann solvers we use herein, can also be written
 as a first-order flux-differencing scheme:
 \begin{align}\label{first-order_FV}
-  \bfu_i^{n+1}=\bfu_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
+  q_i^{n+1}=q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
 \end{align}
 where $\bfF_{i+1/2}$ is a numerical approximation of the flux at $x_\iph$.
 
@@ -309,7 +311,7 @@ a full and detailed description of these two Riemann solvers in the context of
 the shallow water equations.  Both of these solvers satisfy the conservation
 property
 \begin{align} \label{rs_conservation}
-    \amdq_\imh + \apdq_\imh = \bff(\bfu_i) - \bff(\bfu_{i-1}).
+    \amdq_\imh + \apdq_\imh = \bff(\bfq_i) - \bff(\bfq_{i-1}).
 \end{align}
 
 
@@ -321,12 +323,12 @@ In this work, we take $\lambda_{i-1/2}^{\max}$ to be the upper bound
 from \cite[Prop. 3.7]{azerad2017well}.
 The waves are then given by
 \begin{align}\label{rusanov_waves}
-  \W_{i-1/2}^{1,\Rus}=\bfu_{i-1/2}-\bfu_{i-1}, \qquad
-  \W_{i-1/2}^{2,\Rus}=\bfu_{i}-\bfu_{i-1/2},
+  \W_{i-1/2}^{1,\Rus}=\bfq_{i-1/2}-\bfq_{i-1}, \qquad
+  \W_{i-1/2}^{2,\Rus}=\bfq_{i}-\bfq_{i-1/2},
 \end{align}
 where the intermediate state $\bfu_{i-1/2}$ is determined by imposing conservation:
 \begin{align}\label{rus_cons}
-  -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{1,\Rus}+\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus} = \bff(\bfu_{i})-\bff(\bfu_{i-1}).
+  -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{1,\Rus}+\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus} = \bff(\bfq_{i})-\bff(\bfq_{i-1}).
 \end{align}
 The fluctuations are given by \eqref{fluct} with $s_{i-1/2}^1=-\lambda_{i-1/2}^{\max}$
 and $s_{i-1/2}^2=\lambda_{i-1/2}^{\max}$, and the first- and second-order methods based
@@ -378,7 +380,7 @@ and the factors $\alpha^p_\imh$ obtained by solving
     \alpha^2_{i-1/2} \\
     \alpha^3_{i-1/2}
   \end{bmatrix}
-  =\Delta Q_{i-1/2}:=\bfu_i-\bfu_{i-1}.
+  =\Delta Q_{i-1/2}:=q_i-q_{i-1}.
 \end{align}
 
 
@@ -412,12 +414,12 @@ via dissipation of entropy.
 %and rewrite the right-going fluctuation as follows:
 %\begin{align}\label{rus_rs_aux}
 %  \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
-%  = \bff(\bfu_{i})-\bff(\bfu_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
+%  = \bff(q_{i})-\bff(q_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
 %  -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}.
 %  %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
 %\end{align}
 %From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
-%$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
+%$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=q_i-q_{i-1}=\sum_p\W_{i-1/2}^p$.
 %Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
 %\begin{align*}
 %  \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
@@ -470,17 +472,16 @@ via dissipation of entropy.
 %\end{figure}
 
 \subsection{The entropy residual}
-Let $S_i$ be the set of cells containing cell $i$ and those that share a face with it.
-Also let $\bfv(\bfu)=\eta^\prime(\bfu)$ be the entropy variable.
+Let $\entvar(\bfq)$ and $\entflux(\bfq)$ denote the entropy variable and entropy flux.
 Based on \cite{guermond2011entropy}, we consider
 \begin{align}\label{ent_residual}
-  \int_{S_i} \bfv(\bfu) \cdot \left[ \frac{\partial \bfu}{\partial t} + \nabla\cdot \bff(\bfu)\right]d\bfx
-  =\int_{S_i} \left[\frac{\partial \eta(\bfu)}{\partial t} + \bfv(\bfu) \cdot \nabla\cdot \bff(\bfu)\right] d\bfx
+  \int_{S_i} \entvar(\bfq) \cdot \left[ \frac{\partial \bfq}{\partial t} + \nabla\cdot \bff(\bfq)\right]d\bfx
+  =\int_{S_i} \left[\frac{\partial \eta(\bfq)}{\partial t} + \entvar(\bfq) \cdot \nabla\cdot \bff(\bfq)\right] d\bfx
 \end{align}
-as a measurement of the entropy production in $S_i$.
+as a measurement of the entropy production in cell $i$ (here $S_i=[x_\imh,x_\iph]$.
 To avoid the need to compute the time derivative of the entropy, we follow
 \cite{guermond2018second, guermond2018well} and use
-$\int \frac{\partial\eta(\bfu)}{\partial t}d\bfx=-\int \nabla\cdot\bfq(\bfu) d\bfx$,
+$\int \frac{\partial\eta(\bfq)}{\partial t}d\bfx=-\int \nabla\cdot\entflux(\bfq) d\bfx$,
 which holds in smooth regions. Then we define
 \begin{align}\label{Ri}
   \theta_i := \frac{R_i}{D_i},
@@ -488,19 +489,19 @@ which holds in smooth regions. Then we define
 with
 \begin{align*}
   R_i=
-  \left|\int_{S_i} \left[\bfv(\bfu) \cdot \nabla\cdot \bff(\bfu) - \nabla\cdot\bfq(\bfu) \right] d\bfx\right|,
+  \left|\int_{S_i} \left[\entvar(\bfq) \cdot \nabla\cdot \bff(\bfq) - \nabla\cdot\entflux(\bfq) \right] d\bfx\right|,
 \end{align*}
 and $D_i$ being an upper bound of $R_i$ that acts as normalization so that $0\leq \theta_i\leq 1$.
-Note that $R_i\approx 0$ if $\bfu$ is smooth in $S_i$.
+Note that $R_i\approx 0$ if $\bfq$ is smooth in $S_i$.
 In our implementation, we use
 \begin{align*}
-  R_i\approx \left|\bfv(\bfu_i)\cdot \int_{S_i}\nabla\cdot \bff(\bfu)d\bfx
-  -\int_{S_i}\nabla\cdot\bfq(\bfu) d\bfx\right|,
+  R_i\approx \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(\bfq)d\bfx
+  -\int_{S_i}\nabla\cdot\entflux(\bfq) d\bfx\right|,
   \quad
-  %D_i = ||\bfv(\bfu_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfu)d\bfx\right|\right|_{\ell^2}
-  %+\left|\int_{S_i}\nabla\cdot\bfq(\bfu)d\bfx\right|.
-  D_i = \sum_{k=1}^{d+1}|\bfv_k(\bfu_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(\bfu)\right)_kd\bfx\right|
-  +\left|\int_{S_i}\nabla\cdot\bfq(\bfu)d\bfx\right|,
+  %D_i = ||\entvar(\bfq_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfq)d\bfx\right|\right|_{\ell^2}
+  %+\left|\int_{S_i}\nabla\cdot\bfq(\bfq)d\bfx\right|.
+  D_i = \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(\bfq)\right)_kd\bfx\right|
+  +\left|\int_{S_i}\nabla\cdot\entflux(\bfq)d\bfx\right|,
 \end{align*}
 where $({\bf z})_k$ denotes the $k$-th component of ${\bf z}\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
 dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's Riemann solvers.
@@ -509,8 +510,8 @@ dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's 
 In this section, we use \eqref{Ri}, which is a normalized measurement of the entropy residual \eqref{ent_residual},
 to blend Rusanov's and Roe's Riemann solvers. To do this, we define the blended numerical flux:
 \begin{align}\label{num_flux_ev}
-  F_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
-  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max} I + (1-\theta_{i+1/2})|\hat A_{i+1/2}| \right)(\bfu_{i+1}-\bfu_{i}).
+  F_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max} I + (1-\theta_{i+1/2})|\hat A_{i+1/2}| \right)(\bfq_{i+1}-\bfq_{i}).
 \end{align}
 Here $I\in\mathbb{R}^{3\times 3}$ is the identity matrix,
 $\theta_{i+1/2}=\max\{\theta_{i+1},\theta_i\}$, $\lambda_{i+1/2}^{\max}$ is the
@@ -556,7 +557,7 @@ $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
 Here $\sgn(z)$ is the sign function of $z$.
 The second-order LWL method for the one-dimensional problem is given by
 \begin{align}\label{second-order}
-  u_i^{n+1}=u_i^n
+  q_i^{n+1}=q_i^n
   -\frac{\Delta t}{\Delta x}\left[\A^-\Delta Q_{i+1/2}+\A^+\Delta Q_{i-1/2}\right]
   -\frac{\Delta t}{\Delta x}\left[\tilde F_{i+1/2}-\tilde F_{i-1/2}\right],
 \end{align}
@@ -572,7 +573,7 @@ as the speed of $\W_{i+1/2}^p$,
 let us assume that no limiters are applied; i.e., $\tilde\W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$.
 By doing this, equation \eqref{second-order} can be written as
 \begin{align*}
-  u_i^{n+1}=u_i^n
+  q_i^{n+1}=q_i^n
   &-\frac{\Delta t}{2 \Delta x}
   \sum_p
   \left[\left(\hat\lambda_{i+1/2}^p -\frac{\Delta t}{\Delta x}(\lambda_{i+1/2}^p)^2 \right)\W_{i+1/2}^p
@@ -591,12 +592,12 @@ which can be seen by writing the fluctuations in Rusanov's method in terms of Ro
 To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctuation as follows:
 \begin{align}\label{rus_rs_aux}
   \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
-  = \bff(\bfu_{i})-\bff(\bfu_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
+  = \bff(\bfq_{i})-\bff(\bfq_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}.
   %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
 \end{align}
 From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
-$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfu_i-\bfu_{i-1}=\sum_p\W_{i-1/2}^p$.
+$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfq_i-\bfq_{i-1}=\sum_p\W_{i-1/2}^p$.
 Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
 \begin{align*}
   \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
@@ -623,42 +624,42 @@ or \eqref{second-order_via_fluct} based on this Riemann solver are (locally) ent
 In this section, we further modify the first-order method
 \eqref{first-order_via_fluct} in order to guarantee local entropy stability.
 
-Let $\bfv_i=\bfv(\bfu_i)$ and $q_i=q(\bfu_i)$ denote the entropy variable and the
-(one-dimensional) entropy potential at cell $i$, respectively.
-Also let $\psi_i=\bfv(\bfu_i)\cdot \bff(\bfu_i)-q(\bfu_i)$ be the entropy potential at cell $i$.
+Let $\entvar_i=\entvar(\bfq_i)$ and $\entflux_i=\entflux(\bfq_i)$ denote the entropy variable and the
+(one-dimensional) entropy flux at cell $i$, respectively.
+Also let $\efp=\entvar(\bfq_i)\cdot \bff(\bfq_i)-\entflux(\bfq_i)$ be the entropy potential at cell $i$.
 From \cite[\S 4]{tadmor1987numerical}, if the numerical fluxes satisfy
 \begin{align}\label{es_cond}
-(\bfv_{i}-\bfv_{i-1})\cdot \bfF_{i-1/2}\leq \psi_{i}-\psi_{i-1},
+(\entvar_{i}-\entvar_{i-1})\cdot \bfF_{i-1/2}\leq \efp{i}-\efp{i-1},
   \qquad
-  (\bfv_{i+1}-\bfv_i)\cdot \bfF_{i+1/2}\leq \psi_{i+1}-\psi_i,
+  (\entvar_{i+1}-\entvar_i)\cdot \bfF_{i+1/2}\leq \efp{i+1}-\efp,
 \end{align}
 then the following entropy inequality holds
 \begin{align}\label{ent_ineq}
-  \frac{d\eta(\bfu_i)}{dt}+\frac{1}{\Delta x}\left[G_{i+1/2}-G_{i-1/2}\right]\leq 0,
+  \frac{d\eta(\bfq_i)}{dt}+\frac{1}{\Delta x}\left[G_{i+1/2}-G_{i-1/2}\right]\leq 0,
 \end{align}
 where
 \begin{align*}
-    G_{i+1/2} &= \frac{1}{2}\left(\bfv_i+\bfv_{i+1}\right)\bfF_{i+1/2}-\frac{1}{2}(\psi_{i}+\psi_{i+1}),
+    G_{i+1/2} &= \frac{1}{2}\left(\entvar_i+\entvar_{i+1}\right)\bfF_{i+1/2}-\frac{1}{2}(\efp{i}+\efp{i+1}),
 \end{align*}
 is the discrete entropy flux.
 
 To enforce \eqref{es_cond} we further modify the flux \eqref{num_flux_ev}:
 \begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
-  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfu_{i+1}-\bfu_{i}).
+  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i}).
 \end{align*}
 Here $\lambda_{i+1/2}^{\min}$ is yet to be defined.
 We can write the numerical fluxes in terms of $\lambda^p_{i\pm 1/2}$ \eqref{lambda_p}
 and Roe's waves $\W_{i\pm 1/2}^p$.
 Doing so, we get
 \begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfu_{i+1})+\bff(\bfu_i)}{2}
+  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
   - \frac{1}{2}\sum_p(\lambda_{i+1/2}^p+\lambda_{i+1/2}^{\min})\W_{i+1/2}^p.
 \end{align*}
 
 We set
 \begin{align}\label{lambda_min}
-  \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\left[\bff(\bfu_{i+1})+\bff(\bfu_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\psi_{i+1}-\psi_i)}{\frac{1}{2}(\bfv_{i+1}-\bfv_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}
+  \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\efp{i+1}-\efp)}{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}
 \end{align}
 which guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
 
@@ -673,12 +674,12 @@ We do not pursue such modifications in this work.
 \begin{remark}
 In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be written as
 \begin{align*}
-  (\bfv_{i}-\bfv_{i-1})\cdot
+  (\entvar_{i}-\entvar_{i-1})\cdot
   \Big(
-  \underbrace{\bff(\bfu_i)-\A^+\Delta Q_{i-1/2}}_{=\bfF_{i-1/2}}\Big)\leq \psi_{i}-\psi_{i-1},
+  \underbrace{\bff(\bfq_i)-\A^+\Delta Q_{i-1/2}}_{=\bfF_{i-1/2}}\Big)\leq \efp{i}-\efp{i-1},
   \quad
-  (\bfv_{i+1}-\bfv_i)\cdot
-  \Big(\underbrace{\bff(\bfu_i)+\A^-\Delta Q_{i+1/2}}_{=\bfF_{i+1/2}}\Big)\leq \psi_{i+1}-\psi_i.
+  (\entvar_{i+1}-\entvar_i)\cdot
+  \Big(\underbrace{\bff(\bfq_i)+\A^-\Delta Q_{i+1/2}}_{=\bfF_{i+1/2}}\Big)\leq \efp{i+1}-\efp.
 \end{align*}
 \end{remark}
 
@@ -704,11 +705,13 @@ When the exact solution is available, we report a convergence test based on the 
 where $|K_i|$ is the length or area of cell $i$,
 $h_i$ is the cell average of the water height at cell $i$,
 and $h^e(\bfx_i)$ is the exact water height evaluated at the center of cell $i$.
+Since the methods under consideration are at most second order accurate, comparison
+of cell averages with centered point values is a sufficient way to test their accuracy.
 
 We consider a total of six problems. We start with a one-dimensional Riemann problem over a dry bed.
 For this problem we use the first-order method \eqref{first-order_via_fluct},
-which helps preventing violations of positivity. Although, only Rusanov's solver guarantees
-positivity, we do not get negative values for the water height with this method and the other Riemann solvers.
+to avoid negative depth values. Although only Rusanov's solver is proven to guarantee
+positivity, we do not get negative values for the water height with any of the first-order methods.
 In \S \ref{sec:steady_outflow} we consider a one-dimensional problem with a smooth steady state solution. We observe the expected
 second-order accuracy of method \eqref{second-order_via_fluct} with Roe's and the blended solvers. Using
 Rusanov's Riemann solver degrades the accuracy to first-order. The overall accuracy of the blended solver
