@@ -38,6 +38,7 @@
 \newcommand{\sgn}{{\rm sgn}}
 \newcommand{\Rus}{{\rm Rus}}
 \newcommand{\Roe}{{\rm Roe}}
+\newcommand{\Fr}{{\rm Fr}}
 
 %\newdefinition{rmk}{Remark}
 \newtheorem{remark}{Remark}
@@ -251,7 +252,6 @@ only in the shallow water context but for more realistic fluid models and physic
 It will play an important role in the results we present later.
 The rotationally-symmetric steady state is a useful initial condition for studies
 of CHJ stability.
-
 
 \section{Numerical methods}
 In this work we study the behavior of certain shock-capturing finite volume
@@ -804,12 +804,12 @@ and references therein.
       &\multicolumn{2}{c||}{Blended solver}
       &\multicolumn{2}{c||}{Roe's with $\lambda_{i\pm 1/2}^{\min}$} \\ \cline{2-9}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
-      1/50   & 6.21E-04 &  --  & 6.95E-04 &   -- & 5.10E-04 &  --  & 5.95E-04 & --   \\
-      1/100  & 4.70E-04 & 0.40 & 5.27E-04 & 0.40 & 3.53E-04 & 0.52 & 4.06E-04 & 0.55 \\
-      1/200  & 3.91E-04 & 0.26 & 3.88E-04 & 0.44 & 2.38E-04 & 0.56 & 2.83E-04 & 0.52 \\
-      1/400  & 3.16E-04 & 0.30 & 2.64E-04 & 0.55 & 1.51E-04 & 0.65 & 1.89E-04 & 0.58 \\
-      1/800  & 2.35E-04 & 0.42 & 1.67E-04 & 0.66 & 9.43E-05 & 0.68 & 1.20E-04 & 0.65 \\
-      1/1600 & 2.00E-04 & 0.23 & 1.01E-04 & 0.72 & 5.70E-05 & 0.72 & 7.42E-05 & 0.68 \\ \hline
+      1/50   & 6.21E-04 &  --  & 6.95E-04 &   -- & 5.08E-04 & --   & 5.95E-04 & --   \\
+      1/100  & 4.70E-04 & 0.40 & 5.27E-04 & 0.40 & 3.39E-04 & 0.58 & 4.06E-04 & 0.55 \\
+      1/200  & 3.91E-04 & 0.26 & 3.88E-04 & 0.44 & 2.30E-04 & 0.56 & 2.83E-04 & 0.52 \\
+      1/400  & 3.16E-04 & 0.30 & 2.64E-04 & 0.55 & 1.49E-04 & 0.62 & 1.89E-04 & 0.58 \\
+      1/800  & 2.35E-04 & 0.42 & 1.67E-04 & 0.66 & 9.24E-05 & 0.68 & 1.20E-04 & 0.65 \\
+      1/1600 & 2.00E-04 & 0.23 & 1.01E-04 & 0.72 & 5.66E-05 & 0.70 & 7.42E-05 & 0.68 \\ \hline
     \end{tabular}
     \caption{Grid convergence study for the dam break problem over a dry bed
       using method \eqref{first-order_via_fluct} with different Riemann solvers.\label{table:rp_dry_bed}}
@@ -888,90 +888,90 @@ In contrast, the accuracy and convergence rates using Rusanov's solver are clear
       &\multicolumn{2}{c||}{Rusanov's solver}
       &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
-      1/50   & 4.22E-04 &  --  & 5.73E-04 &  --  & 4.34E-04 & --   \\
-      1/100  & 2.00E-04 & 1.07 & 3.35E-04 & 0.78 & 2.08E-04 & 1.05 \\
-      1/200  & 1.11E-04 & 0.85 & 2.01E-04 & 0.74 & 1.13E-04 & 0.88 \\
-      1/400  & 5.05E-05 & 1.13 & 1.18E-04 & 0.77 & 5.26E-05 & 1.10 \\
-      1/800  & 2.60E-05 & 0.95 & 7.08E-05 & 0.74 & 2.73E-05 & 0.94 \\
-      1/1600 & 1.29E-05 & 1.01 & 3.79E-05 & 0.90 & 1.32E-05 & 1.04 \\ \hline
+      1/50   & 4.22E-04 &  --  & 5.73E-04 &  --  & 4.24E-04 &  --  \\ 
+      1/100  & 2.00E-04 & 1.07 & 3.35E-04 & 0.78 & 1.99E-04 & 1.08 \\
+      1/200  & 1.11E-04 & 0.85 & 2.01E-04 & 0.74 & 1.10E-04 & 0.84 \\
+      1/400  & 5.05E-05 & 1.13 & 1.18E-04 & 0.77 & 5.07E-05 & 1.12 \\
+      1/800  & 2.60E-05 & 0.95 & 7.08E-05 & 0.74 & 2.61E-05 & 0.95 \\
+      1/1600 & 1.29E-05 & 1.01 & 3.79E-05 & 0.90 & 1.29E-05 & 1.01 \\ \hline
     \end{tabular}
     \caption{Grid convergence study for the dam break problem over a wet bed
       using method \eqref{second-order_via_fluct} with different Riemann solvers.\label{table:rp_wet_bed}}
   \end{center}
 \end{table}
 
-\subsection{The circular hydraulic jump in one-dimension}\label{sec:1D_chj}
-In this section we consider for the first time a CHJ. We start with a one-dimensional problem
-embedded into the two-dimensional domain $\Omega=(0.1,1)\times(0,0.1)$.
-A semi-analytical solution at steady state is available as described in \S \ref{sec:steady_chj};
-therefore, we can perform a convergence test.
-We consider the initial condition $h(x,t=0)=0.1$, $hu(x,t=0)=0$ and $hv(x,t=0)=0$.
-At the left boundary, we impose $h(0.1,t)=0.3$, $hu(0.1,t)=0.225$ and $hv(0.1,t)=0$.
-At the right boundary we impose $h(1,t)=0.37387387318873766$, $hu(1,t)=\beta/h(1,t)$ and $hv(1,t)=0$ where $\beta=0.0225$.
-The values on the right boundary are chosen so that the CHJ is located at $x=0.3$, as described in \S \ref{sec:formation}.
-%
-In the first row of Figure \ref{fig:rp_wet_bed}, we show (slices of) the solution (at $y=0.05$)
-at different times using the second-order method \eqref{second-order_via_fluct} with Roe's, Rusanov's and the blended Riemann solvers.
-In the second row of the same figure, we plot $\theta_i$ \eqref{Ri}, which is a (normalized) measurement of the
-entropy residual. Note that $\theta_i$ accurately locates the shocks and is (nearly) zero in smooth regions.
-In Table \ref{table:chj_1D}, we summarize the results of a convergence study.
-We remark that the convergence with Roe's solver is erratic.
-Moreover, for the finer grids, the solution appears to become worse.
-Using Rusanov's and the blended Riemann solvers delivers cleaner convergence rates.
-In \cite[\S 5]{kemm2018heuristical} and \cite{bader2014carbuncle}, the authors consider one-dimensional problems embedded into
-two-dimensional domains and observe different instabilities for the
-Euler and the shallow water equations, respectively.
-The authors attributed the problem to a manifestation of the carbuncle instability
-that lead to an unstable location of the steady shock with certain Riemann solvers, including Roe's solver.
+%% \subsection{The circular hydraulic jump in one-dimension}\label{sec:1D_chj}
+%% In this section we consider for the first time a CHJ. We start with a one-dimensional problem
+%% embedded into the two-dimensional domain $\Omega=(0.1,1)\times(0,0.1)$.
+%% A semi-analytical solution at steady state is available as described in \S \ref{sec:steady_chj};
+%% therefore, we can perform a convergence test.
+%% We consider the initial condition $h(x,t=0)=0.1$, $hu(x,t=0)=0$ and $hv(x,t=0)=0$.
+%% At the left boundary, we impose $h(0.1,t)=0.3$, $hu(0.1,t)=0.225$ and $hv(0.1,t)=0$.
+%% At the right boundary we impose $h(1,t)=0.37387387318873766$, $hu(1,t)=\beta/h(1,t)$ and $hv(1,t)=0$ where $\beta=0.0225$.
+%% The values on the right boundary are chosen so that the CHJ is located at $x=0.3$, as described in \S \ref{sec:formation}.
+%% %
+%% In the first row of Figure \ref{fig:rp_wet_bed}, we show (slices of) the solution (at $y=0.05$)
+%% at different times using the second-order method \eqref{second-order_via_fluct} with Roe's, Rusanov's and the blended Riemann solvers.
+%% In the second row of the same figure, we plot $\theta_i$ \eqref{Ri}, which is a (normalized) measurement of the
+%% entropy residual. Note that $\theta_i$ accurately locates the shocks and is (nearly) zero in smooth regions.
+%% In Table \ref{table:chj_1D}, we summarize the results of a convergence study.
+%% We remark that the convergence with Roe's solver is erratic.
+%% Moreover, for the finer grids, the solution appears to become worse.
+%% Using Rusanov's and the blended Riemann solvers delivers cleaner convergence rates.
+%% In \cite[\S 5]{kemm2018heuristical} and \cite{bader2014carbuncle}, the authors consider one-dimensional problems embedded into
+%% two-dimensional domains and observe different instabilities for the
+%% Euler and the shallow water equations, respectively.
+%% The authors attributed the problem to a manifestation of the carbuncle instability
+%% that lead to an unstable location of the steady shock with certain Riemann solvers, including Roe's solver.
 
-\begin{figure}[!h]
-  {\scriptsize
-    \includegraphics[scale=0.29]{figures/chj_1D_t0p5.png}
-    \qquad
-    \includegraphics[scale=0.29]{figures/chj_1D_t1p3.png}
-    \qquad
-    \includegraphics[scale=0.29]{figures/chj_1D_t10p0.png}
+%% \begin{figure}[!h]
+%%   {\scriptsize
+%%     \includegraphics[scale=0.29]{figures/chj_1D_t0p5.png}
+%%     \qquad
+%%     \includegraphics[scale=0.29]{figures/chj_1D_t1p3.png}
+%%     \qquad
+%%     \includegraphics[scale=0.29]{figures/chj_1D_t10p0.png}
 
-    \vspace{15pt}
-    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t0p5.png}
-    \qquad
-    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t1p3.png}
-    \qquad
-    \includegraphics[scale=0.29]{figures/chj_1D_Ri_t10p0.png}
-  }
-  \caption{
-    One-dimensional CHJ using method \eqref{second-order_via_fluct} with
-    (cyan) Roe's, (red) Rusanov's and (blue) the blended Riemann solvers.
-    In the second row we plot $\theta_i$, which is given by \eqref{Ri}.
-    In all simulations we consider $\Delta x=1/400$.
-    \label{fig:1D_chj}}
-\end{figure}
+%%     \vspace{15pt}
+%%     \includegraphics[scale=0.29]{figures/chj_1D_Ri_t0p5.png}
+%%     \qquad
+%%     \includegraphics[scale=0.29]{figures/chj_1D_Ri_t1p3.png}
+%%     \qquad
+%%     \includegraphics[scale=0.29]{figures/chj_1D_Ri_t10p0.png}
+%%   }
+%%   \caption{
+%%     One-dimensional CHJ using method \eqref{second-order_via_fluct} with
+%%     (cyan) Roe's, (red) Rusanov's and (blue) the blended Riemann solvers.
+%%     In the second row we plot $\theta_i$, which is given by \eqref{Ri}.
+%%     In all simulations we consider $\Delta x=1/400$.
+%%     \label{fig:1D_chj}}
+%% \end{figure}
 
-\begin{table}[!ht]\scriptsize
-  \begin{center}
-    \begin{tabular}{||c||c|c||c|c||c|c||} \hline
-      & \multicolumn{2}{c||}{Roe's solver}
-      &\multicolumn{2}{c||}{Rusanov's solver}
-      &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
-      $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
-      1/50  & 1.56E-04 &  --   & 8.80E-04 &  --  & 3.56E-04 &  --  \\
-      1/100 & 1.06E-04 & 0.55  & 5.09E-04 & 0.79 & 1.95E-04 & 0.86 \\
-      1/200 & 7.77E-05 & 0.45  & 2.96E-04 & 0.78 & 1.07E-04 & 0.87 \\
-      1/400 & 7.50E-06 & 3.37  & 1.49E-04 & 0.99 & 3.68E-05 & 1.53 \\
-      1/800 & 9.07E-06 & -0.27 & 7.98E-05 & 0.90 & 1.67E-05 & 1.14 \\ \hline
-    \end{tabular}
-    \caption{Grid convergence study for the one-dimensional CHJ at $t=10$
-      using method \eqref{second-order_via_fluct} with different Riemann solvers.\label{table:chj_1D}}
-  \end{center}
-\end{table}
+%% \begin{table}[!ht]\scriptsize
+%%   \begin{center}
+%%     \begin{tabular}{||c||c|c||c|c||c|c||} \hline
+%%       & \multicolumn{2}{c||}{Roe's solver}
+%%       &\multicolumn{2}{c||}{Rusanov's solver}
+%%       &\multicolumn{2}{c||}{Blended solver} \\ \cline{2-7}
+%%       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate \\ \hline
+%%       1/50  & 1.56E-04 &  --   & 8.80E-04 &  --  & 2.48E-04 & -- \\
+%%       1/100 & 1.06E-04 & 0.55  & 5.09E-04 & 0.79 & 1.70E-04 & 0.54 \\
+%%       1/200 & 7.77E-05 & 0.45  & 2.96E-04 & 0.78 & 9.24E-05 & 0.87 \\
+%%       1/400 & 7.50E-06 & 3.37  & 1.49E-04 & 0.99 & 1.70E-05 & 2.44 \\
+%%       1/800 & 9.07E-06 & -0.27 & 7.98E-05 & 0.90 & 1.28E-05 & 0.40 \\ \hline
+%%     \end{tabular}
+%%     \caption{Grid convergence study for the one-dimensional CHJ at $t=10$
+%%       using method \eqref{second-order_via_fluct} with different Riemann solvers.\label{table:chj_1D}}
+%%   \end{center}
+%% \end{table}
 
 \subsection{Steady outflow}\label{sec:steady_outflow}
-Let us consider a problem similar to that in the previous section, but with an outflow boundary condition.
-That is, we consider the one-dimensional domain $\Omega=(0.1,1)$, the initial condition
-$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
-and set the right boundary condition to outflow.
+Let us consider a one-dimensional problem with a constant inflow and a steady outflow.
+The domain is given by $\Omega=(0.1,1)$, the initial condition is
+$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
+and the right boundary condition is set to outflow.
 We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition.
-If the flow is supercritical ($|F|>1$ where $F$ is the Froude number), the exact solution converges to a
+If the flow is supercritical ($|\Fr|>1$ where $\Fr$ is the Froude number), the exact solution converges to a
 steady state profile given by the solution of \eqref{steady}.
 Depending on the initial condition, shocks might develop before the steady state is reached.
 Nevertheless, the steady state profile is smooth.
@@ -1018,12 +1018,12 @@ based on methods \eqref{first-order_via_fluct} and
       &\multicolumn{2}{c||}{Blended solver}
       \\ \cline{2-13}
       $\Delta x$ & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate & $E_1$ & rate\\ \hline
-      1/50   & 2.16E-4 &  --  & 9.97E-4 &   -- & 2.20E-4 & --   & 4.13E-5 &   -- & 7.32E-4 &  --  & 4.97E-5 & --   \\
-      1/100  & 1.14E-4 & 0.92 & 6.38E-4 & 0.64 & 1.16E-4 & 0.92 & 1.47E-5 & 1.48 & 4.43E-4 & 0.73 & 1.89E-5 & 1.39 \\
-      1/200  & 5.86E-5 & 0.95 & 3.88E-4 & 0.72 & 5.93E-5 & 0.96 & 4.81E-6 & 1.61 & 2.57E-4 & 0.79 & 6.36E-6 & 1.57 \\
-      1/400  & 2.98E-5 & 0.97 & 2.26E-4 & 0.78 & 3.00E-5 & 0.98 & 1.42E-6 & 1.76 & 1.44E-4 & 0.83 & 1.92E-6 & 1.72 \\
-      1/800  & 1.50E-5 & 0.98 & 1.27E-4 & 0.83 & 1.51E-5 & 0.99 & 4.16E-7 & 1.76 & 7.81E-5 & 0.88 & 5.61E-7 & 1.77 \\
-      1/1600 & 7.53E-6 & 0.99 & 6.90E-5 & 0.88 & 7.55E-6 & 0.99 & 1.14E-7 & 1.86 & 4.12E-5 & 0.92 & 1.54E-7 & 1.86 \\ \hline
+      1/50   & 2.16E-4 &  --  & 9.97E-4 &   -- & 2.16E-4 & --   & 4.13E-5 &   -- & 7.32E-4 &  --  & 4.15E-5 & --   \\
+      1/100  & 1.14E-4 & 0.92 & 6.38E-4 & 0.64 & 1.14E-4 & 0.92 & 1.47E-5 & 1.48 & 4.43E-4 & 0.73 & 1.48E-5 & 1.48 \\
+      1/200  & 5.86E-5 & 0.95 & 3.88E-4 & 0.72 & 5.87E-5 & 0.95 & 4.81E-6 & 1.61 & 2.57E-4 & 0.79 & 4.83E-6 & 1.61 \\
+      1/400  & 2.98E-5 & 0.97 & 2.26E-4 & 0.78 & 2.98E-5 & 0.97 & 1.42E-6 & 1.76 & 1.44E-4 & 0.83 & 1.42E-6 & 1.76 \\
+      1/800  & 1.50E-5 & 0.98 & 1.27E-4 & 0.83 & 1.50E-5 & 0.98 & 4.16E-7 & 1.76 & 7.81E-5 & 0.88 & 4.18E-7 & 1.76 \\
+      1/1600 & 7.53E-6 & 0.99 & 6.90E-5 & 0.88 & 7.53E-6 & 0.99 & 1.14E-7 & 1.86 & 4.12E-5 & 0.92 & 1.15E-7 & 1.86 \\ \hline
     \end{tabular}
     \caption{Grid convergence study for the steady outflow problem
       using methods \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}
@@ -1031,20 +1031,212 @@ based on methods \eqref{first-order_via_fluct} and
   \end{center}
 \end{table}
 
-%\clearpage
 \subsection{Steady shock around a cylinder}\label{sec:bow_shock}
+
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
-%We consider two regimes. In the first regime, the physical instabilities are mild.
-%By increasing the strength of the jump and other parameters, we consider a second
-%and more strongly unstable regime. In both cases, we generate the CHJ as described in
-%Section XX; that is, we impose supersonic inflow boundary conditions for the jet and
-%subsonic outflow boundary conditions.
+Let us finally consider the numerical experiments for the CHJ in two-dimensions.
+The domain is given by the annulus $\Omega=\{(x,y)~|~ 0.1\leq\sqrt{x^2+y^2}\leq 1\}$.
+The computational mesh is a logically quadrilateral mesh, see Figure \ref{fig:mesh_chj}.
+For all the experiments in this section, the mesh consists of $10^6$ cells. 
+Let
+\begin{align*}
+  \partial\Omega_I:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=0.1\}, \qquad \mbox{ and } \qquad
+  \partial\Omega_o:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=1\},
+\end{align*}
+denote the inflow and outflow boundaries, respectively. 
+The boundary conditions are 
+\begin{subequations}\label{bcs_chj}
+  \begin{align}
+  h(x,y,t)=h_I, \quad
+  u(x,y,t)=|\bfu_I| \left(\frac{x}{r_I}\right), \quad
+  v(x,y,t)=|\bfu_I| \left(\frac{y}{r_I}\right), \qquad \forall (x,y)\in\partial\Omega_I, \\
+  %
+  h(x,y,t)=h_o, \quad 
+  u(x,y,t)= \frac{\beta }{r_o h}\left(\frac{x}{r_o}\right), \quad
+  v(x,y,t)= \frac{\beta }{r_o h}\left(\frac{y}{r_o}\right), \qquad \forall (x,y)\in\partial\Omega_o, \label{bcs_chj_outflow}
+  \end{align}
+\end{subequations}
+where $h_I=0.3$, $r_I=0.1$, $r_o=1$ and $\beta=r_Ih_I|\bfu_I|$.
+We choose $|\bfu_I|$ and $h_o$ to generate a radially symmetric shock at $r_s:=\sqrt{x^2+y^2}=0.3$, as described in \S \ref{sec:steady_chj}.
+By selecting the boundary conditions $|\bfu_I|$ and $h_o$ we can move through different regimes.
+In particular, we consider two cases.
+For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
+In this case, the CHJ appears to be nearly stable.
+However, using Roe's solver leads to the formation of carbuncle instabilities.
+%
+The second regime is a more aggresive regime with a Froude number of $\Fr\approx 27.3861$ at the inflow boundary. 
+In this regime, using Roe's solver also leads to carbuncle instabilities. In addition, 
+due to the large Froude number, random perturbations might trigger physical instabilities. 
+If the random perturbations model or mimic real disturbances in a physical experiment, it is then
+desirable to properly simulate the unstable behavior of the flow without developing carbuncle instabilities. 
+Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
+solution that could lead to physical instabilities. 
+For this reason, we believe this problem is more challenging than the standard bow shock problem.
 
-%We consider two types of domain and two corresponding computational grids.
-%The two types of domains are two-dimensional squares and circular domains.
-%For both cases we use structured grids. See an example of these domains and grids in Figures XX and XX,
-%respectively.
+For most of the experiments we show a Schlieren plot for the water height.
+That is, we plot $||\nabla h||_{\ell^2}$ with a white-to-black logarithm based colormap.
+For some experiments we also plot the magnitude of the momentum $|h\bfu|=h\sqrt{u^2+v^2}$.
 
+\begin{figure}[!h]
+  \centering 
+  \includegraphics[scale=0.15]{figures/mesh.png}
+  \caption{
+    Example of a grid for the problem with the two-dimensional CHJ.
+    \label{fig:mesh_chj}}
+\end{figure}
+
+\subsubsection{Regime I}
+In this case, the boundary conditions are given by \eqref{bcs_chj} with
+\begin{align}\label{bcs_chj_r1}
+  |\bfu_I|=0.75, \qquad h_o=0.37387387318873766. 
+\end{align}
+The initial condition is a symmetric CHJ located at $\sqrt{x^2+y^2}=0.3$, generated as described in \S \ref{sec:steady_chj}.
+In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
+method \eqref{second-order_via_fluct} with Roe's Riemann solver.
+The solution clearly develops carbuncle instabilities.
+We could fix these instabilities using Rusanov's, Kemm's or the blended Riemann solvers. 
+In Figure \ref{fig:chj_r1_diff}, we show the corresponding solutions at $t=3$.
+For this test case, all carbuncle free solvers give qualitatively similar solutions;
+however, we expect Rusanov's solver to be less accurate. 
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[Solution at (left) $t=1$, (middle) $t=1.5$ and (right) $t=3$ using Roe's Riemann solver.\label{fig:chj_r1_roe}]{
+    \begin{tabular}{ccc} 
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p1.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p2.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p3.png}
+    \end{tabular}
+  }
+  
+  \subfloat[Solution at $t=3$ using (left) Rusanov's, (middle) Kemm's and (right) the blended solvers.\label{fig:chj_r1_diff}]{
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
+      \includegraphics[scale=0.5]{figures/cross.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_blended_p3.png}
+    \end{tabular}
+    }
+    \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
+      We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
+      In all cases we show the Schlieren plot for the water height $h$.
+    %The color scale in the plots go from (blue) $0.0746$ to (red) $0.3738$,
+    %which corresponds to the minimum and maximum values of the momentum at $t=0$.
+    \label{fig:chj_r1}}
+\end{figure}
+
+\subsubsection{Regime II}
+We now consider a more aggresive regime. The boundary conditions are given by \eqref{bcs_chj} with 
+\begin{align}\label{bcs_chj_r2}
+  |\bfu_I|=15, \qquad h_o=6.6845019298155357.
+\end{align}
+Similar than before, we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
+$\sqrt{x^2+y^2}=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
+\eqref{second-order_via_fluct} with Roe's Riemann solver. Just like before, the solution develops
+carbuncle instabilities. Let us now use Rusanov's, Kemm's and the blended solvers to fix the
+carbuncle instabilities. In Figure \ref{fig:chj_r2_diff}, we show the corresponding solutions at $t=0.1$.
+{\color{red} TODO: finish this part depending on the results with Kemm's solver.}
+%
+Opposed to what we observed in the first test case, in this situation the Froude number is
+high enough that numerical perturbations start to trigger a response around the CHJ
+(see the middle and right panels of Figure \ref{fig:chj_r2_diff}).
+For the resolution that we consider, this behavior is dissipated by the extra numerical viscosity introduced by
+Rusanov's solver (see the left panel of Figure \ref{fig:chj_r2_diff}).
+In Figure \ref{fig:chj_r2_later}, we show the solution at a later time considering the same solvers as before.
+This time, we plot not only the Schlieren plot for the water height, but also the magnitude of the momentum. 
+Clearly, using Rusanov's solver dissipates the physical response to these numerical perturbations. 
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[Solution at (left) $t=0.09$, (middle) $t=0.1$ and (right) $t=0.11$ using Roe's Riemann solver.\label{fig:chj_r2_roe}]{
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.3]{figures/chj_r2_roe_p1.png} &
+      \quad\includegraphics[scale=0.3]{figures/chj_r2_roe_p2.png} \quad &
+      \includegraphics[scale=0.3]{figures/chj_r2_roe_p3.png}
+    \end{tabular}
+  }
+
+  \vspace{10pt}
+  \subfloat[Solution at $t=0.1$ using (left) Rusanov's, (middle) Kemm's and (right) the blended solvers.\label{fig:chj_r2_diff}]{
+    \begin{tabular}{ccc}
+      \includegraphics[scale=0.3]{figures/chj_r2_llf_t0p1.png} &
+      \quad \includegraphics[scale=0.5]{figures/cross.png} \quad &
+      \includegraphics[scale=0.3]{figures/chj_r2_blended_t0p1.png}
+    \end{tabular}
+    }
+  \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r2}. 
+    We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
+    In all cases we show the Schlieren plot for the water height $h$.
+    %The color scale in the plots go from (blue) $0.45$ to (red) $4.5$,
+    %which corresponds to the minimum and maximum values of the momentum at $t=0$.
+  }
+\end{figure}
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[$t=5$]{
+    \includegraphics[scale=0.3]{figures/chj_r2_rusanov_t5p0.png} \quad
+    \includegraphics[scale=0.5]{figures/cross.png} \quad
+    \includegraphics[scale=0.3]{figures/chj_r2_blended_t5p0.png}
+  }
+  \caption{CHJ at $t=5$ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r2}. 
+    We consider method \eqref{second-order_via_fluct} with (left) Rusanov's,
+    (middle) Kemm's and (right) the blended solvers. 
+    In all cases we superimpose the Schlieren plot for the water height $h$
+    an the magnitude of the momentum with a uniform (white-to-blue) colormap. 
+    The scale for colormap is (white) $0.45$ to (blue) $4.5$, 
+    which corresponds to the minimum and maximum values at $t=0$.
+    \label{fig:chj_r2_later}}
+\end{figure}
+
+\subsubsection{Regime II with random perturbations}
+Finally, we introduce a physical random perturbation to the inflow boundary condition.
+Let $\epsilon(x,y,t)\in[-0.01,0.01]$ be a random number for a given location $(x,y)$,
+at a given time $t$. 
+The inflow boundary condition is now given by
+\begin{subequations}
+  \begin{align}
+    h(x,y,t)=\tilde h_I, \quad
+    u(x,y,t)=|\tilde \bfu_I| \left(\frac{x}{r_I}\right), \quad
+    v(x,y,t)=|\tilde \bfu_I| \left(\frac{y}{r_I}\right), \qquad \forall (x,y)\in\partial\Omega_I,
+  \end{align}
+\end{subequations}
+with $\tilde h_I = \frac{h_I}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_I|=|\bfu_I|(1+\epsilon(x,y,t))$.
+Here, just as before, $h_I=0.3$ and $|\bfu_I|=15$. 
+Note that $\beta=r_I\tilde h|\tilde\bfu_I|=r_Ih_I\bfu_I$.
+The outflow boundary condition is given by
+\eqref{bcs_chj_outflow} with $h_o=6.6845019298155357$.
+In this case, due to the large Froude number, the random perturbations in the inflow
+might trigger physical instabilities, which we want to preserve. At the same time, we
+do not want the solution to develop carbuncle instabilities.
+In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
+at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
+the blended Riemann solvers, respectively. 
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[Rusanov's Riemann solver\label{fig:chj_r2wp_rusanov}]{
+    \begin{tabular}{cccc}
+      $t=2$ & $t=3$ & $t=4$ & $t=5$ \\
+      \includegraphics[scale=0.24]{figures/chj_r2wp_rusanov_t2p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_rusanov_t3p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_rusanov_t4p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_rusanov_t5p0.png}
+    \end{tabular}
+  }
+  
+  \subfloat[Blended Riemann solver\label{fig:chj_r2wp_blended}]{
+    \begin{tabular}{cccc}
+      \includegraphics[scale=0.24]{figures/chj_r2wp_blended_t2p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_blended_t3p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_blended_t4p0.png} &
+      \includegraphics[scale=0.24]{figures/chj_r2wp_blended_t5p0.png}
+    \end{tabular}
+  }
+  \caption{CHJ at different times with a random perturbation at the inflow boundary.
+    We consider method \eqref{second-order_via_fluct} with (a) Roe's and (b) the blended
+    Riemann solvers. In all cases we show the Schlieren plot for the water height $h$.}
+\end{figure}
+    
 %\subsection{Regime 1: midly unstable flow}
 
 %Show the results with Roe's and Rusanov's solver.
