@@ -96,18 +96,19 @@ def setup(
             solver.num_eqn = 3
             solver.num_waves = 3
             solver.fwave = False
+            solver.dimensional_split=True
         elif riemann_solver == 'hllemcc':
             solver = pyclaw.ClawSolver2D(shallow_hllemcc_2D)
             solver.num_eqn = 3
             solver.num_waves = 3
             solver.fwave = False
+            solver.dimensional_split=False
+            solver.transverse_waves = 1
         else:
             raise Exception('Unrecognized Riemann solver')
-        solver.dimensional_split=True
         solver.limiters = pyclaw.limiters.tvd.minmod
         solver.cfl_max     = 0.46
         solver.cfl_desired = 0.45
-        solver.transverse_waves = 2
         solver.order = 2
     elif solver_type == 'sharpclaw':
         raise Exception('use solver_type classic for now')
@@ -172,7 +173,7 @@ def setup(
         # INITIAL CONDITIONS #
         nx=xc/(rc+1.e-7); ny=yc/(rc+1.e-7)
         state.q[0,:,:] = state.problem_data['h0']
-        state.q[1,:,:] = 0.0
+        state.q[1,:,:] = state.problem_data['u0']
         state.q[2,:,:] = 0.0
 
         # create clawpack solution

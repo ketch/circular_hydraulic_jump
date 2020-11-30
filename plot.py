@@ -104,7 +104,7 @@ if __name__== "__main__":
     if not os.path.exists('./_plots/slices'): os.mkdir('_plots/slices')
     from_frame = 0
     to_frame   = 1000
-    frames=xrange(from_frame,to_frame+1)
+    frames=range(from_frame,to_frame+1)
 
     use_petsc = False
     
