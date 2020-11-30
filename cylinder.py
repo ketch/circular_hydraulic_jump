@@ -173,7 +173,7 @@ def setup(
         # INITIAL CONDITIONS #
         nx=xc/(rc+1.e-7); ny=yc/(rc+1.e-7)
         state.q[0,:,:] = state.problem_data['h0']
-        state.q[1,:,:] = state.problem_data['u0']
+        state.q[1,:,:] = state.problem_data['h0']*state.problem_data['u0']
         state.q[2,:,:] = 0.0
 
         # create clawpack solution
