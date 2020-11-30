@@ -1,4 +1,5 @@
-from clawpack.petclaw.solution import Solution
+from clawpack.petclaw.solution import Solution as petclaw_Solution
+from clawpack.pyclaw.solution import Solution as pyclaw_Solution
 #from petclaw.io.petsc import read_petsc
 import matplotlib
 matplotlib.use('Agg')
@@ -9,6 +10,7 @@ import numpy as np
 import os
 
 def plot_q(frame,
+           use_petsc=True,
            bathymetry=False,
            file_prefix='claw',
            path='./_output/',
@@ -20,8 +22,12 @@ def plot_q(frame,
     import sys
     sys.path.append('.')
 
-    sol=Solution(frame,file_format='petsc',read_aux=False,path=path,file_prefix=file_prefix)
-    
+    if use_petsc:
+        sol=petclaw_Solution(frame,file_format='petsc',read_aux=False,path=path,file_prefix=file_prefix)
+    else:
+        file_prefix='fort'
+        sol=pyclaw_Solution(frame,read_aux=False,path=path,file_prefix=file_prefix)
+    #    
     x=sol.state.grid.x.centers; y=sol.state.grid.y.centers
     mx=len(x); my=len(y)
 
@@ -100,14 +106,16 @@ if __name__== "__main__":
     to_frame   = 1000
     frames=xrange(from_frame,to_frame+1)
 
+    use_petsc = False
+    
     ##########################################
     # Get min and max values for color plots #
-    sol=Solution(0,file_format='petsc',read_aux=False,path='./_output/',file_prefix='claw')
-    hMin = sol.state.q[0,:,:].min(); hMax = sol.state.q[0,:,:].max()
-    print (hMin, hMax)
-    q1=sol.state.q[1,:,:]; q2=sol.state.q[2,:,:]
-    momMag = np.sqrt(q1**2 + q2**2)
-    momMagMin = momMag.min(); momMagMax = momMag.max()
+    #sol=Solution(0,file_format='petsc',read_aux=False,path='./_output/',file_prefix='claw')
+    #hMin = sol.state.q[0,:,:].min(); hMax = sol.state.q[0,:,:].max()
+    #print (hMin, hMax)
+    #q1=sol.state.q[1,:,:]; q2=sol.state.q[2,:,:]
+    #momMag = np.sqrt(q1**2 + q2**2)
+    #momMagMin = momMag.min(); momMagMax = momMag.max()
     ###########################################
     
     if not os.path.exists('./_plots'): os.mkdir('./_plots')
@@ -116,6 +124,7 @@ if __name__== "__main__":
     print('Plotting solution ...')
     for i in frames:
         plot_q(frame=i,
+               use_petsc=use_petsc,
                plot_pcolor=True,
                plot_ent_residual=False,
                #hLim=[hMin,hMax],

@@ -22,12 +22,19 @@ def b4step(self, state, old_state=None):
     Set zero normal boundary inside the cylinder
     """
     # get entropy residual #
-    state.get_qbc_from_q(2,self.qbc)
-    Ri = get_ent_residual(state,self.qbc)
-
+    if use_petsc:
+        state.get_qbc_from_q(2,self.qbc)
+        Ri = get_ent_residual(state,self.qbc)
+    else:
+        Ri = get_ent_residual(state)
+    #
+    
     set_Ri = state.problem_data['set_Ri']
     if set_Ri is None:
-        state.aux[state.num_aux-1,:,:] = Ri[2:-2,2:-2]
+        if use_petsc:
+            state.aux[state.num_aux-1,:,:] = Ri[2:-2,2:-2]
+        else:
+            state.aux[state.num_aux-1,:,:] = Ri
     else:
         state.aux[state.num_aux-1,:,:] = set_Ri
     #
@@ -71,7 +78,7 @@ def setup(
         file_prefix='claw',
         kalpha=1./3,
         kbeta=1.3,
-        kepsilon=1.e-2):
+        kepsilon=1.e-3):
     
     from clawpack import riemann
     if use_petsc:
@@ -154,6 +161,7 @@ def setup(
 
         state.problem_data['use_dmin_blended'] = use_dmin_blended
         state.problem_data['set_Ri'] = set_Ri
+        state.problem_data['use_petsc'] = use_petsc
         state.problem_data['grav'] = g   # Gravitational force
         state.problem_data['h0'] = h0
         state.problem_data['u0'] = u0
@@ -189,18 +197,20 @@ if __name__ == "__main__":
     # ***** numerics ***** #
     # ******************** #
     # riemann solver
-    riemann_solver = 'es'
-    #riemann_solver = 'hllemcc'
+    #riemann_solver = 'es'
+    riemann_solver = 'hllemcc'
     
     use_dmin_blended = 1.0
     set_Ri = None
+    use_petsc = False
     
     # mesh
-    refn = 1
+    refn = 0
     mx=int((2**refn)*160)
     my=int((2**refn)*400)
     
     claw = setup(
+        use_petsc=use_petsc,
         use_dmin_blended = use_dmin_blended,
         set_Ri = set_Ri,
         # parameters
