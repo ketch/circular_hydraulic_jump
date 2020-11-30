@@ -49,7 +49,7 @@ def b4step(self, state, old_state=None):
 
 def inflow_bcs(state, dim, _, qbc, __, num_ghost):
     qbc[0,:num_ghost,:] = state.problem_data['h0']
-    qbc[1,:num_ghost,:] = state.problem_data['u0']
+    qbc[1,:num_ghost,:] = state.problem_data['h0']*state.problem_data['u0']
     qbc[2,:num_ghost,:] = 0.0
 #
 
