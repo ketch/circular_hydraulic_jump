@@ -1,6 +1,6 @@
 subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apdq)
 
-! Roe-solver for the 2D shallow water equations on a mapped 
+! Roe solver for the 2D shallow water equations on a mapped 
 ! (logically quadrilateral) grid
 
 ! waves: 3
@@ -20,8 +20,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     double precision, dimension(mwaves,1-mbc:maxm+mbc), intent(out) :: s
     double precision, dimension(meqn,1-mbc:maxm+mbc), intent(out) :: amdq, apdq
 
-    ! local arrays -- common block comroe is passed to rpt2sh
-    ! ------------
+    ! local arrays
 
     double precision, dimension(mwaves) :: splus, sminus
     integer :: depth
@@ -40,7 +39,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     double precision :: kalpha, kbeta, kepsilon  ! Kemm's parameters for carbuncle fix
 
     common /cparam/ grav, kalpha, kbeta, kepsilon
-    common /comroe/ u, v, a, h
 
     data efix /.true./        !# use entropy fix for transonic rarefactions
     data cfix /.true./        !# additionally use carbuncle fix
@@ -84,8 +82,6 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     enddo
 
     ! compute the Roe-averaged variables needed in the Roe solver.
-    ! These are stored in the common block comroe since they are
-    ! later used in routine rpt2 to do the transverse wave splitting.
 
     do i = 2-mbc, mx+mbc
         hsqrt_l = dsqrt(qr(depth,i-1))
