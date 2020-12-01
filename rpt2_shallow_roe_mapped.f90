@@ -33,13 +33,13 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
     double precision, dimension(-6:maxm2+7) :: unorl, unorr, utanl, utanr
 
     if (ixy == 1) then
-        inx = 1
-        iny = 2
-        ilenrat = 3
-    else
         inx = 4
         iny = 5
         ilenrat = 6
+    else
+        inx = 1
+        iny = 2
+        ilenrat = 3
     endif
             
     do i=2-mbc, mx+mbc
