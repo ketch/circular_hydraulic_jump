@@ -6,8 +6,8 @@ all: shallow_hllemccRoEF_2D.so shallow_hllemcc_2D.so shallow_quad_hllemcc_2D.so 
 #shallow_hllc_2D.so:
 #	f2py -c rpn2_shallow_hllc.f90 rpt2_dummy.f90 -m shallow_hllc_2D
 
-shallow_quad_hllemcc_2D.so: rpn2_swq_hllemcc.f90 rpt2_shallow_roe_mapped.f90 
-	f2py -c rpn2_swq_hllemcc.f90 rpt2_shallow_roe_mapped.f90 -m shallow_quad_hllemcc_2D
+shallow_quad_hllemcc_2D.so: rpn2_swq_hllemcc.f90 rpt2_swq.f90
+	f2py -c rpn2_swq_hllemcc.f90 rpt2_swq.f90 -m shallow_quad_hllemcc_2D
 
 shallow_hllemcc_2D.so: rpn2_sw_hllemcc.f90 rpt2_shallow_roe_with_efix.f90 
 	f2py -c rpn2_sw_hllemcc.f90 rpt2_shallow_roe_with_efix.f90 -m shallow_hllemcc_2D
