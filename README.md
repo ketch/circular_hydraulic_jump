@@ -7,7 +7,7 @@ Code and manuscript for numerical solution of the circular hydraulic jump proble
   fix is off (it should be a Roe solver in that case).  This requires more testing.
 - `rpn2_swq_hllemcc.f90`: Same as above, but this version works on quadrilateral
   (mapped) grids.
-- `rpn2_shallow_es.f90`: (Manuel)
+- `rpn2_shallow_es.f90`: New entropy-dissipative solver.  Works on mapped grids.
 
 ### Transverse solvers:
 

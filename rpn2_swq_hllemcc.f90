@@ -32,7 +32,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     integer, parameter :: maxm2 = 1602  ! assumes at most 1000x1000 grid with mbc=2
     double precision, dimension(3) :: delta
     logical :: efix, cfix
-    double precision, dimension(-1:maxm2) :: u, v, a, h, unorl, hunorr, hutanl, hutanr, alpha, beta
+    double precision, dimension(-1:maxm2) :: u, v, a, h, hunorl, hunorr, hutanl, hutanr, alpha, beta
     double precision :: h_l, h_r, u_l, u_r, v_l, v_r, hsqrt_l, hsqrt_r, hsq2, c_l, c_r
     double precision :: grav
     double precision :: s1l, s3r, saux, sm1fix, sm1roe, sp3fix, sp3roe, zfroude
