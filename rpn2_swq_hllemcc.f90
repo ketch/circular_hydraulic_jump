@@ -32,7 +32,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     integer, parameter :: maxm2 = 1602  ! assumes at most 1000x1000 grid with mbc=2
     double precision, dimension(3) :: delta
     logical :: efix, cfix
-    double precision, dimension(-1:maxm2) :: u, v, a, h, unorl, unorr, utanl, utanr, alpha, beta
+    double precision, dimension(-1:maxm2) :: u, v, a, h, hunorl, hunorr, hutanl, hutanr, alpha, beta
     double precision :: h_l, h_r, u_l, u_r, v_l, v_r, hsqrt_l, hsqrt_r, hsq2, c_l, c_r
     double precision :: grav
     double precision :: s1l, s3r, saux, sm1fix, sm1roe, sp3fix, sp3roe, zfroude
@@ -77,10 +77,10 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     do i=2-mbc, mx+mbc
         alpha(i) = auxl(inx,i)
         beta(i) = auxl(iny,i)
-        unorl(i) = alpha(i)*ql(2,i) + beta(i)*ql(3,i)
-        unorr(i-1) = alpha(i)*qr(2,i-1) + beta(i)*qr(3,i-1)
-        utanl(i) = -beta(i)*ql(2,i) + alpha(i)*ql(3,i)
-        utanr(i-1) = -beta(i)*qr(2,i-1) + alpha(i)*qr(3,i-1)
+        hunorl(i) = alpha(i)*ql(2,i) + beta(i)*ql(3,i)
+        hunorr(i-1) = alpha(i)*qr(2,i-1) + beta(i)*qr(3,i-1)
+        hutanl(i) = -beta(i)*ql(2,i) + alpha(i)*ql(3,i)
+        hutanr(i-1) = -beta(i)*qr(2,i-1) + alpha(i)*qr(3,i-1)
     enddo
 
     ! compute the Roe-averaged variables needed in the Roe solver.
@@ -94,8 +94,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
         ! Roe averages
         h(i) = (qr(depth,i-1)+ql(depth,i))*0.50d0 ! = h_hat
-        u(i) = (unorr(i-1)/hsqrt_l + unorl(i)/hsqrt_r) / hsq2
-        v(i) = (utanr(i-1)/hsqrt_l + utanl(i)/hsqrt_r) / hsq2
+        u(i) = (hunorr(i-1)/hsqrt_l + hunorl(i)/hsqrt_r) / hsq2
+        v(i) = (hutanr(i-1)/hsqrt_l + hutanl(i)/hsqrt_r) / hsq2
         a(i) = dsqrt(grav*h(i)) ! = c_hat
     enddo
 
@@ -104,8 +104,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     ! find a1 thru a3, the coefficients of the 3 eigenvectors:
     do i = 2-mbc, mx+mbc
         delta(1) = ql(depth,i) - qr(depth,i-1)
-        delta(2) = unorl(i) - unorr(i-1)
-        delta(3) = utanl(i) - utanr(i-1)
+        delta(2) = hunorl(i) - hunorr(i-1)
+        delta(3) = hutanl(i) - hutanr(i-1)
         a1 = ((u(i)+a(i))*delta(1) - delta(2))*(0.50d0/a(i))
         a2 = -v(i)*delta(1) + delta(3)
         a3 = (-(u(i)-a(i))*delta(1) + delta(2))*(0.50d0/a(i))
@@ -145,8 +145,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 
             h_l = qr(depth,i-1)
             h_r = ql(depth,i)
-            u_l = unorr(i-1)
-            u_r = unorl(i)
+            u_l = hunorr(i-1)/h_l
+            u_r = hunorl(i)/h_l
             c_l = dsqrt(grav*h_l)
             c_r = dsqrt(grav*h_r)
 
