@@ -93,19 +93,23 @@ def setup(
     if solver_type == 'classic':
         if riemann_solver == 'es':
             solver = pyclaw.ClawSolver2D(shallow_es_2D)
-            solver.num_eqn = 3
+            solver.dimensional_split=True
             solver.num_waves = 3
-            solver.fwave = False
+        elif riemann_solver == 'roe':
+            solver = pyclaw.ClawSolver2D(riemann.shallow_roe_with_efix_2D)
+            solver.dimensional_split=True
+        elif riemann_solver == 'hlle':
+            solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
             solver.dimensional_split=True
         elif riemann_solver == 'hllemcc':
             solver = pyclaw.ClawSolver2D(shallow_hllemcc_2D)
-            solver.num_eqn = 3
-            solver.num_waves = 3
-            solver.fwave = False
             solver.dimensional_split=False
             solver.transverse_waves = 1
+            solver.num_waves = 3
         else:
             raise Exception('Unrecognized Riemann solver')
+        solver.num_eqn = 3
+        solver.fwave = False
         solver.limiters = pyclaw.limiters.tvd.minmod
         solver.cfl_max     = 0.46
         solver.cfl_desired = 0.45
@@ -188,7 +192,7 @@ if __name__ == "__main__":
     # ********************** #
     # ***** parameters ***** #
     # ********************** #
-    tfinal = 100
+    tfinal = 80
     nDTOut = 1
     h0 = 1.0
     u0 = 5.0

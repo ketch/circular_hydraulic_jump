@@ -240,34 +240,28 @@ def setup(initialConditionType=0,
     if solver_type == 'classic':
         if riemann_solver == 'hlle':
             solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
-            solver.fwave = False
         elif riemann_solver == 'roe':
             solver = pyclaw.ClawSolver2D(riemann.shallow_roe_with_efix_2D)
-            solver.fwave = False
         elif riemann_solver == 'hllc':
             solver = pyclaw.ClawSolver2D(shallow_hllc_2D)
             solver.num_eqn = 3
             solver.num_waves = 3
-            solver.fwave = False
         elif riemann_solver == 'hllemcc':
             solver = pyclaw.ClawSolver2D(shallow_hllemcc_2D)
             solver.num_eqn = 3
             solver.num_waves = 3
-            solver.fwave = False
         elif riemann_solver == 'hllemccroef':
             solver = pyclaw.ClawSolver2D(shallow_hllemccRoEF_2D)
             solver.num_eqn = 3
             solver.num_waves = 3
-            solver.fwave = False
         elif riemann_solver == 'hllem':
             # Not yet implemented
             solver = pyclaw.ClawSolver2D(riemann.shallow_hllem_2D)
-            solver.fwave = False
         elif riemann_solver == 'geoclaw':
             solver = pyclaw.ClawSolver2D(riemann.sw_aug_2D)
-            solver.fwave = True
         else:
             raise Exception('Unrecognized Riemann solver') 
+        solver.fwave = True
         #solver.dimensional_split=True
         #solver.limiters = pyclaw.limiters.tvd.minmod
         solver.cfl_max     = 0.9

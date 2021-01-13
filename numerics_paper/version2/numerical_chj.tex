@@ -1034,7 +1034,50 @@ based on methods \eqref{first-order_via_fluct} and
   \end{center}
 \end{table}
 
-\subsection{Steady shock around a cylinder}\label{sec:bow_shock}
+\subsection{Flow past a cylinder}\label{sec:bow_shock}
+In this section we consider the formation of a bow shock when a
+uniform flow encounters a cylindrical obstacle.  This problem has
+been studied previously in the context of carbuncle formation in
+several works for the Euler equations and in
+\cite{kemm2014note,bader2014carbuncle} for the shallow water equations.
+We present results for existing solvers as a form of verification,
+along with results for the new blended solver.  The main question of
+interest is the formation of carbuncles.  It is known, for instance,
+that the Roe solver incorrectly generates a carbuncle at the center
+of the bow shock.
+
+We model only the flow on the upstream side of the cylinder, since
+our interest is in the resolution of the bow shock.  We take the domain
+$[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
+Reflecting boundary conditions are imposed at the surface of the cylinder,
+along with outflow conditions along the rest of the right edge of the domain.
+The depth and velocity are set initially and (for all time) at the other
+boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
+uniform Cartesian grid.
+
+We show results at $t=80$, after the flow has reached
+a steady state.  With a Roe solver, negative values are generated at an early
+time, leading to failure of the solver.  Therefore, we show results only for
+HLLE, HLLEMCC, and the blended solver.  These three methods give very similar
+results.
+
+\begin{figure}[!h]
+  {\scriptsize
+    \includegraphics[scale=0.3]{figures/cylinder_HLLE.png}
+    \qquad \qquad \qquad
+    \includegraphics[scale=0.3]{figures/cylinder_HLLEMCC.png}
+    \qquad \qquad \qquad
+    \includegraphics[scale=0.3]{figures/cylinder_ES.png}
+  }
+  \caption{
+    Flow past a cylinder.  Results for HLLE, HLLEMCC, and the blended solver.
+    \label{fig:steady_outflow}}
+\end{figure}
+
+We have also conducted a more challenging version of this test, in which
+the velocity within the domain is initially zero.  In that case, the HLLE
+and blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
+but HLLEMCC exhibits a carbuncle.
 
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
 Let us finally consider the numerical experiments for the CHJ in two-dimensions.

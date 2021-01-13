@@ -75,10 +75,12 @@ def plot_q(frame,
         #
         pl.xticks(fontsize=20)
         pl.yticks(fontsize=20)
-        pl.tight_layout()
         pl.xlim([0,40])
         pl.ylim([0,100])
+        pl.axis('image')
         pl.title("t= "+str(sol.state.t),fontsize=20)
+        pl.tight_layout()
+        pl.xlim([0,40])
 
         
         pl.savefig('./_plots/pcolor/'+str_frame+'.png')
