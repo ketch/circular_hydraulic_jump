@@ -302,14 +302,14 @@ as a first-order flux-differencing scheme:
 where $\bfF_{i+1/2}$ is a numerical approximation of the flux at $x_\iph$.
 
 Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
-Roe.  Neither of these solvers deals with the carbuncle instability in fully
+Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
+a full and detailed description of these two Riemann solvers in the context of
+the shallow water equations.
+Neither of these solvers deals with the carbuncle instability in a fully
 satisfactory way.  Rusanov's solver suppresses the carbuncle but is known to
 also suppress related real instabilities, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
-We refer to \cite{ketcheson2020riemann} and references therein for
-a full and detailed description of these two Riemann solvers in the context of
-the shallow water equations.  Both of these solvers satisfy the conservation
-property
+Both of these solvers satisfy the conservation property
 \begin{align} \label{rs_conservation}
     \amdq_\imh + \apdq_\imh = \bff(\bfq_i) - \bff(\bfq_{i-1}).
 \end{align}
@@ -387,27 +387,33 @@ and the factors $\alpha^p_\imh$ obtained by solving
 
 \section{An entropy-based blending of Rusanov and Roe}
 
-As we discussed in the introduction, finite volume methods with
-Roe's Riemann solvers are prone to the carbuncle instability for the CHJ.
-In contrast, if we use Rusanov's
-Riemann solver, no carbuncles appear; however, many other important and physical features of
-the solution are dissipated, unless the grid is highly refined.
+As we discussed in the introduction, finite volume methods that use
+a Roe Riemann solver are prone to the carbuncle instability for the CHJ.
+In contrast, methods that use a Rusanov Riemann solver exhibit no carbuncles. 
+However, such methods tend to dissipate other important physical features of
+the solution, unless the grid is highly refined.
 Our main objective is to study the CHJ and to propose a Riemann solver
 that is carbuncle-free but does not dissipate important features of the solution.
 To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers.
 Our blending criterion is based on the residual of the entropy (in)equality,
 which induces dissipation of entropy near discontinuities.
 Blending these Riemann solvers has been proposed before
-to solve the Euler equations, see e.g.
-\cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy},
-the shallow water equations, see e.g. \cite{bader2014carbuncle,kemm2014note},
-and even the Navier-Stokes equations, see e.g. \cite{nishikawa2008very,ohwada2018simple}.
-In these references, the authors use blending criteria different than ours.
-Nevertheless, fixing the carbuncle instability by imposing entropy stability is not new.
-For example, in \cite{ismail2009affordable,ismail2009proposed},
-the authors developed carbuncle free solvers for the Euler equations
-via dissipation of entropy.
+to solve the Euler equations (see
+\cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy}),
+the shallow water equations (see \cite{bader2014carbuncle,kemm2014note}),
+and even the Navier-Stokes equations (see \cite{nishikawa2008very,ohwada2018simple}).
+Our approach differs from those just cited in that it is based on the local entropy;
+for a related approach in the context of the Euler equations, see
+\cite{ismail2009affordable,ismail2009proposed}.
 
+It is important to recognize also that it is not correct to simply suppress
+the carbuncle phenomenon in all situations, since it is related to a physical
+instability in the Euler equations; see \cite{moschetta2001carbuncle,elling2009carbuncle}.
+A test problem was contrived in \cite{elling2009carbuncle} to illustrate this.
+In the present work, we provide a test problem that possesses a genuine instability
+that leads to carbuncles in many numerical approximations.  This is an ideal
+test for assessing numerical methods, since neither the presence of carbuncles
+nor the complete absence of instability represents the correct behavior.
 
 %We close this section by remarking that the fluctuations associated with Rusanov's solver
 %can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
@@ -1071,7 +1077,7 @@ results.
   }
   \caption{
     Flow past a cylinder.  Results for HLLE, HLLEMCC, and the blended solver.
-    \label{fig:steady_outflow}}
+    \label{fig:cylinder_flow}}
 \end{figure}
 
 We have also conducted a more challenging version of this test, in which
