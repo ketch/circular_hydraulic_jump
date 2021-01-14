@@ -1088,10 +1088,11 @@ and blended solvers give carbuncle-free results similar to Figure \ref{fig:stead
 but HLLEMCC exhibits a carbuncle.
 
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
-Let us finally consider the numerical experiments for the CHJ in two-dimensions.
+Let us finally consider the numerical experiments for the CHJ in two dimensions.
 The domain is given by the annulus $\Omega=\{(x,y)~|~ 0.1\leq\sqrt{x^2+y^2}\leq 1\}$.
-The computational mesh is a logically quadrilateral mesh, see Figure \ref{fig:mesh_chj}.
-For all the experiments in this section, the mesh consists of $10^6$ cells. 
+The computational mesh is logically quadrilateral, of the type shown in Figure \ref{fig:mesh_chj}.
+For all the experiments in this section, we use a mesh with 1000 cells in each (radial
+and angular) direction.
 Let
 \begin{align*}
   \partial\Omega_I:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=0.1\}, \qquad \mbox{ and } \qquad
@@ -1112,23 +1113,23 @@ The boundary conditions are
 \end{subequations}
 where $h_I=0.3$, $r_I=0.1$, $r_o=1$ and $\beta=r_Ih_I|\bfu_I|$.
 We choose $|\bfu_I|$ and $h_o$ to generate a radially symmetric shock at $r_s:=\sqrt{x^2+y^2}=0.3$, as described in \S \ref{sec:steady_chj}.
-By selecting the boundary conditions $|\bfu_I|$ and $h_o$ we can move through different regimes.
-In particular, we consider two cases.
-For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
-In this case, the CHJ appears to be nearly stable.
-However, using Roe's solver leads to the formation of carbuncle instabilities.
-%
-The second regime is a more aggresive regime with a Froude number of $\Fr\approx 27.3861$ at the inflow boundary. 
-In this regime, using Roe's solver also leads to carbuncle instabilities. In addition, 
-due to the large Froude number, random perturbations may trigger physical instabilities. 
-If the random perturbations model or mimic real disturbances in a physical experiment, it is then
-desirable to properly simulate the unstable behavior of the flow without developing carbuncle instabilities. 
-Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
-solution that could lead to physical instabilities. 
-For this reason, we believe this problem is more challenging than the standard bow shock problem.
+By adjusting the boundary conditions $|\bfu_I|$ and $h_o$ we can study different flow regimes.
+We focus on two cases.
+%For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
+%In this case, the CHJ appears to be nearly stable.
+%However, using Roe's solver leads to the formation of carbuncle instabilities.
+%%
+%The second regime is a more aggresive regime with a Froude number of $\Fr\approx 27.3861$ at the inflow boundary. 
+%In this regime, using Roe's solver also leads to carbuncle instabilities. In addition, 
+%due to the large Froude number, random perturbations may trigger physical instabilities. 
+%If the random perturbations model or mimic real disturbances in a physical experiment, it is then
+%desirable to properly simulate the unstable behavior of the flow without developing carbuncle instabilities. 
+%Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
+%solution that could lead to physical instabilities. 
+%For this reason, we believe this problem is more challenging than the standard bow shock problem.
 
 For most of the experiments we show a Schlieren plot for the water height.
-That is, we plot $||\nabla h||_{\ell^2}$ with a white-to-black logarithm based colormap.
+That is, we plot $||\nabla h||_{\ell^2}$ with a greyscale logarithmic colormap.
 For some experiments we also plot the magnitude of the momentum $|h\bfu|=h\sqrt{u^2+v^2}$.
 
 \begin{figure}[!h]
@@ -1148,10 +1149,11 @@ The initial condition is a symmetric CHJ located at $\sqrt{x^2+y^2}=0.3$, genera
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
 The solution clearly develops carbuncle instabilities.
-We could fix these instabilities using Rusanov's, Kemm's or the blended Riemann solvers. 
-In Figure \ref{fig:chj_r1_diff}, we show the corresponding solutions at $t=3$.
-For this test case, all carbuncle free solvers give qualitatively similar solutions;
-however, we expect Rusanov's solver to be less accurate. 
+In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
+Rusanov's, Kemm's, and the blended Riemann solver.
+For this test case, these three solvers give qualitatively similar solutions,
+all of which are free from carbuncles.
+%however, we expect Rusanov's solver to be less accurate. 
 
 \begin{figure}[!h]
   \centering
@@ -1183,14 +1185,14 @@ We now consider a more aggresive regime. The boundary conditions are given by \e
 \begin{align}\label{bcs_chj_r2}
   |\bfu_I|=15, \qquad h_o=6.6845019298155357.
 \end{align}
-Similar than before, we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
+Again we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
 $\sqrt{x^2+y^2}=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
-\eqref{second-order_via_fluct} with Roe's Riemann solver. Just like before, the solution develops
-carbuncle instabilities. Let us now use Rusanov's, Kemm's and the blended solvers to fix the
-carbuncle instabilities. In Figure \ref{fig:chj_r2_diff}, we show the corresponding solutions at $t=0.1$.
+\eqref{second-order_via_fluct} with Roe's Riemann solver. Again the solution develops
+carbuncle instabilities.  In Figure \ref{fig:chj_r2_diff}, we 
+see that with Rusanov's, Kemm's and the blended solver, the carbuncles are avoided.
 {\color{red} TODO: finish this part depending on the results with Kemm's solver.}
 %
-Opposed to what we observed in the first test case, in this situation the Froude number is
+In contrast to what we observed in the first test case, in this situation the Froude number is
 high enough that numerical perturbations start to trigger a response around the CHJ
 (see the middle and right panels of Figure \ref{fig:chj_r2_diff}).
 For the resolution that we consider, this behavior is dissipated by the extra numerical viscosity introduced by
@@ -1244,9 +1246,7 @@ Clearly, using Rusanov's solver dissipates the physical response to these numeri
 
 \subsubsection{Regime II with random perturbations}
 Finally, we introduce a physical random perturbation to the inflow boundary condition.
-Let $\epsilon(x,y,t)\in[-0.01,0.01]$ be a random number for a given location $(x,y)$,
-at a given time $t$. 
-The inflow boundary condition is now given by
+We use the same mean values \eqref{bcs_chj_r2}, but now we set
 \begin{subequations}
   \begin{align}
     h(x,y,t)=\tilde h_I, \quad
@@ -1255,10 +1255,8 @@ The inflow boundary condition is now given by
   \end{align}
 \end{subequations}
 with $\tilde h_I = \frac{h_I}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_I|=|\bfu_I|(1+\epsilon(x,y,t))$.
-Here, just as before, $h_I=0.3$ and $|\bfu_I|=15$. 
-Note that $\beta=r_I\tilde h|\tilde\bfu_I|=r_Ih_I\bfu_I$.
-The outflow boundary condition is given by
-\eqref{bcs_chj_outflow} with $h_o=6.6845019298155357$.
+Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
+time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
 In this case, due to the large Froude number, the random perturbations in the inflow
 may trigger physical instabilities, which we want to preserve. At the same time, we
 do not want the solution to develop carbuncle instabilities.
