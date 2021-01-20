@@ -24,17 +24,16 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
 
     ! Local variables
     integer :: i, m, mw, inx, iny, ilenrat, ix1, ixm1, i1
-    double precision :: hsqrt_l, hsqrt_r, hsq2, a1, a2, a3, grav
-    double precision :: asdqh, asdqn, asdqt
+    double precision :: a1, a2, a3, grav
     double precision, dimension(3) :: delta
 
     common /cparam/ grav
 
     ! Roe average quantities of each interface
     integer, parameter :: maxm2 = 1800
-    double precision, dimension(-6:maxm2+7) :: unorl, unorr, utanl, utanr, alpha, beta, u, v, a, h
+    double precision, dimension(-6:maxm2+7) :: alpha, beta, u, v, a, h
 
-    if (-1.gt.1-mbc .or. maxm2 .lt. maxm+mbc) then
+    if (-6.gt.1-mbc .or. maxm2 .lt. maxm+mbc) then
         write(6,*) 'need to increase maxm2 in rpB'
         stop
     endif
@@ -180,7 +179,7 @@ subroutine rpt2(ixy,imp,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,aux1,aux2,aux3,asdq,b
     ! -------------------------------
     do m=1,3
         do i=ix1,ixm1
-            bmasdq(i,m) = 0.d0
+            bmasdq(m,i) = 0.d0
             do mw=1,mwaves
                 bmasdq(m,i) = bmasdq(m,i) + dmin1(s(mw,i), 0.d0)*wave(m,mw,i)
             end do
