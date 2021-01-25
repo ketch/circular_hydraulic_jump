@@ -57,12 +57,12 @@
 \maketitle
 
 \begin{abstract}
-We study numerical discretizations of the shallow water equations
-for the simulation of the circular hydraulic jump formed
-when a vertical fluid jet impacts a horizontal plate.
-This is a challenging problem that includes a curved steady shock
-that can be physically unstable.  We show that numerical methods are prone to
-either suppress the instability completely or form artificial carbuncles.
+The numerical artifact known as a carbuncle in the context of the Euler
+equations has been shown to appear also in shallow water simulations.
+We study how to deal with carbuncles in the shallow water context,
+with an emphasis on a new test problem involving a steady circular hydraulic
+jump that can be physically unstable.  We show that numerical methods are prone to
+either suppress the instability completely or form carbuncles.
 We test existing cures for the carbuncle as well as a new method,
 and show results that exhibit the shock instability without unphysical carbuncles.
 \end{abstract}
@@ -70,6 +70,46 @@ and show results that exhibit the shock instability without unphysical carbuncle
 
 
 \section{Introduction}
+
+\subsection{Numerical shock instabilities}
+
+In \cite{peery1988blunt} a numerical instability was observed to
+appear near the symmetry plane in the simulation of a bow shock.
+This phenomenon, subsequently dubbed ``carbuncle", has been observed by many researchers
+in similar numerical experiments for the Euler equations, and many remedies
+have been proposed, mainly in the form of additional numerical dissipation
+\cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
+Most notably, the HLLE Riemann solver suppresses the carbuncle instability \cite{quirk1997contribution}.
+For a recent review of numerical shock instability and work to alleviate it,
+we refer to \cite[Section 2.5]{simonnumerical}.
+
+Given the similarity of structure between the Euler equations and the shallow
+water equations, it is not surprising that carbuncles appear in numerical
+solutions of the latter as well \cite{kemm2014note}.
+The shallow water carbuncle behaves similarly to the
+Euler carbuncle: it appears when the Roe solver is used, but not when
+the HLL solver is used, and can be suppressed by similar numerical methods
+\cite{kemm2014note,bader2014carbuncle}.
+
+The most common test problems used to investigate carbuncle formation are
+that of bow shock formation or a steady, grid-aligned planar shock.
+In both of these problems, the correct behavior is the formation of a stable
+shock profile, which is achieved easily by simple methods with excessive
+diffusion.  This means these problems are not adequate on their own to
+evaluate methods for practical calculations.
+
+Elling \cite{elling2009carbuncle} proposed instead a problem specifically
+designed to feature a carbuncle as the physical solution.  This has
+been used as a test problem to identify methods that impose excessive dissipation.
+
+Herein we introduce a new and more exacting test problem.  Like some
+of the problems above, it includes an equilibrium solution consisting of a
+steady shock.  Similar to the Elling problem, the equilibrium is unstable.
+However, the correct manifestation of the instability is different from
+the carbuncle.  This allows us to distinguish schemes that yield correct
+behavior from both those that are too dissipative and those that generate
+carbuncles.
+
 
 \subsection{The circular hydraulic jump}
 
@@ -109,27 +149,7 @@ depth at the outside of the jump.  For fluids with finite viscosity, the flow
 can also be completely steady for sufficiently small velocities and depths.
 
 
-\subsection{Numerical shock instabilities}
-
-In \cite{peery1988blunt} a numerical instability was observed to
-appear near the symmetry plane in the simulation of a bow shock.
-This phenomenon, subsequently dubbed ``carbuncle", has been observed by many researchers
-in similar numerical experiments for the Euler equations, and many remedies
-have been proposed, mainly in the form of additional numerical dissipation
-\cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
-Most notably, the HLLE Riemann solver suppresses the carbuncle instability \cite{quirk1997contribution}.
-For a recent review of numerical shock instability and work to alleviate it,
-we refer to \cite[Section 2.5]{simonnumerical}.
-
-Given the similarity of structure between the Euler equations and the shallow
-water equations, it is not surprising that carbuncles appear in numerical
-solutions of the latter as well \cite{kemm2014note}.
-The shallow water carbuncle behaves similarly to the
-Euler carbuncle: it appears when the Roe solver is used, but not when
-the HLL solver is used, and can be suppressed by similar numerical methods
-\cite{kemm2014note,bader2014carbuncle}.
-
-As we will see, carbuncles also appear in the numerical solution of the shallow
+As we will see, carbuncles can appear in the numerical solution of the shallow
 water circular hydraulic jump.  This is natural, since the solution involves a
 standing shock wave.  Dealing with the carbuncle in this context is particularly
 interesting and challenging, since this standing shock should (at least in an
@@ -138,47 +158,17 @@ carbuncle is the manifestation of a true physical
 instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 
+\subsection{Outline}
+In this work, we describe and study the circular hydraulic jump as a new
+test problem for shallow water discretizations.  We find that although some
+existing methods behave acceptably on previous test problems, they
+are not capable of providing accurate solutions for the circular hydraulic jump
+across the range of flow regimes we study.  We develop a new entropy-stable
+Riemann solver for the shallow water equations that generates solutions with
+the correct behavior.
 
 
-\begin{itemize}
-  \item Describe the carbuncle instability starting with Euler and going to SWEs.
-  \item Mention that we observe the cc instability for the CHJ as well.
-  \item Describe that in this case, the situation is more complicated than in other problems since we
-    expect the correct solution to have physical instabilities triggered by round off error.
-  \item Based on existing literature we know that we can use highly dissipative and robust methods to
-    avoid the formation of carbuncle instabilities. However, in this case, these methods also tend to
-    dissipate other important features of the solution unless the mesh is highly refined.
-  \item We are interested in methods that prevent the formation of cc instability in the CHJ
-    but preserve other features and physical instabilities.
-  \item There are multiple ideas and methods proposed to fix the cc insitability for the Euler
-    and recently for the SWEs.
-  \item It is believed that the cc instability occurs due to lack or reduced viscosity in the shear contact waves.
-  \item Some methods also propose to improve the entropy stability properties of the method. In particular, to induce or guarantee that the entropy is dissipated at shocks.
-  \item Based on some of these ideas we start with Rusanov's method using the cell averages of the solution.
-    This is a first-order method that is entropy stable and positivity preserving. We enhance its robustness by
-    overestimating the wave speed when strong shear is present in the solution. The result is a robust solver
-    that do not develop cc instabilities. However, the method is highly dissipative and, as a result,
-    many other important features of the solution are dissipated.
-  \item We then blend this highly dissipative method with a FV method based on Roe's average.
-  \item After this we introduce the second order corrections from Law-Wendroff's method.
-\end{itemize}
-
-\subsection{Our contribution}
-\begin{itemize}
-\item We present a new problem where the cc instability occurs. In our opinion, this is a more challenging
-  problem than the standard bow shock problem since we expect the solution to be non-steady.
-  We aim to preserve instabilities that are inherently present in the CHJ for certain regimes. And,
-  at the same time, we aim to prevent the cc instability.
-\item We explore the use of entropy dissipation and entropy stability as cure of the cc instability for the SWEs.
-\item We propose a specific method to blend the highly dissipative and robust Rusanov's RP and the
-  accurate 3-wave Roe's solver for the SWEs.
-\item We demonstrate that this scheme prevents the formation of cc instabilities not only
-  in the well-known bow shock problem, but also in the CHJ while preserving other important features of
-  the solution.
-\end{itemize}
-
-
-\section{The shallow water circular hydraulic jump}
+\section{Numerical methods for the shallow water equations}
 We consider the shallow water model in two horizontal dimensions:
 \begin{subequations} \label{eq:sw}
 \begin{align}
@@ -190,89 +180,30 @@ We consider the shallow water model in two horizontal dimensions:
 Here $h, u,$ and $v$ are respectively the depth and the $x$- and $y$-components of
 velocity, which are functions of the two spatial coordinates $(x,y)$ as well as time $t$.
 The gravitational force is proportional to $g$.
-%The system \eqref{eq:sw} can be written in vector form as
-%\begin{align}
-%    q_t + f(q)_x + g(q)_y & = 0.
-%\end{align}
-
-\subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
-In this work, we consider the initial boundary value problem consisting of the
-shallow water model \eqref{eq:sw} in an annular domain
+The system \eqref{eq:sw} can be written in vector form as
 \begin{align}
-r_\textup{jet} \le r \le r_\infty
+    q_t + f(q)_x + g(q)_y & = 0.
 \end{align}
-where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
-and prescribed outflow at $r=r_\infty$.
-The domain and boundary conditions are rotationally symmetric.
-By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
-\begin{subequations} \label{eq:rsw}
-\begin{align}
-    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
-    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
-\end{align}
-\end{subequations}
-where the depth $h$ and radial velocity $u$ are functions of the single spatial coordinate $r$.
-Steady-state solutions of \eqref{eq:rsw} satisfy
-\begin{subequations}\label{steady}
-\begin{align}
-    rhu & = C \\
-    h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
-\end{align}
-\end{subequations}
-for some $C$ independent of $r$.  Here $F=|u|/\sqrt{gh}$ is the Froude number.
-We see that two types of steady profiles exist, depending on whether the flow
-is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
-include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
 
-The steady, rotationally-symmetric circular hydraulic jump involves supercritical
-flow for $r<r_0$ and subcritical flow for $r>r_0$, where $r_0$ is the jump radius.
-The jump itself takes the form of a stationary shock wave.  The Rankine-Hugoniot jump
-conditions specify that for such a shock,
-\begin{align} \label{eq:RH}
-    h_+ - h_- & = \frac{-3h_- + \sqrt{h_-^2 + 8 h_- u_-^2/g}}{2} = \frac{3h_-}{2}\left(\sqrt{1+\frac{8}{9}(F_-^2-1)}-1\right),
-\end{align}
-where the subscripts $+, -$ denote states just inside or outside the jump radius, respectively.
 
-A steady-state, rotationally symmetric solution can be given for an annular region with prescribed
-flow at the inner and outer boundaries as follows:
-
-\begin{enumerate}
-    \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
-    \item Integrate \eqref{eq:dh} from both boundaries.
-    \item Find a radius $r_0$ where the matching condition \eqref{eq:RH} is satisfied.
-\end{enumerate}
-Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the required jump
-radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
-and subcritical at the outer boundary.
-
-Numerical tests suggest that the solution of \eqref{eq:rsw} tends rapidly approaches that
-just described under general initial conditions as long as the flow at the jet is
-supercritical and the outer outflow is subcritical.  This solution remains steady
-if the rate of inflow and outflow are matched.  The stability of this solution in
-the face of non-rotationally-symmetric perturbations is an important question not
-only in the shallow water context but for more realistic fluid models and physically.
-It will play an important role in the results we present later.
-The rotationally-symmetric steady state is a useful initial condition for studies
-of CHJ stability.
-
-\section{Numerical methods}
 In this work we study the behavior of certain shock-capturing finite volume
 methods based on the use of Riemann solvers.  For simplicity, we discuss these
-solvers in the context of a 1-dimensional mesh.  
+solvers in the context of a 1-dimensional problem and mesh.  
 In the numerical experiments in \S\ref{sec:num} we use second-order Strang
 splitting \cite{strang1968construction} to extend the method to multiple dimensions.
 
 \subsection{Wave propagation methods}\label{sec:waveprop}
-The numerical solution $q_i$ represents the average value of the set of
+Let $Q_i$ represent the average value of the set of
 conserved quantities over cell $i$, which extends from $x_\imh$ to $x_\iph$.
 At each time step and at each interface $x_\imh$, we approximately solve the
-Riemann problem with initial states $(q^n_{i-1},q^n_i)$.  The approximate
+Riemann problem with initial states $(Q^n_{i-1},Q^n_i)$.  The approximate
 solution consists of a set of traveling discontinuities or waves $\W^p_\imh$
 and corresponding speeds $s^p_\imh$.
 We use the wave propagation framework developed by LeVeque \cite{leveque1997wave, leveque2002finite}
-and employed in the Clawpack software \cite{clawpack,pyclaw-sisc}, which implements the LWL scheme
+and employed in the Clawpack software \cite{clawpack,pyclaw-sisc}, which implements the 
+Lax-Wendroff-LeVeque (LWL) scheme
 \begin{align}\label{second-order_via_fluct}
-  q_i^{n+1} = q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
+  Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
   -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
 \end{align}
 Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$,
@@ -292,17 +223,18 @@ Here $\tilde{\W}_{i\pm 1/2}^p$ is a TVD-limited version of $\W_{i\pm 1/2}^p$.
 We will sometimes work with
 the first-order method obtained by setting the correction fluxes to zero:
 \begin{align}\label{first-order_via_fluct}
-  q_i^{n+1} = q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
+  Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
 \end{align}
 which, for the conservative Riemann solvers we use herein, can also be written
 as a first-order flux-differencing scheme:
 \begin{align}\label{first-order_FV}
-  q_i^{n+1}=q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
+  Q_i^{n+1}=Q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
 \end{align}
 where $\bfF_{i+1/2}$ is a numerical approximation of the flux at $x_\iph$.
 
-Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
-Roe.  Neither of these solvers deals with the carbuncle instability in fully
+Next we briefly review three existing Riemann solvers for the shallow water equations.
+We start with the methods of Rusanov and of Roe.  Neither of these solvers
+deals with the carbuncle instability in a fully
 satisfactory way.  Rusanov's solver suppresses the carbuncle but is known to
 also suppress related real instabilities, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
@@ -383,16 +315,27 @@ and the factors $\alpha^p_\imh$ obtained by solving
   =\Delta Q_{i-1/2}:=q_i-q_{i-1}.
 \end{align}
 
+\subsection{HLLEMCC Riemann solver} \label{sec:kemm}
+Several specialized Riemann solvers have been proposed in order to deal
+with carbuncles.  Among them, only that proposed by Kemm has been implemented
+and tested on the shallow water equations \cite{kemm2014note,bader2014carbuncle}.
+The idea behind that solver, known as the HLLEMCC solver, is to combine
+the HLLE and Roe solvers in such a way that the resulting method behaves
+like Roe's when away from potential carbuncle instabilities, and like HLLE
+where the potential for such instabilities arises.   This is done using
+an indicator function based on the local residual of the Rankine-Hugoniot
+condition for the shear wave.  The method requires some parameters that
+may need to be tuned for a specific problem.  We will consider this method
+in the numerical tests below.
 
 
 \section{An entropy-based blending of Rusanov and Roe}
 
-As we discussed in the introduction, finite volume methods with
-Roe's Riemann solvers are prone to the carbuncle instability for the CHJ.
-In contrast, if we use Rusanov's
-Riemann solver, no carbuncles appear; however, many other important and physical features of
-the solution are dissipated, unless the grid is highly refined.
-Our main objective is to study the CHJ and to propose a Riemann solver
+As we discussed in the introduction, finite volume methods that use a
+Roe Riemann solver are prone to exhibit the carbuncle instability.
+Rusanov solver, like the HLLE solver, suppresses these instabilities but may also
+dissipate other important features of the solution, unless the grid is highly refined.
+In this section, we propose a Riemann solver
 that is carbuncle-free but does not dissipate important features of the solution.
 To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers.
 Our blending criterion is based on the residual of the entropy (in)equality,
@@ -1035,6 +978,69 @@ based on methods \eqref{first-order_via_fluct} and
 \end{table}
 
 \subsection{Steady shock around a cylinder}\label{sec:bow_shock}
+
+\section{Numerical study of the circular hydraulic jump}
+
+\subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
+In this section, we consider the initial boundary value problem consisting of the
+shallow water model \eqref{eq:sw} in an annular domain
+\begin{align}
+r_\textup{jet} \le r \le r_\infty
+\end{align}
+where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
+and prescribed outflow at $r=r_\infty$.
+The domain and boundary conditions are rotationally symmetric.
+By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
+\begin{subequations} \label{eq:rsw}
+\begin{align}
+    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
+    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
+\end{align}
+\end{subequations}
+where the depth $h$ and radial velocity $u$ are functions of the single spatial coordinate $r$.
+Steady-state solutions of \eqref{eq:rsw} satisfy
+\begin{subequations}\label{steady}
+\begin{align}
+    rhu & = C \\
+    h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
+\end{align}
+\end{subequations}
+for some $C$ independent of $r$.  Here $F=|u|/\sqrt{gh}$ is the Froude number.
+We see that two types of steady profiles exist, depending on whether the flow
+is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
+include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
+
+The steady, rotationally-symmetric circular hydraulic jump involves supercritical
+flow for $r<r_0$ and subcritical flow for $r>r_0$, where $r_0$ is the jump radius.
+The jump itself takes the form of a stationary shock wave.  The Rankine-Hugoniot jump
+conditions specify that for such a shock,
+\begin{align} \label{eq:RH}
+    h_+ - h_- & = \frac{-3h_- + \sqrt{h_-^2 + 8 h_- u_-^2/g}}{2} = \frac{3h_-}{2}\left(\sqrt{1+\frac{8}{9}(F_-^2-1)}-1\right),
+\end{align}
+where the subscripts $+, -$ denote states just inside or outside the jump radius, respectively.
+
+A steady-state, rotationally symmetric solution can be given for an annular region with prescribed
+flow at the inner and outer boundaries as follows:
+
+\begin{enumerate}
+    \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
+    \item Integrate \eqref{eq:dh} from both boundaries.
+    \item Find a radius $r_0$ where the matching condition \eqref{eq:RH} is satisfied.
+\end{enumerate}
+Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the required jump
+radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
+and subcritical at the outer boundary.
+
+Numerical tests suggest that the solution of \eqref{eq:rsw} tends rapidly approaches that
+just described under general initial conditions as long as the flow at the jet is
+supercritical and the outer outflow is subcritical.  This solution remains steady
+if the rate of inflow and outflow are matched.  The stability of this solution in
+the face of non-rotationally-symmetric perturbations is an important question not
+only in the shallow water context but for more realistic fluid models and physically.
+It will play an important role in the results we present later.
+The rotationally-symmetric steady state is a useful initial condition for studies
+of CHJ stability.
+
 
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
 Let us finally consider the numerical experiments for the CHJ in two-dimensions.
