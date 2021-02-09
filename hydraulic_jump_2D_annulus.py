@@ -182,10 +182,10 @@ def step_friction(solver, state, dt):
     q[2,:,:] = q[2,:,:] - dt*cf*v/h
         
 def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
-          num_cells_theta=100, tfinal=1,
-          solver_type='classic', num_output_times=10,
+          num_cells_theta=100, tfinal=10,
+          solver_type='classic', num_output_times=100,
           boundary='subcritical', outdir='./_output', friction=False,
-          friction_coeff=0.01, F_bdy=0.1, use_petsc=False, 
+          friction_coeff=0.01, F_bdy=0.1, use_petsc=True, 
           kalpha=1./3, kbeta=1./3, kepsilon=1.e-3):
     
     import shallow_quad_hllemcc_2D
@@ -197,9 +197,13 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
 
     if solver_type == 'classic':
         solver = pyclaw.ClawSolver2D(shallow_quad_hllemcc_2D)
-        solver.cfl_max     = 0.9
-        solver.cfl_desired = 0.8
-        solver.transverse_waves = 2
+        solver.cfl_max     = 0.5
+        solver.cfl_desired = 0.45
+        solver.num_eqn = 3
+        solver.num_waves = 3
+        solver.fwave = False
+        solver.dimensional_split=False
+        solver.transverse_waves = 1 #2
     elif solver_type == 'sharpclaw':
         solver = pyclaw.SharpClawSolver2D(shallow_quad_hllemcc_2D)
 
@@ -264,6 +268,7 @@ def setup(h0=0.5, u0=0.75, h_inf=0.15, g=1., num_cells_r=100,
     state.aux[6,:,:] = area
     state.index_capa = 6 # aux[6,:,:] holds the capacity function
 
+    
     state.q[0,:,:] = 0.15 + 0.1*np.random.rand(*state.q[0,:,:].shape)
     state.q[1,:,:] = 0.
     state.q[2,:,:] = 0.
