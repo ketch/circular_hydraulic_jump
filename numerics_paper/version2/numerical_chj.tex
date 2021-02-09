@@ -280,7 +280,7 @@ flux Jacobian obtained using these averages, resulting in
   \hat\lambda_{i-1/2}^2=\hat u_{i-1/2}, \qquad
   \hat\lambda_{i-1/2}^3=\hat u_{i-1/2}+g\sqrt{g\bar h_{i-1/2}}. \\
 \end{align*}
-and $\W_{i-1/2}^p=\alpha_{i-1/2}^p\hat r_{i-1/2}^p$, with
+and $\W_{i-1/2}^{p,\Roe}=\alpha_{i-1/2}^p\hat r_{i-1/2}^p$, with
 \begin{align*}
   \hat \bfr^1_{i-1/2} =
   \begin{bmatrix}
@@ -358,8 +358,6 @@ that leads to carbuncles in many numerical approximations.  This is an ideal
 test for assessing numerical methods, since neither the presence of carbuncles
 nor the complete absence of instability represents the correct behavior.
 
-In what follows, we use $\W^{p,\Rus}$ to denote the waves in the Rusanov
-solver and simply $\W^p$ to denote the waves in the Roe solver.
 %We close this section by remarking that the fluctuations associated with Rusanov's solver
 %can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
 %and rewrite the right-going fluctuation as follows:
@@ -458,6 +456,29 @@ where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is 
 dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's Riemann solvers.
 
 \subsection{Blended Riemann solver}\label{sec:blended_rs}
+In what follows, we use $\W^{p,\Rus}$ to denote the waves in the Rusanov
+solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.  We propose
+a new scheme consisting of the second-order LWL method \eqref{second-order_via_fluct} using
+the first-order fluxes
+\begin{align}
+  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i})
+\end{align}
+and correction fluxes \eqref{correction-fluxes} where
+\begin{align} \label{s_p}
+    s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
+\end{align}
+with
+\begin{align}\label{lambda_p}
+  \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p| + \lambda_\iph^{\min}.
+\end{align}
+The term $\lambda_\iph^{\min}$ is used to ensure that the scheme would be entropy stable
+if the second-order corrections were neglected.  The normalized entropy
+residual $\theta$ controls whether the scheme behaves more like that of Rusanov
+or Roe.  Specifically, if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, this scheme
+is equivalent to that of Rusanov, while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, 
+this scheme is equivalent to that of Roe.
+
 In this section, we use \eqref{Ri}, which is a normalized measurement of the entropy residual \eqref{ent_residual},
 to blend Rusanov's and Roe's Riemann solvers. To do this, we define the blended numerical flux:
 \begin{align}\label{num_flux_ev}
@@ -468,16 +489,15 @@ Here $I\in\mathbb{R}^{3\times 3}$ is the identity matrix,
 $\theta_{i+1/2}=\max\{\theta_{i+1},\theta_i\}$, $\lambda_{i+1/2}^{\max}$ is the
 upper bound on the wave speed used in Rusanov's Riemann solver (see \S \ref{sec:rusanov}),
 and $\hat A_{i+1/2}$ is Roe's averaged flux Jacobian (see \S \ref{sec:roe}).
+This flux is equal to the Rusanov flux if $\theta_\iph=0$ and the Roe flux if $\theta_\iph=1$.
+We expect that $\theta_\iph\approx 0 $ in smooth regions, while $\theta_\iph\approx 1$ near
+shocks.
 
-The first-order method is given simply by \eqref{first-order_FV}
-with the numerical flux $F_{i+1/2}$ given by \eqref{num_flux_ev}.
-In smooth regions $\theta_{i+1/2}\approx 0$ so the numerical flux is essentially Roe's flux.
-Near discontinuities or steep gradients, $\theta_{i+1/2}$ becomes large. In the limit $\theta_{i+1/2}\approx 1$
-the numerical flux is essentially Rusanov's flux.
+%The first-order method is given simply by \eqref{first-order_FV}
+%with the numerical flux $F_{i+1/2}$ given by \eqref{num_flux_ev}.
 
 The first-order method can also be written in terms of fluctuations via \eqref{first-order_via_fluct}.
-To do this we consider the waves ($\W^p_{i\pm 1/2}$, with $p=1,2,3$)
-from Roe's solver and define
+To do this we define the blended wave speed
 \begin{align}\label{lambda_p}
   \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p|,
 \end{align}
@@ -486,13 +506,13 @@ interface $i+1/2$. Note that $\lambda_{i+1/2}^p\geq 0$.
 The fluctuations are then given by
 \begin{subequations}\label{ev_fluctuations}
 \begin{align}
-  \apdq_\imh & = \frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^p, \\
-  \amdq_\iph & = \frac{1}{2}\sum_p \left(\hat\lambda_{i+1/2}^p - \lambda_{i+1/2}^p\right)\W_{i+1/2}^p.
+  \apdq_\imh & = \frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^{p,\Roe}, \\
+  \amdq_\iph & = \frac{1}{2}\sum_p \left(\hat\lambda_{i+1/2}^p - \lambda_{i+1/2}^p\right)\W_{i+1/2}^{p,\Roe}.
 \end{align}
 \end{subequations}
-
-To implement a second-order LWL scheme based on this solver, in addition to
-these fluctuations we must define a set of waves and corresponding speeds.
+These can be used in \eqref{first-order_via_fluct} to obtain a first-order scheme.
+To implement the correction fluxes required for the second-order scheme \eqref{second-order_via_fluct},
+we must also define a set of waves and corresponding speeds.
 Using only the waves from the Roe solver, it is in general not possible
 to choose speeds that yield the fluctuations \eqref{ev_fluctuations}.
 %In the framework of LeVeque, for a given interface $i+1/2$,
@@ -502,17 +522,14 @@ to choose speeds that yield the fluctuations \eqref{ev_fluctuations}.
 %  \hat \lambda_{i+1/2}^p-\lambda_{i+1/2}^p = s_{i+1/2}^p-|s_{i+1/2}^p|,
 %\end{align*}
 %which is not possible to obtain in general (since the problem is overdetermined).
-Instead, we consider
-$s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
- and study the consequences of this choice once the second-order corrections are applied.
-Here $\sgn(z)$ is the sign function of $z$.
-
-The second-order LWL method for the one-dimensional problem is given by
-\eqref{second-order_via_fluct} and \eqref{correction-fluxes}.
-To understand the effect of choosing $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
-as the speed of $\W_{i+1/2}^p$,
-let us assume that no limiter is applied; i.e., $\tilde\W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$.
-Then \eqref{second-order_via_fluct} can be written as
+Instead, we set
+\begin{align} \label{s_p}
+    s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
+\end{align}
+where $\sgn(z)$ is the sign function of $z$.
+Using this in \eqref{correction-fluxes} and \eqref{ev_fluctuations} in 
+\eqref{second-order_via_fluct}, we obtain (in the absence of limiting)
+the second-order scheme
 \begin{align*}
   q_i^{n+1}=q_i^n
   &-\frac{\Delta t}{2 \Delta x}
@@ -521,15 +538,8 @@ Then \eqref{second-order_via_fluct} can be written as
   +
   \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^p\right],
 \end{align*}
-which is just the standard Lax-Wendroff method written wave propagation form.
-Now taking $\theta_{i\pm 1/2}=0$ corresponds to using a Roe solver while taking
-$\theta_{i\pm 1/2}=1$ corresponds to using a Rusanov solver.
-
 Note that if $\theta_{i\pm 1/2}=0$ we recover the standard second-order Lax-Wendroff method based on
 Roe's Riemann solver.
-In the numerical experiments in \S\ref{sec:num}, we obtain second-order experimental
-order of convergence (EOC) for problems with smooth solution, which is expected since
-$\theta_{i\pm 1/2}\approx 0$ in smooth regions.
 Similarly, if $\theta_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusanov's Riemann solver,
 which can be seen by writing the fluctuations in Rusanov's method in terms of Roe's waves and speeds.
 
