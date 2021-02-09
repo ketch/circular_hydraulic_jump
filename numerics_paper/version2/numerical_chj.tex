@@ -216,9 +216,9 @@ and represent the effect (to first
 order accuracy) of waves coming from the solution of the Riemann problem at
 each of the neighboring interfaces.  Meanwhile, $\Ft_{i\pm 1/2}$ are correction
 fluxes that make the method second-order accurate:
-\begin{align*}
+\begin{align}\label{correction-fluxes}
   \tilde{F}_{i\pm 1/2}=\frac{1}{2}\sum_p|s_{i\pm 1/2}^p|\left(1-\frac{\Delta t}{\Delta x}|s_{i\pm 1/2}^p|\right)\tilde\W_{i\pm 1/2}^p.
-\end{align*}
+\end{align}
 Here $\tilde{\W}_{i\pm 1/2}^p$ is a TVD-limited version of $\W_{i\pm 1/2}^p$.
 We will sometimes work with
 the first-order method obtained by setting the correction fluxes to zero:
@@ -232,16 +232,15 @@ as a first-order flux-differencing scheme:
 \end{align}
 where $\bfF_{i+1/2}$ is a numerical approximation of the flux at $x_\iph$.
 
-Next we briefly review three existing Riemann solvers for the shallow water equations.
-We start with the methods of Rusanov and of Roe.  Neither of these solvers
-deals with the carbuncle instability in a fully
+Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
+Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
+a full and detailed description of these two Riemann solvers in the context of
+the shallow water equations.
+Neither of these solvers deals with the carbuncle instability in a fully
 satisfactory way.  Rusanov's solver suppresses the carbuncle but is known to
 also suppress related real instabilities, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
-We refer to \cite{ketcheson2020riemann} and references therein for
-a full and detailed description of these two Riemann solvers in the context of
-the shallow water equations.  Both of these solvers satisfy the conservation
-property
+Both of these solvers satisfy the conservation property
 \begin{align} \label{rs_conservation}
     \amdq_\imh + \apdq_\imh = \bff(\bfq_i) - \bff(\bfq_{i-1}).
 \end{align}
@@ -333,25 +332,34 @@ in the numerical tests below.
 
 As we discussed in the introduction, finite volume methods that use a
 Roe Riemann solver are prone to exhibit the carbuncle instability.
-Rusanov solver, like the HLLE solver, suppresses these instabilities but may also
-dissipate other important features of the solution, unless the grid is highly refined.
-In this section, we propose a Riemann solver
+In contrast, methods that use a Rusanov Riemann solver exhibit no carbuncles. 
+However, such methods tend to dissipate other important physical features of
+the solution, unless the grid is highly refined.
+Our main objective is to study the CHJ and to propose a Riemann solver
 that is carbuncle-free but does not dissipate important features of the solution.
 To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers.
 Our blending criterion is based on the residual of the entropy (in)equality,
 which induces dissipation of entropy near discontinuities.
 Blending these Riemann solvers has been proposed before
-to solve the Euler equations, see e.g.
-\cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy},
-the shallow water equations, see e.g. \cite{bader2014carbuncle,kemm2014note},
-and even the Navier-Stokes equations, see e.g. \cite{nishikawa2008very,ohwada2018simple}.
-In these references, the authors use blending criteria different than ours.
-Nevertheless, fixing the carbuncle instability by imposing entropy stability is not new.
-For example, in \cite{ismail2009affordable,ismail2009proposed},
-the authors developed carbuncle free solvers for the Euler equations
-via dissipation of entropy.
+to solve the Euler equations (see
+\cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy}),
+the shallow water equations (see \cite{bader2014carbuncle,kemm2014note}),
+and even the Navier-Stokes equations (see \cite{nishikawa2008very,ohwada2018simple}).
+Our approach differs from those just cited in that it is based on the local entropy;
+for a related approach in the context of the Euler equations, see
+\cite{ismail2009affordable,ismail2009proposed}.
 
+It is important to recognize also that it is not correct to simply suppress
+the carbuncle phenomenon in all situations, since it is related to a physical
+instability in the Euler equations; see \cite{moschetta2001carbuncle,elling2009carbuncle}.
+A test problem was contrived in \cite{elling2009carbuncle} to illustrate this.
+In the present work, we provide a test problem that possesses a genuine instability
+that leads to carbuncles in many numerical approximations.  This is an ideal
+test for assessing numerical methods, since neither the presence of carbuncles
+nor the complete absence of instability represents the correct behavior.
 
+In what follows, we use $\W^{p,\Rus}$ to denote the waves in the Rusanov
+solver and simply $\W^p$ to denote the waves in the Roe solver.
 %We close this section by remarking that the fluctuations associated with Rusanov's solver
 %can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
 %and rewrite the right-going fluctuation as follows:
@@ -446,7 +454,7 @@ In our implementation, we use
   D_i = \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(\bfq)\right)_kd\bfx\right|
   +\left|\int_{S_i}\nabla\cdot\entflux(\bfq)d\bfx\right|,
 \end{align*}
-where $({\bf z})_k$ denotes the $k$-th component of ${\bf z}\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
+where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
 dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's Riemann solvers.
 
 \subsection{Blended Riemann solver}\label{sec:blended_rs}
@@ -498,23 +506,13 @@ Instead, we consider
 $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
  and study the consequences of this choice once the second-order corrections are applied.
 Here $\sgn(z)$ is the sign function of $z$.
-The second-order LWL method for the one-dimensional problem is given by
-\begin{align}\label{second-order}
-  q_i^{n+1}=q_i^n
-  -\frac{\Delta t}{\Delta x}\left[\A^-\Delta Q_{i+1/2}+\A^+\Delta Q_{i-1/2}\right]
-  -\frac{\Delta t}{\Delta x}\left[\tilde F_{i+1/2}-\tilde F_{i-1/2}\right],
-\end{align}
-where
-\begin{align*}
-  \tilde F_{i+1/2} = \frac{1}{2}\sum_p\lambda_{i+1/2}^p
-  \left(1-\frac{\Delta t}{\Delta x}\lambda_{i+1/2}^p\right)\tilde\W_{i+1/2}^p
-\end{align*}
-are the flux corrections with $\tilde\W_{i+1/2}^p$ being a limited version of $\W_{i+1/2}^p$.
 
+The second-order LWL method for the one-dimensional problem is given by
+\eqref{second-order_via_fluct} and \eqref{correction-fluxes}.
 To understand the effect of choosing $s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p$
 as the speed of $\W_{i+1/2}^p$,
-let us assume that no limiters are applied; i.e., $\tilde\W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$.
-By doing this, equation \eqref{second-order} can be written as
+let us assume that no limiter is applied; i.e., $\tilde\W_{i\pm 1/2}^p\equiv \W_{i\pm 1/2}^p$.
+Then \eqref{second-order_via_fluct} can be written as
 \begin{align*}
   q_i^{n+1}=q_i^n
   &-\frac{\Delta t}{2 \Delta x}
@@ -523,8 +521,11 @@ By doing this, equation \eqref{second-order} can be written as
   +
   \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^p\right],
 \end{align*}
-which corresponds to the standard Lax-Wendroff method written in terms of fluctuation-like quantities.
-Note that if $\theta_{i\pm 1/2}=0$, we recover the standard second-order Lax-Wendroff method based on
+which is just the standard Lax-Wendroff method written wave propagation form.
+Now taking $\theta_{i\pm 1/2}=0$ corresponds to using a Roe solver while taking
+$\theta_{i\pm 1/2}=1$ corresponds to using a Rusanov solver.
+
+Note that if $\theta_{i\pm 1/2}=0$ we recover the standard second-order Lax-Wendroff method based on
 Roe's Riemann solver.
 In the numerical experiments in \S\ref{sec:num}, we obtain second-order experimental
 order of convergence (EOC) for problems with smooth solution, which is expected since
@@ -534,7 +535,7 @@ which can be seen by writing the fluctuations in Rusanov's method in terms of Ro
 
 To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctuation as follows:
 \begin{align}\label{rus_rs_aux}
-  \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
+  \A^{+,\Rus}\Delta Q_{i-1/2}:=\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}
   = \bff(\bfq_{i})-\bff(\bfq_{i-1}) + \lambda_{i-1/2}^{\max}\left(\W_{i-1/2}^{1,\Rus}+\W_{i-1/2}^{2,\Rus}\right)
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}.
   %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
@@ -543,7 +544,7 @@ From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
 $\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfq_i-\bfq_{i-1}=\sum_p\W_{i-1/2}^p$.
 Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
 \begin{align*}
-  \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\max}
+  \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}
   = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus},
 \end{align*}
@@ -651,27 +652,31 @@ and $h^e(\bfx_i)$ is the exact water height evaluated at the center of cell $i$.
 Since the methods under consideration are at most second order accurate, comparison
 of cell averages with centered point values is a sufficient way to test their accuracy.
 
-We consider a total of six problems. We start with a one-dimensional Riemann problem over a dry bed.
-For this problem we use the first-order method \eqref{first-order_via_fluct},
+We consider a total of six problems. We start in \S \ref{sec:rp_dry_bed} with a
+one-dimensional Riemann problem over a dry bed.
+For this problem we use the first-order methods \eqref{first-order_via_fluct},
 to avoid negative depth values. Although only Rusanov's solver is proven to guarantee
 positivity, we do not get negative values for the water height with any of the first-order methods.
+In \S \ref{sec:rp_wet_bed} we apply the second-order methods to a dam-break problem
+with a wet bed.
 In \S \ref{sec:steady_outflow} we consider a one-dimensional problem with a smooth steady state solution. We observe the expected
 second-order accuracy of method \eqref{second-order_via_fluct} with Roe's and the blended solvers. Using
 Rusanov's Riemann solver degrades the accuracy to first-order. The overall accuracy of the blended solver
 is not degraded since the extra dissipation is not applied in smooth regions.
 In \S\ref{sec:rp_wet_bed} and \S\ref{sec:1D_chj} we consider one-dimensional problems with strong shocks. We observe similar accuracy with the
-blended solver than with Roe's solver; that is, inducing entropy dissipation near the shocks do not degrade the accuracy
-of the underlying Roe's solver. This extra dissipation, however, prevents the formation of carbuncles in other experiments,
+blended solver or the Roe solver; this suggests that the numerical entropy
+dissipation near the shocks does not degrade the accuracy
+of the underlying Roe solver. This extra dissipation, however, prevents the formation of carbuncles in other experiments,
 which we demonstrate in \S \ref{sec:bow_shock} and \S\ref{sec:2D_chj}.
 The main focus of this work is in the formation of carbuncle instabilities in the two-dimensional CHJ. We present
-an extensive set of experiments about this problem in \S \ref{sec:2D_chj}.
+an extensive set of experiments for this problem in \S \ref{sec:2D_chj}.
 We consider not only Roe's, Rusanov's and the blended solvers, but also the HLLE solver and a solver proposed in \cite{kemm2014note},
 which is designed to remove the carbuncle instabilities in the shallow water equations.
 
 \subsection{Dam break problem on a dry bed}\label{sec:rp_dry_bed}
 We start with the one-dimensional dam break problem on a dry bed.
 This problem is a canonical example that demonstrates the `entropy glitch' of Roe's solver
-at transonic rarefactions. Since the baseline Roe's solver we use (see \S\ref{sec:roe}) does not contain
+at transonic rarefactions. Since the baseline Roe solver we use (see \S\ref{sec:roe}) does not contain
 an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch.
 We follow the setup in \cite[\S 4.1.2]{delestre2013swashes}.
 The domain is given by $\Omega=(0,L=10)$, and the initial condition is $hu(x,0)=0$ and
@@ -700,8 +705,8 @@ The exact solution, which can also be found in \cite{delestre2013swashes} and re
   \end{cases}
 \end{align*}
 with $x_A(t)=x_0-t\sqrt{gh_l}$ and $x_B(t)=x_0+2t\sqrt{gh_l}$.
-We use $g=1$ and solve the problem up to $t=10$.
-In figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
+We take $g=1$ and solve the problem up to $t=10$.
+In Figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
 we show the solution using method \eqref{first-order_via_fluct}
 with Roe's solver, Rusanov's solver and the blended solver, respectively.
 The entropy glitch, which is manifested as a non-physical shock at $x=x_0$,
@@ -738,7 +743,7 @@ Finally, let us demonstrate the effect of $\lambda_{i\pm 1/2}^{\min}$ by imposin
 which is equivalent to using Roe's solver with extra dissipation given by $\lambda_{i\pm 1/2}^{\min}$.
 In Figure \ref{fig:rp_dry_bed_roe_with_lmin}, we show the solution using different refinements,
 and in the last column of Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
-Note that the entropy glitch is highly reduced.
+Note that the entropy glitch is greatly reduced.
 To remove completely the entropy glitch we could add high-order entropy dissipation following \cite{tadmor2003entropy}
 and references therein.
 
@@ -803,7 +808,7 @@ with Roe's, Rusanov's and the blended solvers. The solution with different refin
 and each Riemann solver is shown in Figure \ref{fig:rp_wet_bed}.
 In Table \ref{table:rp_wet_bed}, we summarize the results of a convergence test.
 Since the solution is non-smooth, we expect no more than first order convergence rates. Note that the
-results with the entropy dissipative blended solver are comparable against the results using Roe's solver.
+results with the entropy dissipative blended solver are comparable to the results using Roe's solver.
 That is, inducing entropy dissipation via the blended Riemann solver does not degrade the high-order
 accuracy properties of Roe's solver.
 In contrast, the accuracy and convergence rates using Rusanov's solver are clearly degraded.
@@ -917,16 +922,19 @@ The domain is given by $\Omega=(0.1,1)$, the initial condition is
 $h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
 and the right boundary condition is set to outflow.
 We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition.
-If the flow is supercritical ($|\Fr|>1$ where $\Fr$ is the Froude number), the exact solution converges to a
-steady state profile given by the solution of \eqref{steady}.
-Depending on the initial condition, shocks might develop before the steady state is reached.
-Nevertheless, the steady state profile is smooth.
+Regardless of the initial condition, the exact solution converges to a
+steady state profile given by one of the two solutions of \eqref{steady},
+corresponding to subcritical or supercritical flow.  In the present case we
+have imposed a supercritical inflow.
 In Figure \ref{fig:steady_outflow}, we show the solution and $\theta_i$ at different times using
 the second-order method \eqref{second-order_via_fluct}
-with Roe's, Rusanov's and the blended Riemann solvers.
+with Roe's, Rusanov's and the blended Riemann solvers.  
 Additionally, in Table \ref{table:steady_outflow}, we summarize the results of a convergence study
 based on methods \eqref{first-order_via_fluct} and
 \eqref{second-order_via_fluct}, using the same Riemann solvers.
+Although the chosen initial
+condition leads to shock formation, the steady state is smooth and close to
+second order convergence is observed for the Roe and blended solvers.
 
 \begin{figure}[!h]
   {\scriptsize
@@ -977,7 +985,50 @@ based on methods \eqref{first-order_via_fluct} and
   \end{center}
 \end{table}
 
-\subsection{Steady shock around a cylinder}\label{sec:bow_shock}
+\subsection{Flow past a cylinder}\label{sec:bow_shock}
+In this section we consider the formation of a bow shock when a
+uniform flow encounters a cylindrical obstacle.  This problem has
+been studied previously in the context of carbuncle formation in
+several works for the Euler equations and in
+\cite{kemm2014note,bader2014carbuncle} for the shallow water equations.
+We present results for existing solvers as a form of verification,
+along with results for the new blended solver.  The main question of
+interest is the formation of carbuncles.  It is known, for instance,
+that the Roe solver incorrectly generates a carbuncle at the center
+of the bow shock.
+
+We model only the flow on the upstream side of the cylinder, since
+our interest is in the resolution of the bow shock.  We take the domain
+$[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
+Reflecting boundary conditions are imposed at the surface of the cylinder,
+along with outflow conditions along the rest of the right edge of the domain.
+The depth and velocity are set initially and (for all time) at the other
+boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
+uniform Cartesian grid.
+
+We show results at $t=80$, after the flow has reached
+a steady state.  With a Roe solver, negative values are generated at an early
+time, leading to failure of the solver.  Therefore, we show results only for
+HLLE, HLLEMCC, and the blended solver.  These three methods give very similar
+results.
+
+\begin{figure}[!h]
+  {\scriptsize
+    \subfloat[HLLE Solver.]{\includegraphics[scale=0.4]{figures/cylinder_HLLE.png}}
+    \quad \quad \quad \quad \quad \quad
+    \subfloat[HLLEMCC Solver.]{\includegraphics[scale=0.4]{figures/cylinder_HLLEMCC.png}}
+    \quad \quad \quad \quad \quad \quad
+    \subfloat[Blended solver.]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
+  }
+  \caption{
+    Flow past a cylinder.  Results for HLLE, HLLEMCC, and the blended solver.
+    \label{fig:cylinder_flow}}
+\end{figure}
+
+We have also conducted a more challenging version of this test, in which
+the velocity within the domain is initially zero.  In that case, the HLLE
+and blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
+but HLLEMCC exhibits a carbuncle.
 
 \section{Numerical study of the circular hydraulic jump}
 
@@ -1043,10 +1094,11 @@ of CHJ stability.
 
 
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
-Let us finally consider the numerical experiments for the CHJ in two-dimensions.
+Let us finally consider the numerical experiments for the CHJ in two dimensions.
 The domain is given by the annulus $\Omega=\{(x,y)~|~ 0.1\leq\sqrt{x^2+y^2}\leq 1\}$.
-The computational mesh is a logically quadrilateral mesh, see Figure \ref{fig:mesh_chj}.
-For all the experiments in this section, the mesh consists of $10^6$ cells. 
+The computational mesh is logically quadrilateral, of the type shown in Figure \ref{fig:mesh_chj}.
+For all the experiments in this section, we use a mesh with 1000 cells in each (radial
+and angular) direction.
 Let
 \begin{align*}
   \partial\Omega_I:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=0.1\}, \qquad \mbox{ and } \qquad
@@ -1067,23 +1119,23 @@ The boundary conditions are
 \end{subequations}
 where $h_I=0.3$, $r_I=0.1$, $r_o=1$ and $\beta=r_Ih_I|\bfu_I|$.
 We choose $|\bfu_I|$ and $h_o$ to generate a radially symmetric shock at $r_s:=\sqrt{x^2+y^2}=0.3$, as described in \S \ref{sec:steady_chj}.
-By selecting the boundary conditions $|\bfu_I|$ and $h_o$ we can move through different regimes.
-In particular, we consider two cases.
-For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
-In this case, the CHJ appears to be nearly stable.
-However, using Roe's solver leads to the formation of carbuncle instabilities.
-%
-The second regime is a more aggresive regime with a Froude number of $\Fr\approx 27.3861$ at the inflow boundary. 
-In this regime, using Roe's solver also leads to carbuncle instabilities. In addition, 
-due to the large Froude number, random perturbations might trigger physical instabilities. 
-If the random perturbations model or mimic real disturbances in a physical experiment, it is then
-desirable to properly simulate the unstable behavior of the flow without developing carbuncle instabilities. 
-Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
-solution that could lead to physical instabilities. 
-For this reason, we believe this problem is more challenging than the standard bow shock problem.
+By adjusting the boundary conditions $|\bfu_I|$ and $h_o$ we can study different flow regimes.
+We focus on two cases.
+%For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
+%In this case, the CHJ appears to be nearly stable.
+%However, using Roe's solver leads to the formation of carbuncle instabilities.
+%%
+%The second regime is a more aggresive regime with a Froude number of $\Fr\approx 27.3861$ at the inflow boundary. 
+%In this regime, using Roe's solver also leads to carbuncle instabilities. In addition, 
+%due to the large Froude number, random perturbations may trigger physical instabilities. 
+%If the random perturbations model or mimic real disturbances in a physical experiment, it is then
+%desirable to properly simulate the unstable behavior of the flow without developing carbuncle instabilities. 
+%Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
+%solution that could lead to physical instabilities. 
+%For this reason, we believe this problem is more challenging than the standard bow shock problem.
 
 For most of the experiments we show a Schlieren plot for the water height.
-That is, we plot $||\nabla h||_{\ell^2}$ with a white-to-black logarithm based colormap.
+That is, we plot $||\nabla h||_{\ell^2}$ with a greyscale logarithmic colormap.
 For some experiments we also plot the magnitude of the momentum $|h\bfu|=h\sqrt{u^2+v^2}$.
 
 \begin{figure}[!h]
@@ -1103,10 +1155,11 @@ The initial condition is a symmetric CHJ located at $\sqrt{x^2+y^2}=0.3$, genera
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
 The solution clearly develops carbuncle instabilities.
-We could fix these instabilities using Rusanov's, Kemm's or the blended Riemann solvers. 
-In Figure \ref{fig:chj_r1_diff}, we show the corresponding solutions at $t=3$.
-For this test case, all carbuncle free solvers give qualitatively similar solutions;
-however, we expect Rusanov's solver to be less accurate. 
+In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
+Rusanov's, Kemm's, and the blended Riemann solver.
+For this test case, these three solvers give qualitatively similar solutions,
+all of which are free from carbuncles.
+%however, we expect Rusanov's solver to be less accurate. 
 
 \begin{figure}[!h]
   \centering
@@ -1138,14 +1191,14 @@ We now consider a more aggresive regime. The boundary conditions are given by \e
 \begin{align}\label{bcs_chj_r2}
   |\bfu_I|=15, \qquad h_o=6.6845019298155357.
 \end{align}
-Similar than before, we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
+Again we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
 $\sqrt{x^2+y^2}=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
-\eqref{second-order_via_fluct} with Roe's Riemann solver. Just like before, the solution develops
-carbuncle instabilities. Let us now use Rusanov's, Kemm's and the blended solvers to fix the
-carbuncle instabilities. In Figure \ref{fig:chj_r2_diff}, we show the corresponding solutions at $t=0.1$.
+\eqref{second-order_via_fluct} with Roe's Riemann solver. Again the solution develops
+carbuncle instabilities.  In Figure \ref{fig:chj_r2_diff}, we 
+see that with Rusanov's, Kemm's and the blended solver, the carbuncles are avoided.
 {\color{red} TODO: finish this part depending on the results with Kemm's solver.}
 %
-Opposed to what we observed in the first test case, in this situation the Froude number is
+In contrast to what we observed in the first test case, in this situation the Froude number is
 high enough that numerical perturbations start to trigger a response around the CHJ
 (see the middle and right panels of Figure \ref{fig:chj_r2_diff}).
 For the resolution that we consider, this behavior is dissipated by the extra numerical viscosity introduced by
@@ -1199,9 +1252,7 @@ Clearly, using Rusanov's solver dissipates the physical response to these numeri
 
 \subsubsection{Regime II with random perturbations}
 Finally, we introduce a physical random perturbation to the inflow boundary condition.
-Let $\epsilon(x,y,t)\in[-0.01,0.01]$ be a random number for a given location $(x,y)$,
-at a given time $t$. 
-The inflow boundary condition is now given by
+We use the same mean values \eqref{bcs_chj_r2}, but now we set
 \begin{subequations}
   \begin{align}
     h(x,y,t)=\tilde h_I, \quad
@@ -1210,12 +1261,10 @@ The inflow boundary condition is now given by
   \end{align}
 \end{subequations}
 with $\tilde h_I = \frac{h_I}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_I|=|\bfu_I|(1+\epsilon(x,y,t))$.
-Here, just as before, $h_I=0.3$ and $|\bfu_I|=15$. 
-Note that $\beta=r_I\tilde h|\tilde\bfu_I|=r_Ih_I\bfu_I$.
-The outflow boundary condition is given by
-\eqref{bcs_chj_outflow} with $h_o=6.6845019298155357$.
+Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
+time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
 In this case, due to the large Froude number, the random perturbations in the inflow
-might trigger physical instabilities, which we want to preserve. At the same time, we
+may trigger physical instabilities, which we want to preserve. At the same time, we
 do not want the solution to develop carbuncle instabilities.
 In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
 at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
