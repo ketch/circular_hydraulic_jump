@@ -225,12 +225,15 @@ the first-order method obtained by setting the correction fluxes to zero:
 \begin{align}\label{first-order_via_fluct}
   Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
 \end{align}
-which, for the conservative Riemann solvers we use herein, can also be written
-as a first-order flux-differencing scheme:
-\begin{align}\label{first-order_FV}
-  Q_i^{n+1}=Q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right],
+We note that, for the conservative Riemann solvers we use herein, the LWL scheme
+\eqref{second-order_via_fluct} can also be written purely in flux-differencing
+form:
+\begin{align}\label{flux-differencing-form}
+  Q_i^{n+1}=Q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right]
+ -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
 \end{align}
-where $\bfF_{i+1/2}$ is a numerical approximation of the flux at $x_\iph$.
+with appropriately chosen first order fluxes $\bfF_{i+1/2}$ and correction
+fluxes $\tilde{F}_{i-1/2}$.
 
 Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
 Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
@@ -335,13 +338,12 @@ Roe Riemann solver are prone to exhibit the carbuncle instability.
 In contrast, methods that use a Rusanov Riemann solver exhibit no carbuncles. 
 However, such methods tend to dissipate other important physical features of
 the solution, unless the grid is highly refined.
-Our main objective is to study the CHJ and to propose a Riemann solver
-that is carbuncle-free but does not dissipate important features of the solution.
-To do that we propose a Riemann solver that blends Rusanov's and Roe's solvers.
-Our blending criterion is based on the residual of the entropy (in)equality,
-which induces dissipation of entropy near discontinuities.
-Blending these Riemann solvers has been proposed before
-to solve the Euler equations (see
+In this section we propose a Riemann solver
+that is carbuncle-free but avoids dissipating important features of the solution.
+To do so we first use a combination of Rusanov's and Roe's solvers, switching
+between them based on a local measure of the entropy residual.
+Previous works have also proposed blending Riemann solvers with different
+amounts of dissipation in the context of the Euler equations (see
 \cite{nishikawa2008very,wang2016developing,jaisankar2007diffusion,ohwada2018simple,deng2019new,ray2013entropy}),
 the shallow water equations (see \cite{bader2014carbuncle,kemm2014note}),
 and even the Navier-Stokes equations (see \cite{nishikawa2008very,ohwada2018simple}).
@@ -349,14 +351,44 @@ Our approach differs from those just cited in that it is based on the local entr
 for a related approach in the context of the Euler equations, see
 \cite{ismail2009affordable,ismail2009proposed}.
 
-It is important to recognize also that it is not correct to simply suppress
-the carbuncle phenomenon in all situations, since it is related to a physical
-instability in the Euler equations; see \cite{moschetta2001carbuncle,elling2009carbuncle}.
-A test problem was contrived in \cite{elling2009carbuncle} to illustrate this.
-In the present work, we provide a test problem that possesses a genuine instability
-that leads to carbuncles in many numerical approximations.  This is an ideal
-test for assessing numerical methods, since neither the presence of carbuncles
-nor the complete absence of instability represents the correct behavior.
+Since Roe's solver is not entropy stable, the blended solver is also
+not guaranteed to be entropy stable.  We therefore include an additional term
+that is chosen to give entropy stability, at least if the second-order correction
+fluxes are neglected.  The complete proposed scheme can be written in
+flux-differencing form 
+We propose
+a new scheme consisting of the second-order LWL method \eqref{flux-differencing-form} using
+the first-order fluxes
+\begin{align} \label{blended-flux-1}
+  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i})
+\end{align}
+and correction fluxes \eqref{correction-fluxes} based on the Roe waves and
+the modified speeds
+\begin{align} \label{s_p}
+    s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
+\end{align}
+with
+\begin{align}\label{lambda_p}
+  \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p| + \lambda_\iph^{\min}.
+\end{align}
+Here $\mathbb{I}\in\mathbb{R}^{3\times 3}$ is the identity matrix,
+$\lambda_{i+1/2}^{\max}$ is the
+upper bound on the wave speed used in Rusanov's Riemann solver (see \S \ref{sec:rusanov}),
+and $\hat A_{i+1/2}$ is Roe's averaged flux Jacobian (see \S \ref{sec:roe}).
+
+In the following sections we describe the properties of this solver and
+explain how $\theta_\iph$ and $\lambda^{\min}_\iph$ are chosen.
+
+
+%It is important to recognize also that it is not correct to simply suppress
+%the carbuncle phenomenon in all situations, since it is related to a physical
+%instability in the Euler equations; see \cite{moschetta2001carbuncle,elling2009carbuncle}.
+%A test problem was contrived in \cite{elling2009carbuncle} to illustrate this.
+%In the present work, we provide a test problem that possesses a genuine instability
+%that leads to carbuncles in many numerical approximations.  This is an ideal
+%test for assessing numerical methods, since neither the presence of carbuncles
+%nor the complete absence of instability represents the correct behavior.
 
 %We close this section by remarking that the fluctuations associated with Rusanov's solver
 %can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
@@ -453,80 +485,42 @@ In our implementation, we use
   +\left|\int_{S_i}\nabla\cdot\entflux(\bfq)d\bfx\right|,
 \end{align*}
 where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
-dimensions. In the next section, we use $\theta_i$ to blend Rusanov's and Roe's Riemann solvers.
+dimensions.  In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
+which we use
+$$
+    \theta_\iph = \max(\theta_i, \theta_{i+1}).
+$$
+We expect that $\theta_\iph\approx 0 $ in smooth regions,
+while $\theta_\iph\approx 1$ near shocks.
+The value of $\theta_\iph$ controls whether the first-order flux \eqref{blended-flux-1}
+behaves more like that of Rusanov or Roe.  Specifically, if
+$\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, the flux is equivalent to that of
+Rusanov, while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, it is equivalent
+to that of Roe.  
 
-\subsection{Blended Riemann solver}\label{sec:blended_rs}
-In what follows, we use $\W^{p,\Rus}$ to denote the waves in the Rusanov
-solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.  We propose
-a new scheme consisting of the second-order LWL method \eqref{second-order_via_fluct} using
-the first-order fluxes
-\begin{align}
-  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
-  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i})
-\end{align}
-and correction fluxes \eqref{correction-fluxes} where
-\begin{align} \label{s_p}
-    s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
-\end{align}
-with
-\begin{align}\label{lambda_p}
-  \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p| + \lambda_\iph^{\min}.
-\end{align}
-The term $\lambda_\iph^{\min}$ is used to ensure that the scheme would be entropy stable
-if the second-order corrections were neglected.  The normalized entropy
-residual $\theta$ controls whether the scheme behaves more like that of Rusanov
-or Roe.  Specifically, if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, this scheme
-is equivalent to that of Rusanov, while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, 
-this scheme is equivalent to that of Roe.
+In fact, with the choice \eqref{s_p}, the correction fluxes also match
+those of Rusanov or Roe in the appropriate limit, as shown in the next section.
 
-In this section, we use \eqref{Ri}, which is a normalized measurement of the entropy residual \eqref{ent_residual},
-to blend Rusanov's and Roe's Riemann solvers. To do this, we define the blended numerical flux:
-\begin{align}\label{num_flux_ev}
-  F_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
-  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max} I + (1-\theta_{i+1/2})|\hat A_{i+1/2}| \right)(\bfq_{i+1}-\bfq_{i}).
-\end{align}
-Here $I\in\mathbb{R}^{3\times 3}$ is the identity matrix,
-$\theta_{i+1/2}=\max\{\theta_{i+1},\theta_i\}$, $\lambda_{i+1/2}^{\max}$ is the
-upper bound on the wave speed used in Rusanov's Riemann solver (see \S \ref{sec:rusanov}),
-and $\hat A_{i+1/2}$ is Roe's averaged flux Jacobian (see \S \ref{sec:roe}).
-This flux is equal to the Rusanov flux if $\theta_\iph=0$ and the Roe flux if $\theta_\iph=1$.
-We expect that $\theta_\iph\approx 0 $ in smooth regions, while $\theta_\iph\approx 1$ near
-shocks.
-
-%The first-order method is given simply by \eqref{first-order_FV}
-%with the numerical flux $F_{i+1/2}$ given by \eqref{num_flux_ev}.
-
-The first-order method can also be written in terms of fluctuations via \eqref{first-order_via_fluct}.
-To do this we define the blended wave speed
-\begin{align}\label{lambda_p}
-  \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p|,
-\end{align}
-where $\hat\lambda_{i+1/2}^p$ is the $p$-th eigenvalue of Roe's solver corresponding to the
-interface $i+1/2$. Note that $\lambda_{i+1/2}^p\geq 0$.
-The fluctuations are then given by
+\subsection{The correction fluxes}\label{sec:blended_rs}
+In this section we explain the choice of wave speeds \eqref{s_p}.
+For the moment, we consider \eqref{blended-flux-1}-\eqref{lambda_p} without
+entropy stabilization; i.e. we set $\lambda^{\min}_\iph=0$
+for now.
+We use $\W^{p,\Rus}$ to denote the waves in the Rusanov
+solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.
+The first-order method given by \eqref{blended-flux-1} can also be written in
+terms of fluctuations via \eqref{first-order_via_fluct}:
 \begin{subequations}\label{ev_fluctuations}
 \begin{align}
   \apdq_\imh & = \frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^{p,\Roe}, \\
   \amdq_\iph & = \frac{1}{2}\sum_p \left(\hat\lambda_{i+1/2}^p - \lambda_{i+1/2}^p\right)\W_{i+1/2}^{p,\Roe}.
 \end{align}
 \end{subequations}
-These can be used in \eqref{first-order_via_fluct} to obtain a first-order scheme.
 To implement the correction fluxes required for the second-order scheme \eqref{second-order_via_fluct},
 we must also define a set of waves and corresponding speeds.
 Using only the waves from the Roe solver, it is in general not possible
-to choose speeds that yield the fluctuations \eqref{ev_fluctuations}.
-%In the framework of LeVeque, for a given interface $i+1/2$,
-%we would need to consider a wave speed $s_{i+1/2}^p$ so that
-%\begin{align*}
-%  \hat \lambda_{i+1/2}^p+\lambda_{i+1/2}^p = s_{i+1/2}^p+|s_{i+1/2}^p|, \qquad
-%  \hat \lambda_{i+1/2}^p-\lambda_{i+1/2}^p = s_{i+1/2}^p-|s_{i+1/2}^p|,
-%\end{align*}
-%which is not possible to obtain in general (since the problem is overdetermined).
-Instead, we set
-\begin{align} \label{s_p}
-    s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
-\end{align}
-where $\sgn(z)$ is the sign function of $z$.
+to choose speeds that yield the fluctuations \eqref{ev_fluctuations},
+and we instead use \eqref{s_p}.
 Using this in \eqref{correction-fluxes} and \eqref{ev_fluctuations} in 
 \eqref{second-order_via_fluct}, we obtain (in the absence of limiting)
 the second-order scheme
@@ -538,10 +532,10 @@ the second-order scheme
   +
   \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^p\right],
 \end{align*}
-Note that if $\theta_{i\pm 1/2}=0$ we recover the standard second-order Lax-Wendroff method based on
-Roe's Riemann solver.
-Similarly, if $\theta_{i\pm 1/2}=1$, we recover the Lax-Wendroff method based on Rusanov's Riemann solver,
-which can be seen by writing the fluctuations in Rusanov's method in terms of Roe's waves and speeds.
+It is clear again that if $\theta_{i\pm 1/2}=0$ we recover the standard
+second-order Lax-Wendroff method based on Roe's Riemann solver.
+We now show that if $\theta_{i\pm 1/2}=1$, we recover the Lax-Wendroff method
+based on Rusanov's Riemann solver.
 
 To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctuation as follows:
 \begin{align}\label{rus_rs_aux}
@@ -570,13 +564,11 @@ and similarly,
 \end{subequations}
 
 
-\subsection{Entropy-stable Riemann solver}\label{sec:entropy_stable}
-The Riemann solver presented in the previous section blends the solvers of Rusanov and Roe based on a
-local measurement of the entropy residual. The objective is to induce dissipation of entropy
-near discontinuities. However, we have no guarantee that methods \eqref{first-order_via_fluct}
-or \eqref{second-order_via_fluct} based on this Riemann solver are (locally) entropy stable.
-In this section, we further modify the first-order method
-\eqref{first-order_via_fluct} in order to guarantee local entropy stability.
+\subsection{Entropy stabilization}\label{sec:entropy_stable}
+In the previous section we neglected the term $\lambda^{\min}_\iph$ in
+\eqref{blended-flux-1}.  In this section, we show how this term is computed,
+in order to guarantee local entropy stability of the scheme given by \eqref{blended-flux-1}
+when the correction fluxes are neglected.
 
 Let $\entvar_i=\entvar(\bfq_i)$ and $\entflux_i=\entflux(\bfq_i)$ denote the entropy variable and the
 (one-dimensional) entropy flux at cell $i$, respectively.
@@ -597,25 +589,11 @@ where
 \end{align*}
 is the discrete entropy flux.
 
-To enforce \eqref{es_cond} we further modify the flux \eqref{num_flux_ev}:
-\begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
-  - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i}).
-\end{align*}
-Here $\lambda_{i+1/2}^{\min}$ is yet to be defined.
-We can write the numerical fluxes in terms of $\lambda^p_{i\pm 1/2}$ \eqref{lambda_p}
-and Roe's waves $\W_{i\pm 1/2}^p$.
-Doing so, we get
-\begin{align*}
-  \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
-  - \frac{1}{2}\sum_p(\lambda_{i+1/2}^p+\lambda_{i+1/2}^{\min})\W_{i+1/2}^p.
-\end{align*}
-
-We set
+After comparing \eqref{blended-flux-1} and the condition above, we arrive at the value
 \begin{align}\label{lambda_min}
-  \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\efp_{i+1}-\efp_i)}{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}
+  \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\efp_{i+1}-\efp_i)}{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}.
 \end{align}
-which guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
+With this choice, \eqref{blended-flux-1} guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
 
 Since the blended Riemann solver described in Section \ref{sec:blended_rs} already
 tends to introduce entropy dissipation,
@@ -689,15 +667,16 @@ This problem is a canonical example that demonstrates the `entropy glitch' of Ro
 at transonic rarefactions. Since the baseline Roe solver we use (see \S\ref{sec:roe}) does not contain
 an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch.
 We follow the setup in \cite[\S 4.1.2]{delestre2013swashes}.
-The domain is given by $\Omega=(0,L=10)$, and the initial condition is $hu(x,0)=0$ and
+The domain is given by $x\in(0,10)$, and the initial condition is $hu(x,0)=0$ and
 \begin{align*}
   h(x,0)=
   \begin{cases}
-    h_l, & \mbox{ if }, x\leq x_0=5 \\
-    h_r, &\mbox{ otherwise},
+    h_l & x\leq x_0=5 \\
+    0 & x >5,
   \end{cases}
 \end{align*}
-with $h_l=5\times 10^{-3}$ and $h_r=0$. In our experiments we use $h_r=1\times 10^{-15}$ to avoid division by zero.
+with $x_0=5$ and $h_l=5\times 10^{-3}$.  In our experiments we use $h_r=1\times
+10^{-15}$ to avoid division by zero.
 The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is
 \begin{align*}
   h(x,t) =
@@ -709,12 +688,12 @@ The exact solution, which can also be found in \cite{delestre2013swashes} and re
 \quad
   u(x,t) =
   \begin{cases}
-    0, &\mbox{ if } x\leq x_A(t), \\
-    \frac{2}{3}\left(\sqrt{gh_l}+\frac{x-x_0}{t}\right), & \mbox{ if } x_A(t) < x\leq x_B(t), \\
-    0, &\mbox{ if } x_B(t)\leq x,
+    0, &\mbox{ if } x\leq x_-(t), \\
+    \frac{2}{3}\left(\sqrt{gh_l}+\frac{x-x_0}{t}\right), & \mbox{ if } x_-(t) < x\leq x_+(t), \\
+    0, &\mbox{ if } x_+(t)\leq x,
   \end{cases}
 \end{align*}
-with $x_A(t)=x_0-t\sqrt{gh_l}$ and $x_B(t)=x_0+2t\sqrt{gh_l}$.
+with $x_\pm(t)=x_0 \pm t\sqrt{gh_l}$.
 We take $g=1$ and solve the problem up to $t=10$.
 In Figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
 we show the solution using method \eqref{first-order_via_fluct}
@@ -747,13 +726,14 @@ Note that using the blended solver leads to more accurate results.
     \label{fig:rp_dry_bed}}
 \end{figure}
 
-For this particular problem, using method \eqref{first-order_via_fluct} with the blended Riemann solver
-leads to $\lambda_{i\pm 1/2}^{\min}=0$ for all the experiments, but this is not true in general.
-Finally, let us demonstrate the effect of $\lambda_{i\pm 1/2}^{\min}$ by imposing $\theta_{i}=0$ in \eqref{lambda_p},
+For this particular problem, using method \eqref{first-order_via_fluct} with
+the blended Riemann solver leads to $\lambda_{i\pm 1/2}^{\min}=0$ for all the experiments.
+We can artificially activate the entropy stabilization by imposing $\theta_{i}=0$ in \eqref{lambda_p},
 which is equivalent to using Roe's solver with extra dissipation given by $\lambda_{i\pm 1/2}^{\min}$.
-In Figure \ref{fig:rp_dry_bed_roe_with_lmin}, we show the solution using different refinements,
-and in the last column of Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
-Note that the entropy glitch is greatly reduced.
+In Figure \ref{fig:rp_dry_bed_roe_with_lmin} we show the solution,
+and in the last column of Table \ref{table:rp_dry_bed} we summarize the results of a convergence test.
+The entropy glitch is still noticeable but greatly reduced compared to the
+solution from Roe's method without entropy stabilization.
 To remove completely the entropy glitch we could add high-order entropy dissipation following \cite{tadmor2003entropy}
 and references therein.
 
@@ -780,18 +760,17 @@ and references therein.
 \subsection{Dam break problem on a wet bed}\label{sec:rp_wet_bed}
 We consider now a one-dimensional dam break problem on a wet domain.
 We follow the setup in \cite[\S 4.1.1]{delestre2013swashes}.
-The domain is $\Omega=(0,L)$ with $L=10$, the initial condition is given by
+The domain is $x\in(0,10)$ and the initial condition is given by
 $hu(x,0)=0$ and
 \begin{align*}
   h(x,0) =
   \begin{cases}
-    h_l & \mbox{ if } x\in(0,x_0], \\
-    h_r & \mbox{ if } x\in(x_0,L),
+    h_l & x < x_0 \\
+    h_r & x > x_0
   \end{cases}
 \end{align*}
-with $x_0=5$, $h_l=0.005$ and $h_r=0.001$.
-The exact solution, which can be found in \cite{delestre2013swashes} and references therein,
-is given by
+with $x_0=5$, $h_l=0.005$, and $h_r=0.001$.  The exact solution, which can be found in
+\cite{delestre2013swashes} and references therein, is given by
 \begin{align*}
   h(x,t) =
   \begin{cases}
@@ -813,13 +792,14 @@ where $x_A(t)=x_0-t\sqrt{gh_l}$, $x_B(t)=x_0+t\left(2\sqrt{gh_l}-3c_m\right)$,
 $x_C(t)=x_0+t\frac{2c_m^2\left(\sqrt{gh_l}-c_m\right)}{c_m^2-gh_r}$ and
 $c_m$ is the solution of
 $-8gh_rc_m^2\left(\sqrt{gh_l}-c_m\right)^2+\left(c_m^2-gh_r\right)^2\left(c_m^2+gh_r\right)=0$.
-We use $g=1$ and solve the problem up to the final time $t=5$ considering method \eqref{second-order_via_fluct}
+We use $g=1$ and solve the problem up to the final time $t=5$ using the
+second-order method \eqref{second-order_via_fluct}
 with Roe's, Rusanov's and the blended solvers. The solution with different refinement levels
 and each Riemann solver is shown in Figure \ref{fig:rp_wet_bed}.
 In Table \ref{table:rp_wet_bed}, we summarize the results of a convergence test.
 Since the solution is non-smooth, we expect no more than first order convergence rates. Note that the
 results with the entropy dissipative blended solver are comparable to the results using Roe's solver.
-That is, inducing entropy dissipation via the blended Riemann solver does not degrade the high-order
+That is, imposing entropy dissipation via the blended Riemann solver does not degrade the high-order
 accuracy properties of Roe's solver.
 In contrast, the accuracy and convergence rates using Rusanov's solver are clearly degraded.
 
@@ -927,10 +907,19 @@ In contrast, the accuracy and convergence rates using Rusanov's solver are clear
 %% \end{table}
 
 \subsection{Steady outflow}\label{sec:steady_outflow}
-Let us consider a one-dimensional problem with a constant inflow and a steady outflow.
-The domain is given by $\Omega=(0.1,1)$, the initial condition is
-$h(x,t=0)=0.1$, $hu(x,t=0)=0$, the left boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
-and the right boundary condition is set to outflow.
+Under rotational symmetry, the two-dimensional shallow water equations
+can be reduced to the system
+\begin{subequations} \label{eq:rsw}
+\begin{align}
+    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
+    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0, \label{mom1}
+\end{align}
+\end{subequations}
+where $r=\sqrt{x^2+y^2}$ is the radial coordinate.  Here we consider a problem
+in the annulus $r\in(0.1,1)$ with constant inflow at $r=0.1$ and outflow at $r=1$.
+The initial condition is
+$h(r,t=0)=0.1$, $hu(r,t=0)=0$, the inner boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
+and the outer boundary condition is set to outflow.
 We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition.
 Regardless of the initial condition, the exact solution converges to a
 steady state profile given by one of the two solutions of \eqref{steady},
@@ -943,7 +932,7 @@ Additionally, in Table \ref{table:steady_outflow}, we summarize the results of a
 based on methods \eqref{first-order_via_fluct} and
 \eqref{second-order_via_fluct}, using the same Riemann solvers.
 Although the chosen initial
-condition leads to shock formation, the steady state is smooth and close to
+condition leads initially to shock formation, the steady state is smooth and close to
 second order convergence is observed for the Roe and blended solvers.
 
 \begin{figure}[!h]
@@ -965,7 +954,7 @@ second order convergence is observed for the Roe and blended solvers.
     Steady outflow problem using method \eqref{second-order_via_fluct} with
     (cyan) Roe's, (red) Rusanov's and (dashed blue) the blended Riemann solvers.
     In the second row we plot $\theta_i$, which is given by \eqref{Ri}.
-    In all simulations we consider $\Delta x=1/400$.
+    In all simulations we take $\Delta x=1/400$.
     \label{fig:steady_outflow}}
 \end{figure}
 
@@ -1052,12 +1041,7 @@ where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
 and prescribed outflow at $r=r_\infty$.
 The domain and boundary conditions are rotationally symmetric.
 By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
-\begin{subequations} \label{eq:rsw}
-\begin{align}
-    (rh)_t + (rhu)_r & = 0 \label{mass1} \\
-    (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r = 0. \label{mom1}
-\end{align}
-\end{subequations}
+\eqref{eq:rsw},
 where the depth $h$ and radial velocity $u$ are functions of the single spatial coordinate $r$.
 Steady-state solutions of \eqref{eq:rsw} satisfy
 \begin{subequations}\label{steady}
