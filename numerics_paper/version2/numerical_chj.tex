@@ -33,7 +33,7 @@
 \newcommand{\bfF}{{F}}
 \newcommand{\bfu}{{u}}
 \newcommand{\entvar}{\eta'}
-\newcommand{\bfq}{{q}}
+\newcommand{\bfq}{{Q}}
 \newcommand{\bfx}{{x}}
 \newcommand{\sgn}{{\rm sgn}}
 \newcommand{\Rus}{{\rm Rus}}
@@ -225,11 +225,7 @@ fluxes that make the method second-order accurate:
   \tilde{F}_{i\pm 1/2}=\frac{1}{2}\sum_p|s_{i\pm 1/2}^p|\left(1-\frac{\Delta t}{\Delta x}|s_{i\pm 1/2}^p|\right)\tilde\W_{i\pm 1/2}^p.
 \end{align}
 Here $\tilde{\W}_{i\pm 1/2}^p$ is a TVD-limited version of $\W_{i\pm 1/2}^p$.
-We will sometimes work with
-the first-order method obtained by setting the correction fluxes to zero:
-\begin{align}\label{first-order_via_fluct}
-  Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
-\end{align}
+
 We note that, for the conservative Riemann solvers we use herein, the LWL scheme
 \eqref{second-order_via_fluct} can also be written purely in flux-differencing
 form:
@@ -239,6 +235,12 @@ form:
 \end{align}
 with appropriately chosen first order fluxes $\bfF_{i+1/2}$ and correction
 fluxes $\tilde{F}_{i-1/2}$.
+We will sometimes work with
+the first-order method obtained by setting the correction fluxes to zero:
+\begin{align}\label{first-order_via_fluct}
+  Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
+ = Q_i^n -\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right].
+\end{align}
 
 Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
 Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
@@ -510,8 +512,9 @@ entropy stabilization; i.e. we set $\lambda^{\min}_\iph=0$
 for now.
 We use $\W^{p,\Rus}$ to denote the waves in the Rusanov
 solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.
-The first-order method given by the numerical flux \eqref{blended-flux-1} can also be written in
-terms of fluctuations via \eqref{first-order_via_fluct}:
+The first-order method given by \eqref{first-order_via_fluct} with the numerical
+flux \eqref{blended-flux-1} can also be written in
+terms of fluctuations:
 \begin{subequations}\label{ev_fluctuations}
 \begin{align}
   \apdq_\imh & = \frac{1}{2}\sum_p \left(\hat\lambda_{i-1/2}^p + \lambda_{i-1/2}^p\right)\W_{i-1/2}^{p,\Roe}, \\
@@ -530,9 +533,9 @@ the second-order scheme
   q_i^{n+1}=q_i^n
   &-\frac{\Delta t}{2 \Delta x}
   \sum_p
-  \left[\left(\hat\lambda_{i+1/2}^p -\frac{\Delta t}{\Delta x}(\lambda_{i+1/2}^p)^2 \right)\W_{i+1/2}^p
+  \left[\left(\hat\lambda_{i+1/2}^p -\frac{\Delta t}{\Delta x}(\lambda_{i+1/2}^p)^2 \right)\W_{i+1/2}^{p,\Roe}
   +
-  \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^p\right],
+  \left(\hat\lambda_{i-1/2}^p +\frac{\Delta t}{\Delta x}(\lambda_{i-1/2}^p)^2 \right)\W_{i-1/2}^{p,\Roe}\right],
 \end{align*}
 It is clear again that if $\theta_{i\pm 1/2}=0$ we recover the standard
 second-order Lax-Wendroff method based on Roe's Riemann solver.
@@ -547,21 +550,21 @@ To see this, first consider \eqref{rus_cons} and rewrite the right-going fluctua
   %\A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
 \end{align}
 From \eqref{system_for_alphas} and \eqref{rusanov_waves} we get
-$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfq_i-\bfq_{i-1}=\sum_p\W_{i-1/2}^p$.
-Using \eqref{rs_conservation}, \eqref{rus_rs_aux} becomes
+$\W^{1,\Rus}_{i-1/2}+\W^{2,\Rus}_{i-1/2}=\bfq_i-\bfq_{i-1}=\sum_p\W_{i-1/2}^{p,\Roe}$.
+Using \eqref{rs_conservation} and \eqref{ev_fluctuations}, \eqref{rus_rs_aux} becomes
 \begin{align*}
   \lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus}
-  = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p
+  = \sum_p \left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^{p,\Roe}
   -\lambda_{i-1/2}^{\max}\W_{i-1/2}^{2,\Rus},
 \end{align*}
 which implies that
 \begin{subequations}\label{fluct_rus}
 \begin{align}
-  \A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^p,
+  \A^{+,\Rus}\Delta Q_{i-1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i-1/2}^p + \lambda_{i-1/2}^{\max}\right)\W_{i-1/2}^{p,\Roe},
 \end{align}
 and similarly,
 \begin{align}
-  \A^{-,\Rus}\Delta Q_{i+1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i+1/2}^p - \lambda_{i+1/2}^{\max}\right)\W_{i+1/2}^p.
+  \A^{-,\Rus}\Delta Q_{i+1/2}=\frac{1}{2}\sum_p\left(\hat \lambda_{i+1/2}^p - \lambda_{i+1/2}^{\max}\right)\W_{i+1/2}^{p,\Roe}.
 \end{align}
 \end{subequations}
 
@@ -569,8 +572,8 @@ and similarly,
 \subsection{Entropy stabilization}\label{sec:entropy_stable}
 In the previous section we neglected the term $\lambda^{\min}_\iph$ in
 \eqref{blended-flux-1}.  In this section, we show how this term is computed,
-in order to guarantee local entropy stability of the scheme given by \eqref{blended-flux-1}
-when the correction fluxes are neglected.
+in order to guarantee local entropy stability of the scheme given by using
+\eqref{blended-flux-1} in \eqref{first-order_via_fluct}.
 
 Let $\entvar_i=\entvar(\bfq_i)$ and $\entflux_i=\entflux(\bfq_i)$ denote the entropy variable and the
 (one-dimensional) entropy flux at cell $i$, respectively.
@@ -596,6 +599,11 @@ After comparing \eqref{blended-flux-1} and the condition above, we arrive at the
   \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\efp_{i+1}-\efp_i)}{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}.
 \end{align}
 With this choice, \eqref{blended-flux-1} guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
+Note that here we have used the identities
+\begin{align*}
+|\hat{A}_\iph|(Q_{i+1}-Q_i) & = \sum_p |\hat{\lambda}^p_\iph| \W^{p,\Roe}_\iph, & 
+Q_{i+1}-Q_i & = \sum_p \W^{p,\Roe}_\iph.
+\end{align*}
 
 Since the blended Riemann solver described in Section \ref{sec:blended_rs} already
 tends to introduce entropy dissipation,
@@ -618,7 +626,7 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
 \end{remark}
 
 \begin{remark}[About the effect of $\lambda_{i\pm 1/2}^{\min}$ for Roe's solver.]
-  If we set $\theta_{i\pm 1/2}=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes Roe's solver.
+  If we set $\theta_{i\pm 1/2}=0$ and $\lambda^{\min}_\iph=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes Roe's solver.
   In this case, it is well known that transonic rarefactions develop non-physical shocks,
   a phenomenon known as `entropy glitch'. To fix this problem, many entropy fixes to Roe's
   solver have been developed. Enhancing the dissipation via \eqref{lambda_min}
