@@ -110,6 +110,11 @@ the carbuncle.  This allows us to distinguish schemes that yield correct
 behavior from both those that are too dissipative and those that generate
 carbuncles.
 
+In the present work, we provide a test problem that possesses a genuine instability
+that leads to carbuncles in many numerical approximations.  This is an ideal
+test for assessing numerical methods, since neither the presence of carbuncles
+nor the complete absence of instability represents the correct behavior.
+
 
 \subsection{The circular hydraulic jump}
 
@@ -385,10 +390,7 @@ explain how $\theta_\iph$ and $\lambda^{\min}_\iph$ are chosen.
 %the carbuncle phenomenon in all situations, since it is related to a physical
 %instability in the Euler equations; see \cite{moschetta2001carbuncle,elling2009carbuncle}.
 %A test problem was contrived in \cite{elling2009carbuncle} to illustrate this.
-%In the present work, we provide a test problem that possesses a genuine instability
-%that leads to carbuncles in many numerical approximations.  This is an ideal
-%test for assessing numerical methods, since neither the presence of carbuncles
-%nor the complete absence of instability represents the correct behavior.
+%
 
 %We close this section by remarking that the fluctuations associated with Rusanov's solver
 %can be expressed in terms of waves and speeds from Roe's solver. To see this, first consider \eqref{rus_cons}
@@ -508,7 +510,7 @@ entropy stabilization; i.e. we set $\lambda^{\min}_\iph=0$
 for now.
 We use $\W^{p,\Rus}$ to denote the waves in the Rusanov
 solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.
-The first-order method given by \eqref{blended-flux-1} can also be written in
+The first-order method given by the numerical flux \eqref{blended-flux-1} can also be written in
 terms of fluctuations via \eqref{first-order_via_fluct}:
 \begin{subequations}\label{ev_fluctuations}
 \begin{align}
@@ -672,7 +674,7 @@ The domain is given by $x\in(0,10)$, and the initial condition is $hu(x,0)=0$ an
   h(x,0)=
   \begin{cases}
     h_l & x\leq x_0=5 \\
-    0 & x >5,
+    h_r & x >5,
   \end{cases}
 \end{align*}
 with $x_0=5$ and $h_l=5\times 10^{-3}$.  In our experiments we use $h_r=1\times
@@ -693,7 +695,7 @@ The exact solution, which can also be found in \cite{delestre2013swashes} and re
     0, &\mbox{ if } x_+(t)\leq x,
   \end{cases}
 \end{align*}
-with $x_\pm(t)=x_0 \pm t\sqrt{gh_l}$.
+with $x_-(t)=x_0 - t\sqrt{gh_l}$ and $x_+=x_0+2t\sqrt{gh_l}$.
 We take $g=1$ and solve the problem up to $t=10$.
 In Figures \ref{fig:rp_dry_bed_roe}-\ref{fig:rp_dry_bed_blended},
 we show the solution using method \eqref{first-order_via_fluct}
