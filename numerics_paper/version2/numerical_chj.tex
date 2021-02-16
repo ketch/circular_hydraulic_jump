@@ -1163,7 +1163,7 @@ In this case, the boundary conditions are given by \eqref{bcs_chj} with
 The initial condition is a symmetric CHJ located at $\sqrt{x^2+y^2}=0.3$, generated as described in \S \ref{sec:steady_chj}.
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
-The solution clearly develops carbuncle instabilities.
+The solution clearly develops carbuncle instabilities, which are evident in the inset figure at $t=3$.
 In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
 Rusanov's, HLLEMCC, and the blended Riemann solvers.
 For this test case, these three solvers give qualitatively similar solutions,
@@ -1174,17 +1174,17 @@ all of which are free from carbuncles.
   \centering
   \subfloat[Solution at (left) $t=1$, (middle) $t=1.5$ and (right) $t=3$ using Roe's Riemann solver.\label{fig:chj_r1_roe}]{
     \begin{tabular}{ccc} 
-      \includegraphics[scale=0.38]{figures/chj_r1_roe_p1.png} &
-      \includegraphics[scale=0.38]{figures/chj_r1_roe_p2.png} &
-      \includegraphics[scale=0.38]{figures/chj_r1_roe_p3.png}
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p1.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p2.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_roe_p3.png}
     \end{tabular}
   }
   
   \subfloat[Solution at $t=3$ using (left) Rusanov's, (middle) HLLEMCC and (right) the blended solvers.\label{fig:chj_r1_diff}]{
     \begin{tabular}{ccc}
-      \includegraphics[scale=0.38]{figures/chj_r1_llf_p3.png} &
-      \includegraphics[scale=0.38]{figures/chj_r1_hllemcc_p3.png} &
-      \includegraphics[scale=0.38]{figures/chj_r1_blended_p3.png}
+      \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_hllemcc_p3.png} &
+      \includegraphics[scale=0.3]{figures/chj_r1_blended_p3.png}
     \end{tabular}
     }
     \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
@@ -1203,13 +1203,14 @@ We now consider a more aggresive regime. The boundary conditions are given by \e
 Again we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
 $\sqrt{x^2+y^2}=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
 \eqref{second-order_via_fluct} with Roe's Riemann solver. Again the solution develops
-carbuncle instabilities. For this regime, we obtained negative values for the water height with
+carbuncle instabilities, which are clearly seen in the inset figure at $t=3$.
+For this regime, we obtained negative values for the water height with
 the HLLEMCC solver, which lead to failure of the solver. Therefore, we only show results with
 Rusanov's and the blended solvers, see Figure \ref{fig:chj_r2_diff}. With both solvers, the carbuncles are avoided.
 %
 In contrast to what we observed in the first test case, in this situation the Froude number is
 high enough that numerical perturbations start to trigger a response around the CHJ
-(see the middle and right panels of Figure \ref{fig:chj_r2_diff}).
+(see the right panel of Figure \ref{fig:chj_r2_diff}).
 For the resolution that we consider, this behavior is dissipated by the extra numerical viscosity introduced by
 Rusanov's solver (see the left panel of Figure \ref{fig:chj_r2_diff}).
 In Figure \ref{fig:chj_r2_later}, we show the solution at a later time considering the same solvers as before.
@@ -1237,21 +1238,17 @@ Clearly, using Rusanov's solver dissipates the physical response to these numeri
   \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r2}. 
     We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
     In all cases we show the Schlieren plot for the water height $h$.
-    %The color scale in the plots go from (blue) $0.45$ to (red) $4.5$,
-    %which corresponds to the minimum and maximum values of the momentum at $t=0$.
-  }
+    In (a), for the plot that corresponds to $t=0.11$, we zoom close to the jump and plot the y-momentum.}
 \end{figure}
 
 \begin{figure}[!h]
   \centering
-  \subfloat[$t=5$]{
     \includegraphics[scale=0.3]{figures/chj_r2_rusanov_t5p0.png} \quad
-    \includegraphics[scale=0.5]{figures/cross.png} \quad
-    \includegraphics[scale=0.3]{figures/chj_r2_blended_t5p0.png}
-  }
+    %\includegraphics[scale=0.5]{figures/cross.png} \quad
+    \quad \includegraphics[scale=0.3]{figures/chj_r2_blended_t5p0.png}
   \caption{CHJ at $t=5$ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r2}. 
-    We consider method \eqref{second-order_via_fluct} with (left) Rusanov's,
-    (middle) HLLEMCC and (right) the blended solvers. 
+    We consider method \eqref{second-order_via_fluct} with (left) Rusanov's
+    and (right) the blended solvers. 
     In all cases we superimpose the Schlieren plot for the water height $h$
     an the magnitude of the momentum with a uniform (white-to-blue) colormap. 
     The scale for colormap is (white) $0.45$ to (blue) $4.5$, 
@@ -1277,7 +1274,11 @@ may trigger physical instabilities, which we want to preserve. At the same time,
 do not want the solution to develop carbuncle instabilities.
 In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
 at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
-the blended Riemann solvers, respectively. 
+the blended Riemann solvers, respectively.
+In the right panel of Figure \ref{fig:chj_r2wp_blended}, we show an inset figure 
+with the y-momentum. Note that even though the solution is highly unstable 
+(with the blended Riemann solver), no visible carbuncle instabilities are developed. 
+
 
 \begin{figure}[!h]
   \centering
@@ -1300,8 +1301,9 @@ the blended Riemann solvers, respectively.
     \end{tabular}
   }
   \caption{CHJ at different times with a random perturbation at the inflow boundary.
-    We consider method \eqref{second-order_via_fluct} with (a) Roe's and (b) the blended
-    Riemann solvers. In all cases we show the Schlieren plot for the water height $h$.}
+    We consider method \eqref{second-order_via_fluct} with different Riemann solvers. 
+    In all cases we show the Schlieren plot for the water height $h$.
+    In (b), for the plot that corresponds to $t=5$, we zoom close to the jump and plot the y-momentum.}
 \end{figure}
     
 %\subsection{Regime 1: midly unstable flow}
