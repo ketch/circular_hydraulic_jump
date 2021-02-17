@@ -21,7 +21,7 @@
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 
-\newcommand{\out}{\infty}
+\newcommand{\out}{\textup{out}}
 \newcommand{\jet}{{\textup{jet}}}
 \newcommand{\W}{{\mathcal W}}
 \newcommand{\A}{{\mathcal A}}
@@ -1153,7 +1153,6 @@ We focus on two cases.
 
 For most of the experiments we show a Schlieren plot for the water height.
 That is, we plot $||\nabla h||_{\ell^2}$ with a greyscale logarithmic colormap.
-For some experiments we also plot the magnitude of the momentum $|h\bfu|=h\sqrt{u^2+v^2}$.
 
 \subsubsection{Regime I ($F_\jet\approx1.37$)}
 In this case, the boundary conditions are given by \eqref{bcs_chj} with
@@ -1164,7 +1163,7 @@ The initial condition is again a circular hydraulic jump located at $r=0.3$,
 generated as described in \S \ref{sec:jumploc}.
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
-The solution clearly develops carbuncle instabilities, which are evident in the inset figure at $t=3$.
+The solution clearly develops carbuncle instabilities, which are evident in the inset figure.
 In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
 Rusanov's, HLLEMCC, and the blended Riemann solvers.
 For this test case, these three solvers give qualitatively similar solutions,
