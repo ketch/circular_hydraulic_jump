@@ -21,6 +21,8 @@
 \usepackage{algpseudocode}
 \usepackage{algorithm}
 
+\newcommand{\out}{\infty}
+\newcommand{\jet}{{\textup{jet}}}
 \newcommand{\W}{{\mathcal W}}
 \newcommand{\A}{{\mathcal A}}
 \newcommand{\apdq}{\A^+ \!\!{\Delta} Q}
@@ -323,7 +325,7 @@ and the factors $\alpha^p_\imh$ obtained by solving
   =\Delta Q_{i-1/2}:=\bfq_i-\bfq_{i-1}.
 \end{align}
 
-\subsection{HLLEMCC Riemann solver} \label{sec:kemm}
+\subsection{Kemm's Riemann solver} \label{sec:kemm}
 Several specialized Riemann solvers have been proposed in order to deal
 with carbuncles.  Among them, only that proposed by Kemm has been implemented
 and tested on the shallow water equations \cite{kemm2014note,bader2014carbuncle}.
@@ -920,21 +922,102 @@ In contrast, the accuracy and convergence rates using Rusanov's solver are clear
 %%   \end{center}
 %% \end{table}
 
-\subsection{Steady outflow}\label{sec:steady_outflow}
-Under rotational symmetry, the two-dimensional shallow water equations
-can be reduced to the system
+
+\subsection{Flow past a cylinder}\label{sec:bow_shock}
+In this section we consider the formation of a bow shock when a
+uniform flow encounters a cylindrical obstacle.  This problem has
+been studied previously in the context of carbuncle formation in
+several works for the Euler equations and in
+\cite{kemm2014note,bader2014carbuncle} for the shallow water equations.
+We present results for existing solvers as a form of verification,
+along with results for the new blended solver.  The main question of
+interest is the formation of carbuncles.  It is known, for instance,
+that the Roe solver incorrectly generates a carbuncle at the center
+of the bow shock.
+
+We model only the flow on the upstream side of the cylinder, since
+our interest is in the resolution of the bow shock.  We take the domain
+$[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
+Reflecting boundary conditions are imposed at the surface of the cylinder,
+along with outflow conditions along the rest of the right edge of the domain.
+The depth and velocity are set initially and (for all time) at the other
+boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
+uniform Cartesian grid.
+%
+In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
+a steady state.  With Roe's solver, negative values (of the water height) are generated at an early
+time, leading to failure of the solver.  Therefore, we show results only for
+Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.  These three methods give very similar
+results.
+
+\begin{figure}[!h]
+  {\scriptsize
+    %\subfloat[Rusanov's solver.]{\includegraphics[scale=0.4]{figures/cylinder_hlle.png}}
+    \subfloat[Rusanov's solver.]{\includegraphics[scale=0.4]{figures/cylinder_rusanov.png}}
+    \quad \quad \quad \quad \quad \quad
+    \subfloat[HLLEMCC solver.]{\includegraphics[scale=0.4]{figures/cylinder_hllemcc.png}}
+    \quad \quad \quad \quad \quad \quad
+    \subfloat[Blended solver.]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
+  }
+  \caption{
+    Flow past a cylinder.  Results for Rusanov's, HLLEMCC, and the blended solvers.
+    \label{fig:cylinder_flow}}
+\end{figure}
+
+We have also conducted a more challenging version of this test, in which
+the velocity within the domain is initially zero.  In that case, Rusanov's 
+and the blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
+but HLLEMCC exhibits a carbuncle.
+
+\section{Numerical study of the circular hydraulic jump}
+
+\subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
+In this section, we consider the initial boundary value problem consisting of the
+shallow water model \eqref{eq:sw} in an annular domain
+\begin{align} \label{eq:annulus}
+r_\textup{jet} \le r \le r_\infty
+\end{align}
+where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
+and prescribed outflow at $r=r_\infty$.
+The domain and boundary conditions are rotationally symmetric.
+By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
 \begin{subequations} \label{eq:rsw}
 \begin{align}
     (rh)_t + (rhu)_r &= 0, \label{mass1} \\
     (rhu)_t + (rhu^2)_r + r \left(\frac{1}{2}gh^2\right)_r &= 0, \label{mom1}
 \end{align}
 \end{subequations}
-where $r=\sqrt{x^2+y^2}$ is the radial coordinate.  Here we consider a problem
+where the depth $h$ and radial velocity $u$ are functions of $r$ and $t$.
+By direct integration one finds that steady-state solutions of
+\eqref{eq:rsw} satisfy
+\begin{subequations}\label{steady}
+\begin{align}
+    rhu & = C \\
+    h'(r) & = \frac{h(r)}{\frac{g}{\beta^2} r^3 (h(r))^3 -r} = \frac{h(r)}{r} \cdot \frac{(F(r))^2}{1-(F(r))^2} \label{eq:dh}
+\end{align}
+\end{subequations}
+for some $C$ independent of $r$.  Here $F(r)=|u(r)|/\sqrt{gh(r)}$ is the Froude number.
+We see that two types of steady profiles exist, depending on whether the flow
+is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
+include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
+
+\subsection{Numerical test: steady outflow}\label{sec:steady_outflow}
+We now test the numerical methods by using a time-dependent simulation
+to compute the steady flow solution just described, 
 in the annulus $r\in(0.1,1)$ with constant inflow at $r=0.1$ and outflow at $r=1$.
 The initial condition is
 $h(r,t=0)=0.1$, $hu(r,t=0)=0$, the inner boundary condition is $h(0.1,t)=0.3$, $hu(0.1,t)=0.75$,
-and the outer boundary condition is set to outflow.
-We refer to \cite[\S 21.8.5]{leveque2002finite} for details about the outflow boundary condition.
+and the outer boundary condition is set to outflow
+(see \cite[\S 21.8.5]{leveque2002finite} for details).
+The computational mesh is logically quadrilateral, of the type shown in
+Figure \ref{fig:mesh_chj}.
+\begin{figure}[!h]
+  \centering 
+  \includegraphics[scale=0.15]{figures/mesh.png}
+  \caption{
+    Example of a grid for the problem with the two-dimensional CHJ.
+    \label{fig:mesh_chj}}
+\end{figure}
 Regardless of the initial condition, the exact solution converges to a
 steady state profile given by one of the two solutions of \eqref{steady},
 corresponding to subcritical or supercritical flow.  In the present case we
@@ -998,78 +1081,7 @@ second order convergence is observed for the Roe and blended solvers.
   \end{center}
 \end{table}
 
-\subsection{Flow past a cylinder}\label{sec:bow_shock}
-In this section we consider the formation of a bow shock when a
-uniform flow encounters a cylindrical obstacle.  This problem has
-been studied previously in the context of carbuncle formation in
-several works for the Euler equations and in
-\cite{kemm2014note,bader2014carbuncle} for the shallow water equations.
-We present results for existing solvers as a form of verification,
-along with results for the new blended solver.  The main question of
-interest is the formation of carbuncles.  It is known, for instance,
-that the Roe solver incorrectly generates a carbuncle at the center
-of the bow shock.
-
-We model only the flow on the upstream side of the cylinder, since
-our interest is in the resolution of the bow shock.  We take the domain
-$[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
-Reflecting boundary conditions are imposed at the surface of the cylinder,
-along with outflow conditions along the rest of the right edge of the domain.
-The depth and velocity are set initially and (for all time) at the other
-boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
-uniform Cartesian grid.
-%
-In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
-a steady state.  With Roe's solver, negative values (of the water height) are generated at an early
-time, leading to failure of the solver.  Therefore, we show results only for
-Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.  These three methods give very similar
-results.
-
-\begin{figure}[!h]
-  {\scriptsize
-    %\subfloat[Rusanov's solver.]{\includegraphics[scale=0.4]{figures/cylinder_hlle.png}}
-    \subfloat[Rusanov's solver.]{\includegraphics[scale=0.4]{figures/cylinder_rusanov.png}}
-    \quad \quad \quad \quad \quad \quad
-    \subfloat[HLLEMCC solver.]{\includegraphics[scale=0.4]{figures/cylinder_hllemcc.png}}
-    \quad \quad \quad \quad \quad \quad
-    \subfloat[Blended solver.]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
-  }
-  \caption{
-    Flow past a cylinder.  Results for Rusanov's, HLLEMCC, and the blended solvers.
-    \label{fig:cylinder_flow}}
-\end{figure}
-
-We have also conducted a more challenging version of this test, in which
-the velocity within the domain is initially zero.  In that case, Rusanov's 
-and the blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
-but HLLEMCC exhibits a carbuncle.
-
-\section{Numerical study of the circular hydraulic jump}
-
-\subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
-In this section, we consider the initial boundary value problem consisting of the
-shallow water model \eqref{eq:sw} in an annular domain
-\begin{align}
-r_\textup{jet} \le r \le r_\infty
-\end{align}
-where $r = \sqrt{x^2+y^2}$, with prescribed inflow at $r=r_\textup{jet}$
-and prescribed outflow at $r=r_\infty$.
-The domain and boundary conditions are rotationally symmetric.
-By assuming rotational symmetry in \eqref{eq:sw}, one obtains the system
-\eqref{eq:rsw},
-where the depth $h$ and radial velocity $u$ are functions of the single spatial coordinate $r$.
-Steady-state solutions of \eqref{eq:rsw} satisfy
-\begin{subequations}\label{steady}
-\begin{align}
-    rhu & = C \\
-    h'(r) & = \frac{h}{\frac{g}{\beta^2} r^3 h^3 -r} = \frac{h}{r} \cdot \frac{F^2}{1-F^2} \label{eq:dh}
-\end{align}
-\end{subequations}
-for some $C$ independent of $r$.  Here $F=|u|/\sqrt{gh}$ is the Froude number.
-We see that two types of steady profiles exist, depending on whether the flow
-is subcritical ($|F|<1$) or supercritical ($|F|>1$).  No smooth steady solution can
-include both regimes, since the right hand side of \eqref{eq:dh} blows up when $F=1$.
-
+\subsection{Location of the jump} \label{sec:jumploc}
 The steady, rotationally-symmetric circular hydraulic jump involves supercritical
 flow for $r<r_0$ and subcritical flow for $r>r_0$, where $r_0$ is the jump radius.
 The jump itself takes the form of a stationary shock wave.  The Rankine-Hugoniot jump
@@ -1091,44 +1103,40 @@ Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the requir
 radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
 and subcritical at the outer boundary.
 
-Numerical tests suggest that the solution of \eqref{eq:rsw} tends rapidly approaches that
-just described under general initial conditions as long as the flow at the jet is
-supercritical and the outer outflow is subcritical.  This solution remains steady
+Numerical tests suggest that the solution of \eqref{eq:rsw} rapidly approaches that
+just described under general initial conditions as long as the inflow at the jet is
+supercritical and the outflow at $r_\infty$ is subcritical.  Subcritical outflow
+can be enforced by an appropriate outer boundary condition.  This solution remains steady
 if the rate of inflow and outflow are matched.  The stability of this solution in
 the face of non-rotationally-symmetric perturbations is an important question not
 only in the shallow water context but for more realistic fluid models and physically.
-It will play an important role in the results we present later.
+It will play an important role in the results we present below.
 The rotationally-symmetric steady state is a useful initial condition for studies
 of CHJ stability.
 
 
 \subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
 Let us finally consider the numerical experiments for the CHJ in two dimensions.
-The domain is given by the annulus $\Omega=\{(x,y)~|~ 0.1\leq\sqrt{x^2+y^2}\leq 1\}$.
-The computational mesh is logically quadrilateral, of the type shown in Figure \ref{fig:mesh_chj}.
-For all the experiments in this section, we use a mesh with 1000 cells in each (radial
-and angular) direction.
-Let
-\begin{align*}
-  \partial\Omega_I:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=0.1\}, \qquad \mbox{ and } \qquad
-  \partial\Omega_o:=\{(x,y)\in\Omega ~|~ \sqrt{x^2+y^2}=1\},
-\end{align*}
-denote the inflow and outflow boundaries, respectively. 
-The boundary conditions are 
+The domain is again given by the annulus \eqref{eq:annulus}, but now we solve
+the fully 2D shallow water equations \eqref{eq:sw}.  For all of the following
+experiments, we use a mesh with 1000 cells in each (radial and angular) direction.
+The boundary conditions at the jet and the outer boundary are given by
 \begin{subequations}\label{bcs_chj}
   \begin{align}
-  h(x,y,t)=h_I, \quad
-  u(x,y,t)=|\bfu_I| \left(\frac{x}{r_I}\right), \quad
-  v(x,y,t)=|\bfu_I| \left(\frac{y}{r_I}\right), \qquad \forall (x,y)\in\partial\Omega_I, \\
+  h(x,y,t)=h_\jet, \quad
+  u(x,y,t)=|\bfu_\jet| \left(\frac{x}{r_\jet}\right), \quad
+  v(x,y,t)=|\bfu_\jet| \left(\frac{y}{r_\jet}\right), \qquad \sqrt{x^2+y^2}=r_\jet \\
   %
-  h(x,y,t)=h_o, \quad 
-  u(x,y,t)= \frac{\beta }{r_o h}\left(\frac{x}{r_o}\right), \quad
-  v(x,y,t)= \frac{\beta }{r_o h}\left(\frac{y}{r_o}\right), \qquad \forall (x,y)\in\partial\Omega_o, \label{bcs_chj_outflow}
+  h(x,y,t)=h_\out, \quad 
+  u(x,y,t)= \frac{\beta }{r_\out h}\left(\frac{x}{r_\out}\right), \quad
+  v(x,y,t)= \frac{\beta }{r_\out h}\left(\frac{y}{r_\out}\right), \qquad \sqrt{x^2+y^2}=r_\out,
   \end{align}
 \end{subequations}
-where $h_I=0.3$, $r_I=0.1$, $r_o=1$ and $\beta=r_Ih_I|\bfu_I|$.
-We choose $|\bfu_I|$ and $h_o$ to generate a radially symmetric shock at $r_s:=\sqrt{x^2+y^2}=0.3$, as described in \S \ref{sec:steady_chj}.
-By adjusting the boundary conditions $|\bfu_I|$ and $h_o$ we can study different flow regimes.
+where $h_\jet=0.3$, $r_\jet=0.1$, $r_\out=1$ and $\beta=r_\jet h_\jet|\bfu_\jet|$.
+We choose $|\bfu_\jet|$ and $h_\out$ such that the steady roationally symmetric
+solution involves a symmetric shock at $r_s=0.3$, as described
+in \S \ref{sec:steady_chj}.
+By adjusting the boundary conditions $|\bfu_\jet|$ and $h_\out$ we can study different flow regimes.
 We focus on two cases.
 %For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
 %In this case, the CHJ appears to be nearly stable.
@@ -1147,20 +1155,13 @@ For most of the experiments we show a Schlieren plot for the water height.
 That is, we plot $||\nabla h||_{\ell^2}$ with a greyscale logarithmic colormap.
 For some experiments we also plot the magnitude of the momentum $|h\bfu|=h\sqrt{u^2+v^2}$.
 
-\begin{figure}[!h]
-  \centering 
-  \includegraphics[scale=0.15]{figures/mesh.png}
-  \caption{
-    Example of a grid for the problem with the two-dimensional CHJ.
-    \label{fig:mesh_chj}}
-\end{figure}
-
-\subsubsection{Regime I}
+\subsubsection{Regime I ($F_\jet\approx1.37$)}
 In this case, the boundary conditions are given by \eqref{bcs_chj} with
 \begin{align}\label{bcs_chj_r1}
-  |\bfu_I|=0.75, \qquad h_o=0.37387387318873766. 
+  |\bfu_\jet|=0.75, \qquad h_\out=0.37387387318873766. 
 \end{align}
-The initial condition is a symmetric CHJ located at $\sqrt{x^2+y^2}=0.3$, generated as described in \S \ref{sec:steady_chj}.
+The initial condition is again a circular hydraulic jump located at $r=0.3$,
+generated as described in \S \ref{sec:jumploc}.
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
 The solution clearly develops carbuncle instabilities, which are evident in the inset figure at $t=3$.
@@ -1172,7 +1173,9 @@ all of which are free from carbuncles.
 
 \begin{figure}[!h]
   \centering
-  \subfloat[Solution at (left) $t=1$, (middle) $t=1.5$ and (right) $t=3$ using Roe's Riemann solver.\label{fig:chj_r1_roe}]{
+  \subfloat[Solution at (left) $t=1$, (middle) $t=1.5$ and (right) $t=3$ using Roe's Riemann solver.
+    The main plots are Schlieren plots of the depth $h$, while the inset in the right
+    figure shows the magnitude of the momentum.\label{fig:chj_r1_roe}]{
     \begin{tabular}{ccc} 
       \includegraphics[scale=0.3]{figures/chj_r1_roe_p1.png} &
       \includegraphics[scale=0.3]{figures/chj_r1_roe_p2.png} &
@@ -1187,7 +1190,7 @@ all of which are free from carbuncles.
       \includegraphics[scale=0.3]{figures/chj_r1_blended_p3.png}
     \end{tabular}
     }
-    \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
+    \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
       We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
       In all cases we show the Schlieren plot for the water height $h$.
       In (a), for the plot that corresponds to $t=3$, we zoom close to the jump
@@ -1195,27 +1198,34 @@ all of which are free from carbuncles.
     \label{fig:chj_r1}}
 \end{figure}
 
-\subsubsection{Regime II}
-We now consider a more aggresive regime. The boundary conditions are given by \eqref{bcs_chj} with 
+\subsubsection{Regime II ($F_\jet\approx27.39$)}
+We now consider a higher-Froude number regime. The boundary conditions are
+given by \eqref{bcs_chj} with 
 \begin{align}\label{bcs_chj_r2}
-  |\bfu_I|=15, \qquad h_o=6.6845019298155357.
+  |\bfu_\jet|=15, \qquad h_\out=6.6845019298155357.
 \end{align}
-Again we follow \S \ref{sec:steady_chj} to generate an initial condition with a symmetric CHJ located at
-$\sqrt{x^2+y^2}=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
+Again we follow \S \ref{sec:jumploc} to generate an initial condition with a circular jump located at
+$r=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
 \eqref{second-order_via_fluct} with Roe's Riemann solver. Again the solution develops
 carbuncle instabilities, which are clearly seen in the inset figure at $t=3$.
 For this regime, we obtained negative values for the water height with
-the HLLEMCC solver, which lead to failure of the solver. Therefore, we only show results with
-Rusanov's and the blended solvers, see Figure \ref{fig:chj_r2_diff}. With both solvers, the carbuncles are avoided.
-%
-In contrast to what we observed in the first test case, in this situation the Froude number is
-high enough that numerical perturbations start to trigger a response around the CHJ
-(see the right panel of Figure \ref{fig:chj_r2_diff}).
-For the resolution that we consider, this behavior is dissipated by the extra numerical viscosity introduced by
-Rusanov's solver (see the left panel of Figure \ref{fig:chj_r2_diff}).
-In Figure \ref{fig:chj_r2_later}, we show the solution at a later time considering the same solvers as before.
-This time, we plot not only the Schlieren plot for the water height, but also the magnitude of the momentum. 
-Clearly, using Rusanov's solver dissipates the physical response to these numerical perturbations. 
+the HLLEMCC solver, which lead to failure of the solver. Therefore, in Figure
+\ref{fig:chj_r2_diff} we only show results with Rusanov's and the blended
+solvers.  
+
+The solutions obtained with these solvers show no carbuncles.  The Rusanov
+solution remains very close to the initial symmetric equilibrium state,
+whereas the blended solver solution includes perturbations that appear
+just downstream from the jump.
+In Figure \ref{fig:chj_r2_later}, we show the Rusanov and blended solutions at
+a much later time of $t=5$.  In addition to the Schlieren plot of the water
+height, we superimpose a color plot of the magnitude of the momentum. 
+It is evident that the visible perturbations in the blended solution are
+completely dissipated in the Rusanov solution, at least when using the grid employed here.
+
+It is natural to ask whether these perturbations are meaningful; i.e., whether
+the symmetric equilibrium is unstable.  To investigate this, we conduct one
+more test.
 
 \begin{figure}[!h]
   \centering
@@ -1257,16 +1267,20 @@ Clearly, using Rusanov's solver dissipates the physical response to these numeri
 \end{figure}
 
 \subsubsection{Regime II with random perturbations}
-Finally, we introduce a physical random perturbation to the inflow boundary condition.
+Given the symmetry of the grid and initial data in the section above,
+the non-rotationally-symmetric perturbations seen when using the blended
+solver above must arise due to the influence of numerical errors.
+In order to understand whether these are evidence of a true instability,
+we now introduce a non-symmetric perturbation at the inflow boundary.
 We use the same mean values \eqref{bcs_chj_r2}, but now we set
 \begin{subequations}
   \begin{align}
-    h(x,y,t)=\tilde h_I, \quad
-    u(x,y,t)=|\tilde \bfu_I| \left(\frac{x}{r_I}\right), \quad
-    v(x,y,t)=|\tilde \bfu_I| \left(\frac{y}{r_I}\right), \qquad \forall (x,y)\in\partial\Omega_I,
+    h(x,y,t)=\tilde h_\jet, \quad
+    u(x,y,t)=|\tilde \bfu_\jet| \left(\frac{x}{r_\jet}\right), \quad
+    v(x,y,t)=|\tilde \bfu_\jet| \left(\frac{y}{r_\jet}\right), \qquad r=r_\jet,
   \end{align}
 \end{subequations}
-with $\tilde h_I = \frac{h_I}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_I|=|\bfu_I|(1+\epsilon(x,y,t))$.
+with $\tilde h_\jet = \frac{h_\jet}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_\jet|=|\bfu_\jet|(1+\epsilon(x,y,t))$.
 Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
 time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
 In this case, due to the large Froude number, the random perturbations in the inflow
