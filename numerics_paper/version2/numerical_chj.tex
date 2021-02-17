@@ -256,7 +256,7 @@ Both of these solvers satisfy the conservation property
 
 
 \subsection{Rusanov's Riemann solver}\label{sec:rusanov}
-The Rusanov's solver approximates the Riemann solution by with a single wave traveling in each
+Rusanov's solver approximates the Riemann solution by with a single wave traveling in each
 direction.  Both waves are assumed to travel with speed $\lambda^{\max}_\imh$, which is an
 upper bound on the wave speeds appearing in the true solution of the Riemann problem.
 In this work, we take $\lambda_{i-1/2}^{\max}$ to be the upper bound
@@ -509,7 +509,7 @@ In this section we explain the choice of wave speeds \eqref{s_p}.
 For the moment, we consider \eqref{blended-flux-1}-\eqref{lambda_p} without
 entropy stabilization; i.e. we set $\lambda^{\min}_\iph=0$
 for now.
-We use $\W^{p,\Rus}$ to denote the waves in the Rusanov's
+We use $\W^{p,\Rus}$ to denote the waves in the Rusanov
 solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.
 The first-order method given by \eqref{first-order_via_fluct} with the numerical
 flux \eqref{blended-flux-1} can also be written in
