@@ -1093,7 +1093,6 @@ where the subscripts $+, -$ denote states just inside or outside the jump radius
 
 A steady-state, rotationally symmetric solution can be given for an annular region with prescribed
 flow at the inner and outer boundaries as follows:
-
 \begin{enumerate}
     \item Specify the depth and velocity at the inner boundary (near the jet) and outer boundary.
     \item Integrate \eqref{eq:dh} from both boundaries.
@@ -1103,24 +1102,13 @@ Due to the nature of solutions of \eqref{eq:dh}, it can be shown that the requir
 radius $r_0$ always exists if the prescribed flow is supercritical at the inner boundary
 and subcritical at the outer boundary.
 
-Numerical tests suggest that the solution of \eqref{eq:rsw} rapidly approaches that
-just described under general initial conditions as long as the inflow at the jet is
-supercritical and the outflow at $r_\infty$ is subcritical.  Subcritical outflow
-can be enforced by an appropriate outer boundary condition.  This solution remains steady
-if the rate of inflow and outflow are matched.  The stability of this solution in
-the face of non-rotationally-symmetric perturbations is an important question not
-only in the shallow water context but for more realistic fluid models and physically.
-It will play an important role in the results we present below.
-The rotationally-symmetric steady state is a useful initial condition for studies
-of CHJ stability.
 
-
-\subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
-Let us finally consider the numerical experiments for the CHJ in two dimensions.
-The domain is again given by the annulus \eqref{eq:annulus}, but now we solve
-the fully 2D shallow water equations \eqref{eq:sw}.  For all of the following
-experiments, we use a mesh with 1000 cells in each (radial and angular) direction.
-The boundary conditions at the jet and the outer boundary are given by
+In this section we described how the location of the jump for a steady, rotationally-symmetric CHJ
+is determined by the boundary conditions. Following similar steps, one can choose inner boundary conditions
+and find outflow boundary conditions that lead to a CHJ at a prescribed location.
+This a convenient approach to construct initial conditions for numerical experiments at different flow regimes. 
+Let us consider two flow regimes and construct the corresponding CHJs, which we use in the following sections.
+Consider the following boundary conditions:
 \begin{subequations}\label{bcs_chj}
   \begin{align}
   h(x,y,t)=h_\jet, \quad
@@ -1133,11 +1121,54 @@ The boundary conditions at the jet and the outer boundary are given by
   \end{align}
 \end{subequations}
 where $h_\jet=0.3$, $r_\jet=0.1$, $r_\out=1$ and $\beta=r_\jet h_\jet|\bfu_\jet|$.
-We choose $|\bfu_\jet|$ and $h_\out$ such that the steady roationally symmetric
-solution involves a symmetric shock at $r_s=0.3$, as described
-in \S \ref{sec:steady_chj}.
+We choose $|\bfu_\jet|$ and $h_\out$ such that the steady roationally-symmetric
+solution involves a symmetric shock at $r_s=0.3$; see Table \ref{table:regimes}.
+In Figure \ref{fig:regimes}, we show the water depth $h$ along $y=0$ for these regimes.
+
+\begin{table}[!ht]
+  \begin{center}
+    \begin{tabular}{||c||c|c|c||} \hline
+      & $F(r_\jet)$ &  $|\bfu_\jet|$ & $h_\out$ \\ \hline
+      Regime I & 1.37 & 0.75 & 0.37387387318873766 \\ \hline
+      Regime II & 27.39 & 15 & 6.6845019298155357 \\ \hline
+    \end{tabular}
+    \caption{Boundary data $|u_\jet|$ and $h_\out$ which along with \eqref{bcs_chj}
+      produce CHJs located at $r_s=0.3$ for two different flow regimes. \label{table:regimes}}
+  \end{center}
+\end{table}
+
+\begin{figure}[!h]
+  \centering
+  \subfloat[$F(r_\jet)\approx 1.37$\label{fig:ic_regime_I}]{\includegraphics[scale=0.3]{figures/chj_r1_init.png}} \qquad
+  \subfloat[$F(r_\jet)\approx 27.39$\label{fig:ic_regime_II}]{\includegraphics[scale=0.3]{figures/chj_r2_init.png}}
+  \caption{Radially symmetric CHJs created by solving \eqref{steady} with a jump given by \eqref{eq:RH}.
+    We show a slice along $y=0$.
+    In Section \ref{sec:regime_i}, we consider the CHJ in (a) as initial condition;
+    and in Sections \ref{sec:regime_ii} and \ref{sec:regime_iiwp},
+    we consider the CHJ in (b) as initial condition. 
+    \label{fig:regimes}}
+\end{figure}
+
+Numerical tests suggest that the solution of \eqref{eq:rsw} rapidly approaches that
+just described under general initial conditions as long as the inflow at the jet is
+supercritical and the outflow at $r_\infty$ is subcritical.  Subcritical outflow
+can be enforced by an appropriate outer boundary condition.  This solution remains steady
+if the rate of inflow and outflow are matched.  The stability of this solution in
+the face of non-rotationally-symmetric perturbations is an important question not
+only in the shallow water context but for more realistic fluid models and physically.
+It will play an important role in the results we present below.
+The rotationally-symmetric steady state is a useful initial condition for studies
+of CHJ stability.
+
+\subsection{The circular hydraulic jump in two dimensions}\label{sec:2D_chj}
+Let us finally consider the numerical experiments for the CHJ in two dimensions.
+The domain is again given by the annulus \eqref{eq:annulus}, but now we solve
+the fully 2D shallow water equations \eqref{eq:sw}.  For all of the following
+experiments, we use a mesh with 1000 cells in each (radial and angular) direction.
+The boundary conditions at the jet and the outer boundary are given by \eqref{bcs_chj}.
 By adjusting the boundary conditions $|\bfu_\jet|$ and $h_\out$ we can study different flow regimes.
-We focus on two cases.
+We focus on the two cases in Table \ref{table:regimes}.
+%
 %For the first case, the Froude number at the inflow boundary is $\Fr\approx 1.3693$.
 %In this case, the CHJ appears to be nearly stable.
 %However, using Roe's solver leads to the formation of carbuncle instabilities.
@@ -1150,17 +1181,16 @@ We focus on two cases.
 %Therefore, the numerical method must introduce a carbuncle fix without dissipating important features of the
 %solution that could lead to physical instabilities. 
 %For this reason, we believe this problem is more challenging than the standard bow shock problem.
-
+%
 For most of the experiments we show a Schlieren plot for the water height.
 That is, we plot $||\nabla h||_{\ell^2}$ with a greyscale logarithmic colormap.
 
-\subsubsection{Regime I ($F_\jet\approx1.37$)}
+\subsubsection{Regime I ($F_\jet\approx1.37$)}\label{sec:regime_i}
 In this case, the boundary conditions are given by \eqref{bcs_chj} with
 \begin{align}\label{bcs_chj_r1}
   |\bfu_\jet|=0.75, \qquad h_\out=0.37387387318873766. 
 \end{align}
-The initial condition is again a circular hydraulic jump located at $r=0.3$,
-generated as described in \S \ref{sec:jumploc}.
+The initial condition is a circular hydraulic jump located at $r_s=0.3$; see Figure \ref{fig:ic_regime_I}. 
 In Figure \ref{fig:chj_r1_roe}, we show the solution at different times using
 method \eqref{second-order_via_fluct} with Roe's Riemann solver.
 The solution clearly develops carbuncle instabilities, which are evident in the inset figure.
@@ -1182,13 +1212,19 @@ all of which are free from carbuncles.
     \end{tabular}
   }
   
-  \subfloat[Solution at $t=3$ using (left) Rusanov's, (middle) HLLEMCC and (right) the blended solvers.\label{fig:chj_r1_diff}]{
-    \begin{tabular}{ccc}
-      \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
-      \includegraphics[scale=0.3]{figures/chj_r1_hllemcc_p3.png} &
-      \includegraphics[scale=0.3]{figures/chj_r1_blended_p3.png}
-    \end{tabular}
-    }
+  \subfloat[Solution at $t=3$ using (left) Rusanov's,
+    (upper-right) HLLEMCC and (bottom-right) the blended solvers.\label{fig:chj_r1_diff}]{
+    \includegraphics[scale=0.3]{figures/chj_r1_quadrants.png}
+    %\begin{tabular}{ccc}
+    %  \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
+    %  \includegraphics[scale=0.3]{figures/chj_r1_hllemcc_p3.png} &
+    %  \includegraphics[scale=0.3]{figures/chj_r1_blended_p3.png}
+    %\end{tabular}
+  }
+  \qquad\qquad
+  \subfloat[Solution at $t=3$ along $y=0$ using the same solvers as in (b).]{
+    \includegraphics[scale=0.3]{figures/chj_r1_slices.png}}
+  
     \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
       We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
       In all cases we show the Schlieren plot for the water height $h$.
@@ -1197,14 +1233,14 @@ all of which are free from carbuncles.
     \label{fig:chj_r1}}
 \end{figure}
 
-\subsubsection{Regime II ($F_\jet\approx27.39$)}
+\subsubsection{Regime II ($F_\jet\approx27.39$)}\label{sec:regime_ii}
 We now consider a higher-Froude number regime. The boundary conditions are
 given by \eqref{bcs_chj} with 
 \begin{align}\label{bcs_chj_r2}
   |\bfu_\jet|=15, \qquad h_\out=6.6845019298155357.
 \end{align}
-Again we follow \S \ref{sec:jumploc} to generate an initial condition with a circular jump located at
-$r=0.3$. In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
+The initial condition is a circular hydraulic jump located at $r_s=0.3$; see Figure \ref{fig:ic_regime_II}.
+In Figure \ref{fig:chj_r2_roe}, we show the solution at different times using method
 \eqref{second-order_via_fluct} with Roe's Riemann solver. Again the solution develops
 carbuncle instabilities, which are clearly seen in the inset figure at $t=3$.
 For this regime, we obtained negative values for the water height with
@@ -1265,7 +1301,7 @@ more test.
     \label{fig:chj_r2_later}}
 \end{figure}
 
-\subsubsection{Regime II with random perturbations}
+\subsubsection{Regime II with random perturbations}\label{sec:regime_iiwp}
 Given the symmetry of the grid and initial data in the section above,
 the non-rotationally-symmetric perturbations seen when using the blended
 solver above must arise due to the influence of numerical errors.
