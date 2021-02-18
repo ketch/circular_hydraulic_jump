@@ -1204,7 +1204,7 @@ all of which are free from carbuncles.
   \centering
   \subfloat[Solution at (left) $t=1$, (middle) $t=1.5$ and (right) $t=3$ using Roe's Riemann solver.
     The main plots are Schlieren plots of the depth $h$, while the inset in the right
-    figure shows the magnitude of the momentum.\label{fig:chj_r1_roe}]{
+    figure shows the momentum in the radial direction.\label{fig:chj_r1_roe}]{
     \begin{tabular}{ccc} 
       \includegraphics[scale=0.3]{figures/chj_r1_roe_p1.png} &
       \includegraphics[scale=0.3]{figures/chj_r1_roe_p2.png} &
@@ -1227,9 +1227,7 @@ all of which are free from carbuncles.
   
     \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
       We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
-      In all cases we show the Schlieren plot for the water height $h$.
-      In (a), for the plot that corresponds to $t=3$, we zoom close to the jump
-      and plot the y-momentum. 
+      In (a) and (b) we show the Schlieren plot for the water height $h$.
     \label{fig:chj_r1}}
 \end{figure}
 
@@ -1273,7 +1271,7 @@ more test.
   }
 
   \vspace{10pt}
-  \subfloat[Solution at $t=0.1$ using (left) Rusanov's and (right) the blended solvers.\label{fig:chj_r2_diff}]{
+  \subfloat[Solution at $t=0.11$ using (left) Rusanov's and (right) the blended solvers.\label{fig:chj_r2_diff}]{
     \begin{tabular}{ccc}
       \includegraphics[scale=0.3]{figures/chj_r2_llf_t0p1.png} \qquad &
       %\quad \includegraphics[scale=0.5]{figures/cross.png} \quad &
@@ -1283,7 +1281,7 @@ more test.
   \caption{CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r2}. 
     We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
     In all cases we show the Schlieren plot for the water height $h$.
-    In (a), for the plot that corresponds to $t=0.11$, we zoom close to the jump and plot the y-momentum.}
+    The inset figures show the momentum in the radial direction.}
 \end{figure}
 
 \begin{figure}[!h]
@@ -1298,6 +1296,7 @@ more test.
     an the magnitude of the momentum with a uniform (white-to-blue) colormap. 
     The scale for colormap is (white) $0.45$ to (blue) $4.5$, 
     which corresponds to the minimum and maximum values at $t=0$.
+    The inset figure shows the momentum in the radial direction.
     \label{fig:chj_r2_later}}
 \end{figure}
 
@@ -1325,7 +1324,7 @@ In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show th
 at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
 the blended Riemann solvers, respectively.
 In the right panel of Figure \ref{fig:chj_r2wp_blended}, we show an inset figure 
-with the y-momentum. Note that even though the solution is highly unstable 
+with the momentum in the radial direction. Note that even though the solution is highly unstable 
 (with the blended Riemann solver), no visible carbuncle instabilities are developed. 
 
 
@@ -1352,7 +1351,7 @@ with the y-momentum. Note that even though the solution is highly unstable
   \caption{CHJ at different times with a random perturbation at the inflow boundary.
     We consider method \eqref{second-order_via_fluct} with different Riemann solvers. 
     In all cases we show the Schlieren plot for the water height $h$.
-    In (b), for the plot that corresponds to $t=5$, we zoom close to the jump and plot the y-momentum.}
+    The inset figure shows the momentum in the radial direction.}
 \end{figure}
     
 %\subsection{Regime 1: midly unstable flow}
