@@ -1365,6 +1365,26 @@ with the momentum in the radial direction. Note that even though the solution is
 %Show the results with the three proposed methodologies.
 
 \section{Conclusions}
+In this work we have introduced a new Riemann solver for the shallow water
+equations, described in Section \ref{sec:blended_rs}.  Through numerical tests we have
+shown that the solver gives accuracy similar to that of Roe's method and
+robustness similar to that of Rusanov's method.  Although the full
+second-order method we have proposed is not provably entropy stable or
+positivity preserving, it gives improved results for test problems
+where both of these properties are important.
+
+We have introduced two new test problems for numerical shallow water solvers,
+both consisting of flow in an annulus, with inflow from a jet
+at the center and outflow at the outer boundary.  The first test
+problem, describe in Section \ref{sec:steady_outflow}, has a smooth solution that can
+be computed by solving an ODE and thus serves as a useful test of
+accuracy.  The second problem, the circular hydraulic jump, involves
+a standing shock wave that can be physically unstable but is
+also susceptible numerically to the non-physical carbuncle instability.
+Additionally, it involves high-velocity low-depth flow regions where
+it is challenging to maintain positivity.
+This makes it an excellent problem for testing that schemes are both
+robust and not overly dissipative.
 
 %\bibliographystyle{apalike}
 \bibliographystyle{plain}
