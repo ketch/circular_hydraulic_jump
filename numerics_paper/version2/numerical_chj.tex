@@ -59,14 +59,17 @@
 \maketitle
 
 \begin{abstract}
-The numerical artifact known as a carbuncle in the context of the Euler
-equations has been shown to appear also in shallow water simulations.
-We study how to deal with carbuncles in the shallow water context,
-with an emphasis on a new test problem involving a steady circular hydraulic
+We investigate the numerical artifact known as a carbuncle, in the solution
+of the shallow water equations.  We propose a new Riemann solver that is based
+on a local measure of the entropy residual and aims to avoid carbuncles while
+maintaining high accuracy.
+We propose a new challenging test problem for shallow water codes, 
+consisting of a steady circular hydraulic
 jump that can be physically unstable.  We show that numerical methods are prone to
 either suppress the instability completely or form carbuncles.
-We test existing cures for the carbuncle as well as a new method,
-and show results that exhibit the shock instability without unphysical carbuncles.
+We test existing cures for the carbuncle and show that only the proposed
+method is able to avoid unphysical carbuncles without suppressing the
+physical instability.
 \end{abstract}
 
 
@@ -81,7 +84,7 @@ This phenomenon, subsequently dubbed ``carbuncle", has been observed by many res
 in similar numerical experiments for the Euler equations, and many remedies
 have been proposed, mainly in the form of additional numerical dissipation
 \cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
-Most notably, the HLLE Riemann solver suppresses the carbuncle instability \cite{quirk1997contribution}.
+Most notably, dissipative Riemann solvers like HLLE and LLF suppress the carbuncle instability \cite{quirk1997contribution}.
 For a recent review of numerical shock instability and work to alleviate it,
 we refer to \cite[Section 2.5]{simonnumerical}.
 
@@ -89,22 +92,23 @@ Given the similarity of structure between the Euler equations and the shallow
 water equations, it is not surprising that carbuncles appear in numerical
 solutions of the latter as well \cite{kemm2014note}.
 The shallow water carbuncle behaves similarly to the
-Euler carbuncle: it appears when the Roe solver is used, but not when
-the HLL solver is used, and can be suppressed by similar numerical methods
-\cite{kemm2014note,bader2014carbuncle}.
+Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
+the HLLE solver is used, and can also be suppressed by particular modifications
+of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
 
 The most common test problems used to investigate carbuncle formation are
 that of bow shock formation or a steady, grid-aligned planar shock.
 In both of these problems, the correct behavior is the formation of a stable
-shock profile, which is achieved easily by simple methods with excessive
-diffusion.  This means these problems are not adequate on their own to
+shock profile without carbuncles.  This is achieved by certain methods
+designed specifically to avoid carbuncles, but also by by typical first-order
+accurate methods.  Thus these problems are not adequate on their own to
 evaluate methods for practical calculations.
-
 Elling \cite{elling2009carbuncle} proposed instead a problem specifically
 designed to feature a carbuncle as the physical solution.  This has
 been used as a test problem to identify methods that impose excessive dissipation.
 
-Herein we introduce a new and more exacting test problem.  Like some
+Herein we introduce a new and more exacting test problem that arises in a
+common physical setting.  Like some
 of the problems above, it includes an equilibrium solution consisting of a
 steady shock.  Similar to the Elling problem, the equilibrium is unstable.
 However, the correct manifestation of the instability is different from
@@ -116,6 +120,7 @@ In the present work, we provide a test problem that possesses a genuine instabil
 that leads to carbuncles in many numerical approximations.  This is an ideal
 test for assessing numerical methods, since neither the presence of carbuncles
 nor the complete absence of instability represents the correct behavior.
+This test problem is the circular hydraulic jump.
 
 
 \subsection{The circular hydraulic jump}
@@ -123,8 +128,8 @@ nor the complete absence of instability represents the correct behavior.
 Perhaps the first reference to the observation of the circular hydraulic jump
 comes from Lord Rayleigh \cite{rayleigh1914theory}, who wrote that it
 ``may usually be seen whenever a stream of water from a tap strikes a horizontal
-surface".  This phenomenon that is familiar in the everyday kitchen sink, is in
-fact highly nonlinear and complex.  Near the jet, the flow is shallow and
+surface''.  This phenomenon that is familiar in the everyday kitchen sink, is in
+fact highly nonlinear and unintuitive.  Near the jet, the flow is shallow and
 supercritical, while further away it is deeper and subcritical.  The transition from supercritical
 to subcritical flow
 occurs in a very narrow region and takes the form of a \emph{jump} or \emph{bore}
@@ -164,18 +169,26 @@ appropriate flow regime) be unstable, and some research has suggested that the
 carbuncle is the manifestation of a true physical
 instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
+In this work, we describe and study the circular hydraulic jump as a new
+test problem for shallow water discretizations.
 
 \subsection{Outline}
-In this work, we describe and study the circular hydraulic jump as a new
-test problem for shallow water discretizations.  We find that although some
+In Section \ref{sec2}, we review some existing numerical methods for
+the shallow water equations, focusing on certain Riemann solvers.
+In Section \ref{sec:blended_rs}, we propose a new Riemann solver that blends
+those of Roe and Rusanov in order to avoid carbuncles with being
+excessively dissipative.  In Section \ref{sec:num}, we use Clawpack to
+compare the performance of the new Riemann solver to existing
+solvers on several standard shallow water test problems.  In Section \ref{sec:chj}, we
+study the circular hydraulic jump using the newly proposed solver.
+We find that although some
 existing methods behave acceptably on previous test problems, they
 are not capable of providing accurate solutions for the circular hydraulic jump
-across the range of flow regimes we study.  We develop a new entropy-stable
-Riemann solver for the shallow water equations that generates solutions with
-the correct behavior.
+across the range of flow regimes we study.
+Some conclusions and future directions are discussed in Section \ref{sec:conclusion}.
 
 
-\section{Numerical methods for the shallow water equations}
+\section{Numerical methods for the shallow water equations} \label{sec2}
 We consider the shallow water model in two horizontal dimensions:
 \begin{subequations} \label{eq:sw}
 \begin{align}
@@ -189,8 +202,10 @@ velocity, which are functions of the two spatial coordinates $(x,y)$ as well as 
 The gravitational force is proportional to $g$.
 The system \eqref{eq:sw} can be written in vector form as
 \begin{align}
-    q_t + f(q)_x + g(q)_y & = 0.
+    q_t + \nabla \cdot f(q)_x & = 0,
 \end{align}
+where $q=[h, hu, hv]^T$ and the flux functions $f$ is defined in accordance
+with \eqref{eq:sw}.
 
 In this work we study the behavior of certain shock-capturing finite volume
 methods based on the use of Riemann solvers.  For simplicity, we discuss these
@@ -225,10 +240,11 @@ fluxes that make the method second-order accurate:
 \begin{align}\label{correction-fluxes}
   \tilde{F}_{i\pm 1/2}=\frac{1}{2}\sum_p|s_{i\pm 1/2}^p|\left(1-\frac{\Delta t}{\Delta x}|s_{i\pm 1/2}^p|\right)\tilde\W_{i\pm 1/2}^p.
 \end{align}
-Here $\tilde{\W}_{i\pm 1/2}^p$ is a TVD-limited version of $\W_{i\pm 1/2}^p$.
+Here $\tilde{\W}_{i\pm 1/2}^p$ is a limited version of $\W_{i\pm 1/2}^p$, usually
+based on a total variation diminishing limiter function.
 
 We note that, for the conservative Riemann solvers we use herein, the LWL scheme
-\eqref{second-order_via_fluct} can also be written purely in flux-differencing
+\eqref{second-order_via_fluct} can be written equivalently in flux-differencing
 form:
 \begin{align}\label{flux-differencing-form}
   Q_i^{n+1}=Q_i^n-\frac{\Delta t}{\Delta x}\left[\bfF_{i+1/2}-\bfF_{i-1/2}\right]
@@ -245,7 +261,7 @@ the first-order method obtained by setting the correction fluxes to zero:
 
 Next we briefly review two commonly-used Riemann solvers: those of Rusanov and
 Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
-a full and detailed description of these two Riemann solvers in the context of
+a detailed description of these two Riemann solvers in the context of
 the shallow water equations.
 Neither of these solvers deals with the carbuncle instability in a fully
 satisfactory way.  Rusanov's solver suppresses the carbuncle but is known to
@@ -363,20 +379,18 @@ Since Roe's solver is not entropy stable, the blended solver is also
 not guaranteed to be entropy stable.  We therefore include an additional term
 that is chosen to give entropy stability, at least if the second-order correction
 fluxes are neglected.  The complete proposed scheme can be written in
-flux-differencing form 
-We propose
-a new scheme consisting of the second-order LWL method \eqref{flux-differencing-form} using
+flux-differencing form \eqref{flux-differencing-form} using
 the first-order fluxes
 \begin{align} \label{blended-flux-1}
   \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
   - \frac{1}{2} \left( \theta_{i+1/2}\lambda_{i+1/2}^{\max}\mathbb{I} + (1-\theta_{i+1/2})|\hat A_{i+1/2}| +\lambda_{i+1/2}^{\min}\mathbb{I}\right)(\bfq_{i+1}-\bfq_{i})
 \end{align}
-and correction fluxes \eqref{correction-fluxes} based on the Roe waves and
-the modified speeds
+and correction fluxes \eqref{correction-fluxes} based on the Roe waves with
+modified speeds
 \begin{align} \label{s_p}
     s_{i+1/2}^p=\sgn(\hat\lambda_{i+1/2}^p)\lambda_{i+1/2}^p
 \end{align}
-with
+where
 \begin{align}\label{lambda_p}
   \lambda_{i+1/2}^p := \theta_{i+1/2}\lambda_{i+1/2}^{\max} + (1-\theta_{i+1/2})|\hat \lambda_{i+1/2}^p| + \lambda_\iph^{\min}.
 \end{align}
@@ -477,7 +491,7 @@ with
   R_i=
   \left|\int_{S_i} \left[\entvar(\bfq) \cdot \nabla\cdot \bff(\bfq) - \nabla\cdot\entflux(\bfq) \right] d\bfx\right|,
 \end{align*}
-and $D_i$ being an upper bound of $R_i$ that acts as normalization so that $0\leq \theta_i\leq 1$.
+and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
 Note that $R_i\approx 0$ if $\bfq$ is smooth in $S_i$.
 In our implementation, we use
 \begin{align*}
@@ -644,7 +658,7 @@ In this section we present one- and two-dimensional numerical experiments to dem
 blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}.
 We compare the behavior of the blended solver against the standard Roe's and Rusanov's solvers.
 In most of the experiments we use these Riemann solvers with the LWL method reviewed in \S\ref{sec:waveprop}.
-When the exact solution is available, we report a convergence test based on the $L^1$-error for the water height
+When the exact solution is available, we report convergence results based on the $L^1$-error for the water height
 \begin{align*}
   E_1=\sum_i|K_i|~|h_i-h^e(\bfx_i)|,
 \end{align*}
@@ -969,7 +983,7 @@ the velocity within the domain is initially zero.  In that case, Rusanov's
 and the blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
 but HLLEMCC exhibits a carbuncle.
 
-\section{Numerical study of the circular hydraulic jump}
+\section{Numerical study of the circular hydraulic jump}\label{sec:chj}
 
 \subsection{Semi-analytical steady solution under rotational symmetry}\label{sec:steady_chj}
 In this section, we consider the initial boundary value problem consisting of the
@@ -1364,7 +1378,7 @@ with the momentum in the radial direction. Note that even though the solution is
 %Show the results with Roe's and Rusanov's solver.
 %Show the results with the three proposed methodologies.
 
-\section{Conclusions}
+\section{Conclusions}\label{sec:conclusion}
 In this work we have introduced a new Riemann solver for the shallow water
 equations, described in Section \ref{sec:blended_rs}.  Through numerical tests we have
 shown that the solver gives accuracy similar to that of Roe's method and
@@ -1376,11 +1390,11 @@ where both of these properties are important.
 We have introduced two new test problems for numerical shallow water solvers,
 both consisting of flow in an annulus, with inflow from a jet
 at the center and outflow at the outer boundary.  The first test
-problem, describe in Section \ref{sec:steady_outflow}, has a smooth solution that can
+problem, described in Section \ref{sec:steady_outflow}, has a smooth solution that can
 be computed by solving an ODE and thus serves as a useful test of
 accuracy.  The second problem, the circular hydraulic jump, involves
 a standing shock wave that can be physically unstable but is
-also susceptible numerically to the non-physical carbuncle instability.
+also susceptible to the numerical carbuncle instability.
 Additionally, it involves high-velocity low-depth flow regions where
 it is challenging to maintain positivity.
 This makes it an excellent problem for testing that schemes are both
