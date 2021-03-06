@@ -40,6 +40,7 @@
 \newcommand{\sgn}{{\rm sgn}}
 \newcommand{\Rus}{{\rm Rus}}
 \newcommand{\Roe}{{\rm Roe}}
+\newcommand{\EV}{{\rm EV}}
 \newcommand{\efp}{\psi}
 \newcommand{\entflux}{g}
 \newcommand{\Fr}{{\rm Fr}}
@@ -67,7 +68,7 @@ We propose a new challenging test problem for shallow water codes,
 consisting of a steady circular hydraulic
 jump that can be physically unstable.  We show that numerical methods are prone to
 either suppress the instability completely or form carbuncles.
-We test existing cures for the carbuncle and show that only the proposed
+We test existing cures for the carbuncle. In our experiments, only the proposed
 method is able to avoid unphysical carbuncles without suppressing the
 physical instability.
 \end{abstract}
@@ -84,7 +85,7 @@ This phenomenon, subsequently dubbed ``carbuncle", has been observed by many res
 in similar numerical experiments for the Euler equations, and many remedies
 have been proposed, mainly in the form of additional numerical dissipation
 \cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
-Most notably, dissipative Riemann solvers like HLLE and LLF suppress the carbuncle instability \cite{quirk1997contribution}.
+Most notably, dissipative Riemann solvers like HLLE and Rusanov suppress the carbuncle instability \cite{quirk1997contribution}.
 For a recent review of numerical shock instability and work to alleviate it,
 we refer to \cite[Section 2.5]{simonnumerical}.
 
@@ -93,15 +94,21 @@ water equations, it is not surprising that carbuncles appear in numerical
 solutions of the latter as well \cite{kemm2014note}.
 The shallow water carbuncle behaves similarly to the
 Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
-the HLLE solver is used, and can also be suppressed by particular modifications
+the HLLE or Rusanov solvers are used, and can also be suppressed by particular modifications
 of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
+In this work, we propose a new Riemann solver that blends those of Rusanov and Roe
+based on a local measure of the entropy residual, 
+as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque 
+finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
+while maintaining an accuracy similar to that of Roe solver.  
 
 The most common test problems used to investigate carbuncle formation are
 that of bow shock formation or a steady, grid-aligned planar shock.
 In both of these problems, the correct behavior is the formation of a stable
 shock profile without carbuncles.  This is achieved by certain methods
-designed specifically to avoid carbuncles, but also by by typical first-order
-accurate methods.  Thus these problems are not adequate on their own to
+designed specifically to avoid carbuncles, but also by typical first-order
+accurate methods.  Thus these test problems are not adequate on their own to
 evaluate methods for practical calculations.
 Elling \cite{elling2009carbuncle} proposed instead a problem specifically
 designed to feature a carbuncle as the physical solution.  This has
@@ -171,12 +178,14 @@ instability \cite{moschetta2001carbuncle,elling2009carbuncle}.
 
 In this work, we describe and study the circular hydraulic jump as a new
 test problem for shallow water discretizations.
+We solve this test problem using a novel Riemann solver that supresses the 
+formation of carbuncles without dissipating important features of the solution. 
 
 \subsection{Outline}
 In Section \ref{sec2}, we review some existing numerical methods for
 the shallow water equations, focusing on certain Riemann solvers.
 In Section \ref{sec:blended_rs}, we propose a new Riemann solver that blends
-those of Roe and Rusanov in order to avoid carbuncles with being
+those of Roe and Rusanov in order to avoid carbuncles without being
 excessively dissipative.  In Section \ref{sec:num}, we use Clawpack to
 compare the performance of the new Riemann solver to existing
 solvers on several standard shallow water test problems.  In Section \ref{sec:chj}, we
@@ -202,7 +211,7 @@ velocity, which are functions of the two spatial coordinates $(x,y)$ as well as 
 The gravitational force is proportional to $g$.
 The system \eqref{eq:sw} can be written in vector form as
 \begin{align}
-    q_t + \nabla \cdot f(q)_x & = 0,
+    q_t + \nabla \cdot f(q) & = 0,
 \end{align}
 where $q=[h, hu, hv]^T$ and the flux functions $f$ is defined in accordance
 with \eqref{eq:sw}.
@@ -264,7 +273,9 @@ Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
 a detailed description of these two Riemann solvers in the context of
 the shallow water equations.
 Neither of these solvers deals with the carbuncle instability in a fully
-satisfactory way.  Rusanov's solver suppresses the carbuncle but is known to
+satisfactory way.  Rusanov's solver suppresses the carbuncle but 
+(due to the use of excessive numerical dissipation)
+is known to
 also suppress related real instabilities, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
 Both of these solvers satisfy the conservation property
@@ -274,7 +285,7 @@ Both of these solvers satisfy the conservation property
 
 
 \subsection{Rusanov's Riemann solver}\label{sec:rusanov}
-Rusanov's solver approximates the Riemann solution by with a single wave traveling in each
+Rusanov's solver approximates the Riemann solution with a single wave traveling in each
 direction.  Both waves are assumed to travel with speed $\lambda^{\max}_\imh$, which is an
 upper bound on the wave speeds appearing in the true solution of the Riemann problem.
 In this work, we take $\lambda_{i-1/2}^{\max}$ to be the upper bound
@@ -303,9 +314,9 @@ The Roe Riemann solver is based on evaluating the flux Jacobian using Roe's aver
 The waves and speeds are given by the eigenvectors and eigenvalues of the approximate
 flux Jacobian obtained using these averages, resulting in
 \begin{align*}
-  \hat\lambda_{i-1/2}^1=\hat u_{i-1/2}-g\sqrt{g\bar h_{i-1/2}}, \qquad
+  \hat\lambda_{i-1/2}^1=\hat u_{i-1/2}-\sqrt{g\bar h_{i-1/2}}, \qquad
   \hat\lambda_{i-1/2}^2=\hat u_{i-1/2}, \qquad
-  \hat\lambda_{i-1/2}^3=\hat u_{i-1/2}+g\sqrt{g\bar h_{i-1/2}}. \\
+  \hat\lambda_{i-1/2}^3=\hat u_{i-1/2}+\sqrt{g\bar h_{i-1/2}}. \\
 \end{align*}
 and $\W_{i-1/2}^{p,\Roe}=\alpha_{i-1/2}^p\hat r_{i-1/2}^p$, with
 \begin{align*}
@@ -347,7 +358,7 @@ with carbuncles.  Among them, only that proposed by Kemm has been implemented
 and tested on the shallow water equations \cite{kemm2014note,bader2014carbuncle}.
 The idea behind that solver, known as the HLLEMCC solver, is to combine
 the HLLE and Roe solvers in such a way that the resulting method behaves
-like Roe's when away from potential carbuncle instabilities, and like HLLE
+like Roe's away from potential carbuncle instabilities, and like HLLE
 where the potential for such instabilities arises.   This is done using
 an indicator function based on the local residual of the Rankine-Hugoniot
 condition for the shear wave.  The method requires some parameters that
@@ -473,12 +484,19 @@ explain how $\theta_\iph$ and $\lambda^{\min}_\iph$ are chosen.
 
 \subsection{The entropy residual}
 Let $\entvar(\bfq)$ and $\entflux(\bfq)$ denote the entropy variable and entropy flux.
+Recall that $Q=[h,hu,hv]^t$. We use the total energy as entropy; that is, we consider 
+\begin{align*}
+  \eta(\bfq)=\frac{1}{2} gh^2 + \frac{(hu)^2+(hv)^2}{2h}, \qquad
+  \entflux(\bfq)=
+    \frac{\eta(\bfq)}{h}
+    \begin{bmatrix} hu \\ hv \end{bmatrix}.
+\end{align*}
 Based on \cite{guermond2011entropy}, we consider
 \begin{align}\label{ent_residual}
   \int_{S_i} \entvar(\bfq) \cdot \left[ \frac{\partial \bfq}{\partial t} + \nabla\cdot \bff(\bfq)\right]d\bfx
   =\int_{S_i} \left[\frac{\partial \eta(\bfq)}{\partial t} + \entvar(\bfq) \cdot \nabla\cdot \bff(\bfq)\right] d\bfx
 \end{align}
-as a measurement of the entropy production in cell $i$ (here $S_i=[x_\imh,x_\iph]$.
+as a measurement of the entropy production in cell $i$ (here $S_i=[x_\imh,x_\iph]$).
 To avoid the need to compute the time derivative of the entropy, we follow
 \cite{guermond2018second, guermond2018well} and use
 $\int \frac{\partial\eta(\bfq)}{\partial t}d\bfx=-\int \nabla\cdot\entflux(\bfq) d\bfx$,
@@ -523,7 +541,7 @@ those of Rusanov or Roe in the appropriate limit, as shown in the next section.
 \subsection{The correction fluxes}
 In this section we explain the choice of wave speeds \eqref{s_p}.
 For the moment, we consider \eqref{blended-flux-1}-\eqref{lambda_p} without
-entropy stabilization; i.e. we set $\lambda^{\min}_\iph=0$
+entropy stabilization; i.e., we set $\lambda^{\min}_\iph=0$
 for now.
 We use $\W^{p,\Rus}$ to denote the waves in the Rusanov
 solver and $\W^{p,\Roe}$ to denote the waves in the Roe solver.
@@ -584,7 +602,7 @@ and similarly,
 \end{subequations}
 To get the second-order Lax-Wendroff method based on Rusanov's Riemann solver,
 plug the fluctuations \eqref{fluct_rus} into \eqref{second-order_via_fluct} where 
-$\tilde F_{i\pm 1/2}$ is given by \eqref{correction-fluxes} with $|s^p_{i\pm 1/2}|=\lambda_{i\pm 1/2}^{\max}$. 
+$\tilde F_{i\pm 1/2}$ is given by \eqref{correction-fluxes} with $|s^p_{i\pm 1/2}|=\lambda_{i\pm 1/2}^{\max}$ and $\tilde\W^p_{i\pm 1/2}=\W_{i\pm 1/2}^{p,\Roe}$.
 By doing this, we get \eqref{LWL} (since $\theta_{i\pm 1/2}=1 \implies \lambda_{i\pm 1/2}^p=\lambda_{i\pm 1/2}^{\max}$).
 
 \subsection{Entropy stabilization}\label{sec:entropy_stable}
@@ -610,16 +628,24 @@ where
 \begin{align*}
     G_{i+1/2} &= \frac{1}{2}\left(\entvar_i+\entvar_{i+1}\right)\bfF_{i+1/2}-\frac{1}{2}(\efp_{i}+\efp_{i+1}),
 \end{align*}
-is the discrete entropy flux.
+is a discretization of the entropy flux.
 
 After plugging \eqref{blended-flux-1} into the condition \eqref{es_cond}, we arrive at the value
 \begin{align}\label{lambda_min}
-  \lambda_{i+1/2}^{\min} = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^p\W_{i+1/2}^p\right]-(\efp_{i+1}-\efp_i)}{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^p}\right\}.
+  \lambda_{i+1/2}^{\min} 
+  = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot
+    \left[\bff(\bfq_{i+1})+\bff(\bfq_{i})-\sum_p\lambda_{i+1/2}^{p,\EV}\W_{i+1/2}^{p,\Roe}\right]
+    -(\efp_{i+1}-\efp_i)}
+  {\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot\sum_p\W_{i+1/2}^{p,\Roe}}\right\},
 \end{align}
+where 
+\begin{align*}
+  \lambda_{i+1/2}^{p,\EV}=\theta_{i+1/2}\lambda_{i+1/2}^{\max}+(1-\theta_{i+1/2})|\hat{\lambda}_{i+1/2}^p|.
+\end{align*}
 With this choice, \eqref{blended-flux-1} guarantees \eqref{es_cond}, and therefore \eqref{ent_ineq}.
 Note that here we have used the identities
 \begin{align*}
-|\hat{A}_\iph|(Q_{i+1}-Q_i) & = \sum_p |\hat{\lambda}^p_\iph| \W^{p,\Roe}_\iph, & 
+|\hat{A}_\iph|(Q_{i+1}-Q_i) = \sum_p |\hat{\lambda}^p_\iph| \W^{p,\Roe}_\iph, \qquad
 Q_{i+1}-Q_i & = \sum_p \W^{p,\Roe}_\iph.
 \end{align*}
 
@@ -652,7 +678,23 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
   via a numerical experiment in \S \ref{sec:rp_dry_bed}.
 \end{remark}
 
-\clearpage
+\begin{remark}[About the design philosophy.]
+  The work by Tadmor \cite{tadmor2003entropy} is based on imposing condition \eqref{ent_ineq} as equality. 
+  By doing this, the method is said to be entropy conservative. To improve the nonlinear 
+  stability properties of the numerical scheme, a consistent (and potentially high-order) 
+  artifical entropy dissipative operator is included. 
+  In this work, we add dissipation on the conserved variables based on 
+  a measurement of the entropy residual 
+  (as in \cite{guermond2011entropy,guermond2018second,guermond2018well}).
+  Doing this, however, does not guarantee \eqref{ent_ineq}. 
+  Indeed, some linear stabilization techniques that add artificial dissipation on the conserved 
+  variables are known to produce entropy; see for example \cite{ern2013weighting,kuzmin2020entropy}. 
+  To guarantee \eqref{ent_ineq}, we add extra dissipation on the conserved variables via 
+  \eqref{lambda_min}. 
+  Doing this counteracts entropy production created by any component of the Riemann solver;
+  see for example \cite{kuzmin2020entropy} (in the context of $C^0$ finite elements). 
+\end{remark}
+
 \section{Numerical results}\label{sec:num}
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
 blended Riemann solver from \S\ref{sec:blended_rs} with the extra entropy dissipation from \S\ref{sec:entropy_stable}.
@@ -702,7 +744,7 @@ The domain is given by $x\in(0,10)$, and the initial condition is $hu(x,0)=0$ an
   h(x,0)=
   \begin{cases}
     h_l & x\leq x_0=5 \\
-    h_r & x >5,
+    h_r & x >x_0,
   \end{cases}
 \end{align*}
 with $h_l=5\times 10^{-3}$.  In our experiments we use $h_r=1\times
