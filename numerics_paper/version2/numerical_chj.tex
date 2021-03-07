@@ -37,6 +37,8 @@
 \newcommand{\entvar}{\eta'}
 \newcommand{\bfq}{{Q}}
 \newcommand{\bfx}{{x}}
+\newcommand{\bfs}{{s}}
+\newcommand{\bfn}{{n}}
 \newcommand{\sgn}{{\rm sgn}}
 \newcommand{\Rus}{{\rm Rus}}
 \newcommand{\Roe}{{\rm Roe}}
@@ -483,7 +485,7 @@ explain how $\theta_\iph$ and $\lambda^{\min}_\iph$ are chosen.
 %    \label{HLLEMCC}
 %\end{figure}
 
-\subsection{The entropy residual}
+\subsection{The entropy residual}\label{sec:entres}
 Let $\entvar(q)$ and $\entflux(q)$ denote the entropy variable and entropy flux.
 Recall that $q=[h,hu,hv]^T$. We use the total energy as entropy; that is, 
 \begin{align*}
@@ -513,17 +515,30 @@ with
 and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
 Note that $R_i\approx 0$ if $q$ is smooth in $S_i$.
 In our implementation, we use
-\begin{align*}
-  R_i\approx \Delta x \left|\entvar(Q_i)\cdot \nabla\cdot f(Q_i)
-  -\nabla\cdot\entflux(Q_i) \right|,
-  \quad
-  %D_i = ||\entvar(\bfq_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfq)d\bfx\right|\right|_{\ell^2}
-  %+\left|\int_{S_i}\nabla\cdot\bfq(\bfq)d\bfx\right|.
-  D_i = \Delta x \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\left(\nabla\cdot\bff(Q_i)\right)_k\right|
-  +\left|\nabla\cdot\entflux(Q_i)\right|,
-\end{align*}
-where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
-dimensions.  In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
+\begin{subequations}\label{Ri_and_Di}
+\begin{align}
+  R_i 
+  \approx 
+  \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(q)d\bfx
+  -\int_{S_i}\nabla\cdot\entflux(q) d\bfx\right| 
+  = 
+  \left|\entvar(\bfq_i)\cdot \int_{\partial S_i}\bfn_i(s) \cdot \bff(q) d\bfs
+  -\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|, 
+\end{align}
+and 
+\begin{align}
+  D_i 
+  = 
+  \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{\partial S_i}\left(\bfn_i(s)\cdot\bff(q)\right)_kd\bfs\right|
+  +\left|\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|,
+\end{align}
+\end{subequations}
+where $\bfn_i$ denotes the outward-pointing normal vector at the boundary of cell $i$, 
+$(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$, 
+and $d$ is the number of physical dimensions.  
+In the integrands of \eqref{Ri_and_Di}, $q$ is the average of $Q$ 
+from each side of the boundary $\partial S_i$. 
+In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
 which we use
 $$
     \theta_\iph = \max(\theta_i, \theta_{i+1}).
@@ -633,7 +648,10 @@ is a discretization of the entropy flux.
 If \eqref{ent_ineq} holds with equality, the scheme is entropy-conservative
 \cite{tadmor2003entropy}.  
 
-The added dissipation described in the previous sections does not guarantee \eqref{ent_ineq}. 
+The approach in \cite{tadmor2003entropy}, is based on first developing an
+entropy-conservative scheme and then adding entropy dissipation to enforce \eqref{ent_ineq}.
+On the other hand, herein we have added dissipation (as described in Section \ref{sec:entres})
+that does not guarantee \eqref{ent_ineq}.
 Indeed, some linear stabilization techniques that add artificial dissipation of the conserved 
 variables are known to produce entropy; see for example \cite{ern2013weighting,kuzmin2020entropy}. 
 To guarantee \eqref{ent_ineq}, we add extra dissipation of the conserved variables via 
@@ -1415,7 +1433,11 @@ shown that the solver gives accuracy similar to that of Roe's method and
 robustness similar to that of Rusanov's method.  Although the full
 second-order method we have proposed is not provably entropy stable or
 positivity preserving, it gives improved results for test problems
-where both of these properties are important.
+where both of these properties are important.  The approach used in Section
+\ref{sec:blended_rs} could be applied to enforce entropy stability for any Riemann
+solver of the type used in Clawpack.  The same techniques could also
+be used more generally to avoid carbuncles in the solution of the
+Euler equations.
 
 We have introduced two new test problems for numerical shallow water solvers,
 both consisting of flow in an annulus, with inflow from a jet
