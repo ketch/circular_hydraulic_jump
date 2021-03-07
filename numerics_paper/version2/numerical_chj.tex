@@ -214,7 +214,7 @@ The system \eqref{eq:sw} can be written in vector form as
 \begin{align}
     q_t + \nabla \cdot f(q) & = 0,
 \end{align}
-where $q=[h, hu, hv]^T$ and the flux functions $f$ is defined in accordance
+where $q=[h, hu, hv]^T$ and the flux function $f$ is defined in accordance
 with \eqref{eq:sw}.
 
 In this work we study the behavior of certain shock-capturing finite volume
@@ -514,13 +514,13 @@ and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
 Note that $R_i\approx 0$ if $q$ is smooth in $S_i$.
 In our implementation, we use
 \begin{align*}
-  R_i\approx \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(q)d\bfx
-  -\int_{S_i}\nabla\cdot\entflux(q) d\bfx\right|,
+  R_i\approx \Delta x \left|\entvar(Q_i)\cdot \nabla\cdot f(Q_i)
+  -\nabla\cdot\entflux(Q_i) \right|,
   \quad
   %D_i = ||\entvar(\bfq_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfq)d\bfx\right|\right|_{\ell^2}
   %+\left|\int_{S_i}\nabla\cdot\bfq(\bfq)d\bfx\right|.
-  D_i = \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(q)\right)_kd\bfx\right|
-  +\left|\int_{S_i}\nabla\cdot\entflux(q)d\bfx\right|,
+  D_i = \Delta x \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\left(\nabla\cdot\bff(Q_i)\right)_k\right|
+  +\left|\nabla\cdot\entflux(Q_i)\right|,
 \end{align*}
 where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
 dimensions.  In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
@@ -621,7 +621,7 @@ From \cite[\S 4]{tadmor1987numerical}, if the numerical fluxes satisfy
   \qquad
   (\entvar_{i+1}-\entvar_i)\cdot \bfF_{i+1/2}\leq \efp_{i+1}-\efp_i,
 \end{align}
-then the following entropy inequality holds
+then we have the entropy inequality
 \begin{align}\label{ent_ineq}
   \frac{d\eta(\bfq_i)}{dt}+\frac{1}{\Delta x}\left[G_{i+1/2}-G_{i-1/2}\right]\leq 0,
 \end{align}
@@ -630,8 +630,18 @@ where
     G_{i+1/2} &= \frac{1}{2}\left(\entvar_i+\entvar_{i+1}\right)\bfF_{i+1/2}-\frac{1}{2}(\efp_{i}+\efp_{i+1}),
 \end{align*}
 is a discretization of the entropy flux.
+If \eqref{ent_ineq} holds with equality, the scheme is entropy-conservative
+\cite{tadmor2003entropy}.  
 
-After plugging \eqref{blended-flux-1} into the condition \eqref{es_cond}, we arrive at the value
+The added dissipation described in the previous sections does not guarantee \eqref{ent_ineq}. 
+Indeed, some linear stabilization techniques that add artificial dissipation of the conserved 
+variables are known to produce entropy; see for example \cite{ern2013weighting,kuzmin2020entropy}. 
+To guarantee \eqref{ent_ineq}, we add extra dissipation of the conserved variables via 
+\eqref{lambda_min}. 
+Doing this counteracts entropy production created by any component of the Riemann solver;
+see for example \cite{kuzmin2020entropy} (in the context of $C^0$ finite elements). 
+
+Plugging \eqref{blended-flux-1} into the condition \eqref{es_cond} yields the required value
 \begin{align}\label{lambda_min}
   \lambda_{i+1/2}^{\min} 
   = \max\left\{0,\frac{\frac{1}{2}(\entvar_{i+1}-\entvar_{i})\cdot
@@ -658,8 +668,8 @@ Extra modifications would be needed to guarantee entropy stability of the second
 \eqref{second-order_via_fluct} and its multidimensional extension via Strang splitting.
 We do not pursue such modifications in this work.
 
-\begin{remark}
-In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be written as
+We close this section with two remarks.  First, note that 
+the entropy stability condition \eqref{es_cond} can be written equivalently in terms of fluctuations:
 \begin{align*}
   (\entvar_{i}-\entvar_{i-1})\cdot
   \Big(
@@ -668,33 +678,10 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
   (\entvar_{i+1}-\entvar_i)\cdot
   \Big(\underbrace{\bff(\bfq_i)+\A^-\Delta Q_{i+1/2}}_{=\bfF_{i+1/2}}\Big)\leq \efp_{i+1}-\efp_i.
 \end{align*}
-\end{remark}
 
-\begin{remark}[About the effect of $\lambda_{i\pm 1/2}^{\min}$ for Roe's solver.]
-  If we set $\theta_{i\pm 1/2}=0$ and $\lambda^{\min}_\iph=0, ~\forall i$ in \eqref{lambda_p}, then the Riemann solver becomes Roe's solver.
-  In this case, it is well known that transonic rarefactions develop non-physical shocks,
-  a phenomenon known as `entropy glitch'. To fix this problem, many entropy fixes to Roe's
-  solver have been developed. Enhancing the dissipation via \eqref{lambda_min}
-  also serves as a transonic entropy fix for Roe's solver, which we demonstrate
-  via a numerical experiment in \S \ref{sec:rp_dry_bed}.
-\end{remark}
-
-\begin{remark*}[About the design philosophy.]
-  The work by Tadmor \cite{tadmor2003entropy} is based on imposing condition \eqref{ent_ineq} as equality. 
-  By doing this, the method is said to be entropy conservative. To improve the nonlinear 
-  stability properties of the numerical scheme, a consistent (and potentially high-order) 
-  artifical entropy dissipative operator is included. 
-  In this work, we add dissipation on the conserved variables based on 
-  a measurement of the entropy residual 
-  (as in \cite{guermond2011entropy,guermond2018second,guermond2018well}).
-  Doing this, however, does not guarantee \eqref{ent_ineq}. 
-  Indeed, some linear stabilization techniques that add artificial dissipation on the conserved 
-  variables are known to produce entropy; see for example \cite{ern2013weighting,kuzmin2020entropy}. 
-  To guarantee \eqref{ent_ineq}, we add extra dissipation on the conserved variables via 
-  \eqref{lambda_min}. 
-  Doing this counteracts entropy production created by any component of the Riemann solver;
-  see for example \cite{kuzmin2020entropy} (in the context of $C^0$ finite elements). 
-\end{remark*}
+Second, the additional dissipation introduced by $\lambda_{i\pm 1/2}^{\min}$ can also
+serve independently as an entropy fix for Roe's solver, as we demonstrate
+via a numerical experiment in \S \ref{sec:rp_dry_bed}.
 
 \section{Numerical results}\label{sec:num}
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
