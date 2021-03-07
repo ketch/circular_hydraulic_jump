@@ -515,7 +515,7 @@ with
 \end{align*}
 and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
 Note that $R_i\approx 0$ if $q$ is smooth in $S_i$.
-In our implementation, we consider
+In our implementation, we use the approximation
 \begin{align}
   R_i 
   &\approx 
@@ -526,24 +526,23 @@ In our implementation, we consider
   -\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|,
 \end{align}
 where $\bfn_i$ denotes the unit vector normal to $\partial S_i$ pointing outward from cell $i$. 
-To compute these integrals, we first split $\partial S_i$ into its faces $\{\f_i\in\partial S_i\}$.
-Let $|\f_i|$ be the length of $\f_i$, $\bar Q_{\f_i}$ be the average of $Q$ 
-from both sides of $\f_i$ and $\bfn_{\f_i}$ be the unit vector normal to $\f_i$ 
-pointing outward from cell $i$.
-Then, we use
+To compute the boundary integrals, we approximate $q$ on each cell edge $\f_{ij}$ by the average of the two
+neighboring cell averages $\bar Q_{ij} = (Q_i+Q_j)/2$, resulting in
 \begin{subequations}\label{Ri_and_Di}
 \begin{align}
   R_i = 
-  \left|\sum_{\f_i\in\partial S_i} |\f_i|
-  \left[\entvar(\bfq_i)\cdot \left(\bfn_{\f_i} \cdot \bff\left(\bar Q_{\f_i}\right)\right)-\bfn_{\f_i} \cdot\entflux \left(\bar Q_{\f_i}\right)\right] \right|,
+  \left|\sum_{\f_{ij}\in\partial S_i} |\f_{ij}|
+  \left[\entvar(\bfq_i)\cdot \left(\bfn_{ij} \cdot \bff\left(\bar Q_{ij}\right)\right)-\bfn_{ij} \cdot\entflux \left(\bar Q_{ij}\right)\right] \right|,
 \end{align}
-and 
+where $\bfn_{ij}$ and $|\f_{ij}|$ are
+the unit outward-facing normal and edge length of edge $\f_{ij}$, respectively.
+The normalization factor is similarly computed as
 \begin{align}
   D_i 
   = 
   \sum_{k=1}^{d+1}\left|\entvar_k\left(\bfq_i\right)\right|
-  \left|\sum_{\f_i\in\partial S_i}|\f_i|\left(\bfn_{\f_i}\cdot\bff\left(\bar Q_{\f_i}\right)\right)_k\right|
-  +\left|\sum_{\f_i\in \partial S_i} |\f_i| \bfn_{\f_i}\cdot\entflux\left(\bar Q_{\f_i}\right) \right|,
+  \left|\sum_{\f_{ij}\in\partial S_i}|\f_{ij}|\left(\bfn_{ij}\cdot\bff\left(\bar Q_{ij}\right)\right)_k\right|
+  +\left|\sum_{\f_i\in \partial S_i} |\f_{ij}| \bfn_{ij}\cdot\entflux\left(\bar Q_{ij}\right) \right|,
 \end{align}
 \end{subequations}
 where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$, 
