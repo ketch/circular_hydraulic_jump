@@ -274,10 +274,9 @@ Roe.  We refer to \cite{ketcheson2020riemann} and references therein for
 a detailed description of these two Riemann solvers in the context of
 the shallow water equations.
 Neither of these solvers deals with the carbuncle instability in a fully
-satisfactory way.  Rusanov's solver suppresses the carbuncle but 
-(unless the mesh is highly refined)
-is known to
-also suppress related real instabilities, while Roe's solver exhibits carbuncles.
+satisfactory way.  
+Rusanov's solver suppresses the carbuncle instability but may 
+introduce excessive numerical dissipation, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
 Both of these solvers satisfy the conservation property
 \begin{align} \label{rs_conservation}
