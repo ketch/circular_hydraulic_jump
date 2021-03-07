@@ -516,7 +516,6 @@ with
 and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
 Note that $R_i\approx 0$ if $q$ is smooth in $S_i$.
 In our implementation, we consider
-{\color{blue}
 \begin{align}
   R_i 
   &\approx 
@@ -548,31 +547,30 @@ and
 \end{align}
 \end{subequations}
 where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$, 
-and $d$ is the number of physical dimensions.}
-{\color{red}
-\begin{subequations}\label{Ri_and_Di_tmp}
-\begin{align}
-  R_i 
-  \approx 
-  \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(q)d\bfx
-  -\int_{S_i}\nabla\cdot\entflux(q) d\bfx\right| 
-  = 
-  \left|\entvar(\bfq_i)\cdot \int_{\partial S_i}\bfn_i(s) \cdot \bff(q) d\bfs
-  -\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|, 
-\end{align}
-and 
-\begin{align}
-  D_i 
-  = 
-  \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{\partial S_i}\left(\bfn_i(s)\cdot\bff(q)\right)_kd\bfs\right|
-  +\left|\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|,
-\end{align}
-\end{subequations}
-where $\bfn_i$ denotes the unit vector normal to $\partial S_i$ pointing outward from cell $i$,
-$(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$, 
-and $d$ is the number of physical dimensions.  
-In the integrands of \eqref{Ri_and_Di_tmp}, $q$ is the average of $Q$ 
-from each side of the boundary $\partial S_i$.}
+and $d$ is the number of physical dimensions.
+%\begin{subequations}\label{Ri_and_Di_tmp}
+%\begin{align}
+%  R_i 
+%  \approx 
+%  \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(q)d\bfx
+%  -\int_{S_i}\nabla\cdot\entflux(q) d\bfx\right| 
+%  = 
+%  \left|\entvar(\bfq_i)\cdot \int_{\partial S_i}\bfn_i(s) \cdot \bff(q) d\bfs
+%  -\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|, 
+%\end{align}
+%and 
+%\begin{align}
+%  D_i 
+%  = 
+%  \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{\partial S_i}\left(\bfn_i(s)\cdot\bff(q)\right)_kd\bfs\right|
+%  +\left|\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|,
+%\end{align}
+%\end{subequations}
+%where $\bfn_i$ denotes the unit vector normal to $\partial S_i$ pointing outward from cell $i$,
+%$(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$, 
+%and $d$ is the number of physical dimensions.  
+%In the integrands of \eqref{Ri_and_Di_tmp}, $q$ is the average of $Q$ 
+%from each side of the boundary $\partial S_i$.
 In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
 which we use
 $$
