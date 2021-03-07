@@ -47,6 +47,7 @@
 
 %\newdefinition{rmk}{Remark}
 \newtheorem{remark}{Remark}
+\newtheorem*{remark*}{Remark}{}
 
 \title{Numerical simulation and entropy dissipative cure of the
   carbuncle instability for the shallow water circular hydraulic jump}
@@ -94,7 +95,7 @@ water equations, it is not surprising that carbuncles appear in numerical
 solutions of the latter as well \cite{kemm2014note}.
 The shallow water carbuncle behaves similarly to the
 Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
-the HLLE or Rusanov solvers are used, and can also be suppressed by particular modifications
+the HLLE or Rusanov solver is used, and can also be suppressed by particular modifications
 of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
 In this work, we propose a new Riemann solver that blends those of Rusanov and Roe
 based on a local measure of the entropy residual, 
@@ -274,7 +275,7 @@ a detailed description of these two Riemann solvers in the context of
 the shallow water equations.
 Neither of these solvers deals with the carbuncle instability in a fully
 satisfactory way.  Rusanov's solver suppresses the carbuncle but 
-(due to the use of excessive numerical dissipation)
+(unless the mesh is highly refined)
 is known to
 also suppress related real instabilities, while Roe's solver exhibits carbuncles.
 Later we will combine these two solvers in order to better deal with shock instability.
@@ -483,23 +484,23 @@ explain how $\theta_\iph$ and $\lambda^{\min}_\iph$ are chosen.
 %\end{figure}
 
 \subsection{The entropy residual}
-Let $\entvar(\bfq)$ and $\entflux(\bfq)$ denote the entropy variable and entropy flux.
-Recall that $Q=[h,hu,hv]^t$. We use the total energy as entropy; that is, we consider 
+Let $\entvar(q)$ and $\entflux(q)$ denote the entropy variable and entropy flux.
+Recall that $q=[h,hu,hv]^T$. We use the total energy as entropy; that is, 
 \begin{align*}
-  \eta(\bfq)=\frac{1}{2} gh^2 + \frac{(hu)^2+(hv)^2}{2h}, \qquad
-  \entflux(\bfq)=
-    \frac{\eta(\bfq)}{h}
+  \eta(q)=\frac{1}{2} gh^2 + \frac{(hu)^2+(hv)^2}{2h}, \qquad
+  \entflux(q)=
+    \frac{\eta(q)}{h}
     \begin{bmatrix} hu \\ hv \end{bmatrix}.
 \end{align*}
 Based on \cite{guermond2011entropy}, we consider
 \begin{align}\label{ent_residual}
-  \int_{S_i} \entvar(\bfq) \cdot \left[ \frac{\partial \bfq}{\partial t} + \nabla\cdot \bff(\bfq)\right]d\bfx
-  =\int_{S_i} \left[\frac{\partial \eta(\bfq)}{\partial t} + \entvar(\bfq) \cdot \nabla\cdot \bff(\bfq)\right] d\bfx
+  \int_{S_i} \entvar(q) \cdot \left[ \frac{\partial q}{\partial t} + \nabla\cdot \bff(q)\right]d\bfx
+  =\int_{S_i} \left[\frac{\partial \eta(q)}{\partial t} + \entvar(q) \cdot \nabla\cdot \bff(q)\right] d\bfx
 \end{align}
 as a measurement of the entropy production in cell $i$ (here $S_i=[x_\imh,x_\iph]$).
 To avoid the need to compute the time derivative of the entropy, we follow
 \cite{guermond2018second, guermond2018well} and use
-$\int \frac{\partial\eta(\bfq)}{\partial t}d\bfx=-\int \nabla\cdot\entflux(\bfq) d\bfx$,
+$\int \frac{\partial\eta(q)}{\partial t}d\bfx=-\int \nabla\cdot\entflux(q) d\bfx$,
 which holds in smooth regions. Then we define
 \begin{align}\label{Ri}
   \theta_i := \frac{R_i}{D_i},
@@ -507,19 +508,19 @@ which holds in smooth regions. Then we define
 with
 \begin{align*}
   R_i=
-  \left|\int_{S_i} \left[\entvar(\bfq) \cdot \nabla\cdot \bff(\bfq) - \nabla\cdot\entflux(\bfq) \right] d\bfx\right|,
+  \left|\int_{S_i} \left[\entvar(q) \cdot \nabla\cdot \bff(q) - \nabla\cdot\entflux(q) \right] d\bfx\right|,
 \end{align*}
 and $D_i$ being an upper bound on $R_i$ so that $0\leq \theta_i\leq 1$.
-Note that $R_i\approx 0$ if $\bfq$ is smooth in $S_i$.
+Note that $R_i\approx 0$ if $q$ is smooth in $S_i$.
 In our implementation, we use
 \begin{align*}
-  R_i\approx \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(\bfq)d\bfx
-  -\int_{S_i}\nabla\cdot\entflux(\bfq) d\bfx\right|,
+  R_i\approx \left|\entvar(\bfq_i)\cdot \int_{S_i}\nabla\cdot \bff(q)d\bfx
+  -\int_{S_i}\nabla\cdot\entflux(q) d\bfx\right|,
   \quad
   %D_i = ||\entvar(\bfq_i)||_{\ell^2}\left|\left|\int_{S_i}\nabla\cdot\bff(\bfq)d\bfx\right|\right|_{\ell^2}
   %+\left|\int_{S_i}\nabla\cdot\bfq(\bfq)d\bfx\right|.
-  D_i = \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(\bfq)\right)_kd\bfx\right|
-  +\left|\int_{S_i}\nabla\cdot\entflux(\bfq)d\bfx\right|,
+  D_i = \sum_{k=1}^{d+1}|\entvar_k(\bfq_i)|\left|\int_{S_i}\left(\nabla\cdot\bff(q)\right)_kd\bfx\right|
+  +\left|\int_{S_i}\nabla\cdot\entflux(q)d\bfx\right|,
 \end{align*}
 where $(z)_k$ denotes the $k$-th component of $z\in\mathbb{R}^{d+1}$ and $d$ is the number of physical
 dimensions.  In \eqref{blended-flux-1} we need values of $\theta$ at the cell interfaces, for
@@ -678,7 +679,7 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
   via a numerical experiment in \S \ref{sec:rp_dry_bed}.
 \end{remark}
 
-\begin{remark}[About the design philosophy.]
+\begin{remark*}[About the design philosophy.]
   The work by Tadmor \cite{tadmor2003entropy} is based on imposing condition \eqref{ent_ineq} as equality. 
   By doing this, the method is said to be entropy conservative. To improve the nonlinear 
   stability properties of the numerical scheme, a consistent (and potentially high-order) 
@@ -693,7 +694,7 @@ In terms of fluctuations, the entropy stability condition \eqref{es_cond} can be
   \eqref{lambda_min}. 
   Doing this counteracts entropy production created by any component of the Riemann solver;
   see for example \cite{kuzmin2020entropy} (in the context of $C^0$ finite elements). 
-\end{remark}
+\end{remark*}
 
 \section{Numerical results}\label{sec:num}
 In this section we present one- and two-dimensional numerical experiments to demonstrate the behavior of the
