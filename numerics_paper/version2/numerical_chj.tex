@@ -526,7 +526,7 @@ In our implementation, we use the approximation
   -\int_{\partial S_i}\bfn_i(s)\cdot\entflux(q) d\bfs\right|,
 \end{align}
 where $\bfn_i$ denotes the unit vector normal to $\partial S_i$ pointing outward from cell $i$. 
-To compute the boundary integrals, we approximate $q$ on each cell edge $\f_{ij}$ by the average of the two
+To compute the boundary integrals, we approximate $q$ on each cell edge $\f_{ij}\in\partial S_i$ by the average of the two
 neighboring cell averages $\bar Q_{ij} = (Q_i+Q_j)/2$, resulting in
 \begin{subequations}\label{Ri_and_Di}
 \begin{align}
@@ -534,8 +534,9 @@ neighboring cell averages $\bar Q_{ij} = (Q_i+Q_j)/2$, resulting in
   \left|\sum_{\f_{ij}\in\partial S_i} |\f_{ij}|
   \left[\entvar(\bfq_i)\cdot \left(\bfn_{ij} \cdot \bff\left(\bar Q_{ij}\right)\right)-\bfn_{ij} \cdot\entflux \left(\bar Q_{ij}\right)\right] \right|,
 \end{align}
-where $\bfn_{ij}$ and $|\f_{ij}|$ are
-the unit outward-facing normal and edge length of edge $\f_{ij}$, respectively.
+where $|\f_{ij}|$ is the length of $\f_{ij}$ and 
+$\bfn_{ij}$ is the unit vector normal to $\f_{ij}$ pointing outward from cell $i$.
+%where $n_{ij}$ and $|\f_{ij}|$ are the unit outward-facing normal and edge length of edge $\f_{ij}$, respectively.
 The normalization factor is similarly computed as
 \begin{align}
   D_i 
