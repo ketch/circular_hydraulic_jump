@@ -12,6 +12,9 @@ shallow_roe_exp_2D.so:
 shallow_llf_2D.so:
 	f2py -c rpn2_shallow_llf.f90 rpt2_dummy.f90 -m shallow_llf_2D
 
+shallow_llf_dk_2D.so:
+	f2py -c rpn2_shallow_llf_dk.f90 rpt2_dummy.f90 -m shallow_llf_dk_2D
+
 shallow_ev_2D.so:
 	f2py -c rpn2_shallow_ev.f90 rpt2_dummy.f90 -m shallow_ev_2D
 
