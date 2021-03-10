@@ -67,7 +67,8 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
         ! Speeds of non-shear waves
         s1 = min(u_l - c_l, u_hat - c_hat)
         s2 = max(u_r + c_r, u_hat + c_hat)
-        a = max(dabs(s1,s2))
+        !a = max(dabs(s1,s2))
+        a = max(dabs(s1),dabs(s2))
 
         ! middle" state
         h_m = -(ql(mu,i)-qr(mu,i-1))/(2.d0*a) + (h_r + h_l)/2.d0
