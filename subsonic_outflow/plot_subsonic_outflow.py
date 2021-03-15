@@ -34,8 +34,8 @@ def plot_q(frame,
     #
     
     # Plot numerical solution
-    pl.plot(x,h[:,my/2],'-k',lw=2)
-    pl.plot(r0+dx/2.0,h[0,my/2],'ko',lw=10)
+    pl.plot(x,h[:,my//2],'-k',lw=2)
+    pl.plot(r0+dx/2.0,h[0,my//2],'ko',lw=10)
 
     # plot exact solution in the inner ghost cells
     pl.plot(r_backward,hh_backward,'--r')
@@ -51,7 +51,7 @@ def plot_q(frame,
     pl.close()
     
     # compute L1 error
-    return dx*np.sum(np.abs(hInterp_forward(x)-h[:,my/2]))
+    return dx*np.sum(np.abs(hInterp_forward(x)-h[:,my//2]))
 #
 
 if __name__== "__main__":
@@ -70,7 +70,7 @@ if __name__== "__main__":
     if not os.path.exists('./_plots'): os.mkdir('_plots')
     from_frame = 0
     to_frame   = 100
-    frames=xrange(from_frame,to_frame+1)
+    frames=range(from_frame,to_frame+1)
     Ncells_interp = 10000
     
     # ********************************************************* #
