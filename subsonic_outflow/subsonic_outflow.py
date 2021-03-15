@@ -67,7 +67,7 @@ def b4step(self, state, old_state=None):
 
 def boundary_jet(state, dim, _, qbc, __, num_ghost):
     x = state.grid.x.centers
-    dx = x[1]-x[0]
+    dx = state.grid.x.delta
         
     r0 =  state.problem_data['r0']
     h0 =  state.problem_data['h0']
@@ -250,10 +250,10 @@ def setup(
     state.problem_data['rOutflow'] = rOutflow
 
     # ***** COMPUTE EXACT SOLUTION TO USE AT BOUNDARIES ***** #    
-    dx=state.grid.x.centers[1]-state.grid.x.centers[0]
+    dx=state.grid.x.delta
     beta = r0*h0*u0
     # inner boundary
-    dh=ode(steady_rhs_backward,
+    dh=ode(steady_rhs,
            steady_rhs_backward_jacobian).set_integrator('vode',
                                                         method='bdf',
                                                         nsteps=1E5)
@@ -313,7 +313,7 @@ if __name__ == "__main__":
     # inflow 
     hInflow = 0.3
     velInflow = 0.05
-    rInflow = 0.1
+    rInflow = 0.8
     # outflow
     rOutflow = 1.0
     
