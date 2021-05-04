@@ -7,6 +7,9 @@ from matplotlib import rc
 import numpy as np
 import os
 from ent_residual import *
+from scipy.integrate import ode
+from scipy import integrate
+from scipy.interpolate import interp1d
 
 def plot_q(frame,
            with_jump=True,
@@ -21,6 +24,7 @@ def plot_q(frame,
     mx=len(x); my=len(y)
 
     h=sol.state.q[0,:,:]
+    hu=sol.state.q[1,:,:]
     q1=sol.state.q[1,:,:]
     Ri = get_ent_residual(sol.state)
 
@@ -34,9 +38,60 @@ def plot_q(frame,
         str_frame = str(frame)
     #
 
-    fig, axs = pl.subplots(2,1)
-    axs[0].plot(x,h[:,my/2],lw=2)
-    axs[1].plot(x,Ri[:,my/2],'-k',lw=2)
+    #fig, axs = pl.subplots(2,1)
+    #axs[0].plot(x,h[:,my/2],'--k',lw=2)
+    #axs[1].plot(x,Ri[:,my/2],'-k',lw=2)
+    
+    ###################33
+    # ***** COMPUTE EXACT SOLUTION TO USE AT BOUNDARIES ***** #    
+    dx=x[1]-x[0]
+    h0 =  sol.state.problem_data['h0']
+    r0 =  sol.state.problem_data['r0']
+    h0 =  sol.state.problem_data['h0']
+    u0 =  sol.state.problem_data['u0']
+    g =  sol.state.problem_data['grav']
+    rOutflow =  sol.state.problem_data['rOutflow']
+    beta = r0*h0*u0
+
+    #import pdb; pdb.set_trace()
+    #sol.state.get_qbc_from_q(2,sol.state.qbc)
+    pl.plot(x,h[:,my/2],'-k',lw=2)
+    #pl.plot(r0+dx/2.0,h[0,my/2],'ko',lw=10)
+    
+    # inner boundary
+    dh=ode(steady_rhs_v2,
+           steady_rhs_v2_jacobian).set_integrator('vode',
+                                                  method='bdf',
+                                                  nsteps=1E5)
+    dh.set_initial_value(h0,r0).set_f_params(beta).set_jac_params(beta)
+    rEnd=r0-3*dx/2.0 # for 2 ghost cells
+    dr=1E-3*dx
+    r_backward=np.linspace(r0-dr,rEnd,1000)
+    hh_backward = r_backward*0
+    for i in range(len(r_backward)):
+        hh_backward[i] = dh.integrate(r_backward[i])[0]
+    #    
+    hInterp = interp1d(r_backward,hh_backward)
+    hm1 = hInterp(r0-dx/2.0)
+    hm2 = hInterp(r0-3*dx/2.0)
+
+    #pl.plot(r_backward,hh_backward,'--r')
+    #
+    # outer boundary
+    r_forward = np.linspace(r0,1.1*rOutflow,1000)
+    hh_forward = integrate.odeint(steady_rhs,h0,r_forward,args=(beta,g))[:,0]
+    hInterp = interp1d(r_forward,hh_forward[:])
+    hp1 = hInterp(rOutflow+dx/2.0)
+    hp2 = hInterp(rOutflow+3*dx/2.0)
+
+    #pl.plot(r_forward,hh_forward,'--b')
+    
+    #import pdb; pdb.set_trace()
+    #pl.plot(r0+dx/2.0,h0,'go',lw=10)
+    #pl.plot(r0-dx/2.0,hm1,'go',lw=10)
+    #pl.plot(r0-3*dx/2.0,hm2,'go',lw=10)
+    # END OF COMPUTATION OF EXACT SOLUTION AT BOUNDARIES #    
+    #######################
     
     pl.suptitle("t= "+str(sol.state.t),fontsize=20)
     pl.savefig('./_plots_chj_1D/h_'+str_frame+'_slices.png')
@@ -68,6 +123,21 @@ def plot_frame(frame,
     pl.plot(x,h[:,my/2],lw=2)
 #
 
+def steady_rhs_v2(r,h,beta):
+    g=1.0
+    a=g/beta**2 * r**3
+    b=r
+    return h/(a * h**3 - b)
+#
+
+def steady_rhs_v2_jacobian(r,h,beta):
+    g=1.0
+    a=g/beta**2 * r**3
+    b=r
+    return (-2*a*h**3-b)/(a*h**3-b)**2
+#
+
+
 def steady_rhs(h,r,beta,g=1.):
     return h/(g/beta**2 * r**3 * h**3 - r)
 #
@@ -83,6 +153,7 @@ def get_L1_error(frame,
     mx=len(x); my=len(y)
 
     h=sol.state.q[0,:,:]
+    hu=sol.state.q[1,:,:]
     
     from scipy import integrate
     r0 = sol.state.problem_data['r0']
@@ -126,7 +197,13 @@ def get_L1_error(frame,
     if plot_exact:
         pl.plot(x,h_exact[:,my/2],'--k',lw=2)    
     #
-    
+    pl.savefig('num_vs_exact.png')
+
+    pl.clf()
+    Fro = hu/(h*np.sqrt(g*h));    
+    pl.plot(x,Fro[:,my/2],'-b',lw=3)
+    pl.savefig('Froude_number.png')
+        
     dx=x[1]-x[0]; dy=y[1]-y[0]
     L1_error = dx*dy*np.sum(np.abs(h - h_exact))
     print "**********... L1-error: ", L1_error
@@ -155,10 +232,10 @@ if __name__== "__main__":
 
     with_jump = False
     time = 100 if with_jump else 50
-    
-    get_L1_error(time,with_jump=with_jump)
-    #pl.savefig('plot.png')
 
+    time=50
+    get_L1_error(time,with_jump=with_jump,plot_exact=True)
+    
     if False:
         pl.figure(figsize=(8,4))
         get_L1_error(5,with_jump=with_jump,path='./_output_roe_N400',plot_exact=False,color='-c')
@@ -248,8 +325,9 @@ if __name__== "__main__":
         pl.yticks([0.0,0.1,0.2,0.3,0.4])
         pl.savefig('./_plots_chj_1D/chj_1D_Ri_t10p0.png')
         #
-    
-    if False:
+
+    pl.clf()
+    if True:
         ##########################################
         if not os.path.exists('./_plots'): os.mkdir('./_plots')
         print('**********************')
