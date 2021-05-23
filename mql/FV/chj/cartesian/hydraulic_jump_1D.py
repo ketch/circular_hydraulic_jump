@@ -21,6 +21,7 @@ import numpy as np
 from scipy import integrate
 from scipy.interpolate import interp1d
 from ent_residual import *
+from scipy.integrate import ode
 
 def step_radial_src(solver,state,dt):
     """
@@ -45,6 +46,20 @@ def step_radial_src(solver,state,dt):
     
     q[0,:,:] = q[0,:,:] - dt/rad * h*u
     q[1,:,:] = q[1,:,:] - dt/rad * h*u*u
+#
+
+def dq_swe_radial(solver,state,dt):
+    q   = state.q
+    rad = state.grid.p_centers[0]
+
+    h = q[0,:,:]
+    u = q[1,:,:]/h
+    dq = np.empty(q.shape)
+    dq[0,:,:] = - 1.0/rad * h*u
+    dq[1,:,:] = - 1.0/rad * h*u*u
+    dq[2,:,:] = 0
+
+    return dq
 #
 
 def get_FrOutflow(hInflow,rInflow,velInflow,rOutflow,hOutflow,grav):
@@ -72,6 +87,9 @@ def b4step(self, state, old_state=None):
 
 def boundary_jet(state, dim, _, qbc, __, num_ghost):
     "Subsonic outflow BC at fixed Froude number.  Handles bottom/left boundaries."
+    x = state.grid.x.centers
+    dx = x[1]-x[0]
+        
     r0 =  state.problem_data['r0']
     h0 =  state.problem_data['h0']
     u0 =  state.problem_data['u0']
@@ -83,29 +101,25 @@ def boundary_jet(state, dim, _, qbc, __, num_ghost):
     if const_extrap:
         qbc[0,:num_ghost,:] = h0
         qbc[1,:num_ghost,:] = h0*u0
-        qbc[2,:num_ghost,:] = 0.0
+        qbc[2,:num_ghost,:] = 0.0        
     else:
-        x = state.grid.x.centers
-        dx = x[1]-x[0]
+        rm1 = r0-dx/2.0
+        rm2 = r0-3*dx/2.0
+        
+        # hm1
+        hm1 = state.problem_data['hm1'] 
+        um1 = beta/(rm1*hm1)
+        qbc[0,1,:] = hm1
+        qbc[1,1,:] = hm1*um1
+        qbc[2,1,:] = 0.0
 
-        # get BC for h via a linear interp
-        x_exact = np.linspace(r0,rOutflow,10000)
-        hh = integrate.odeint(steady_rhs,h0,x_exact,args=(beta,g))
-        hInterp = interp1d(x_exact,hh[:,0])
-        m=(hInterp(r0+dx/2.0+dx)-hInterp(r0+dx/2.0))/dx
-        b=h0-m*r0
-        for i in range(num_ghost):
-            qbc[0,num_ghost-1-i,:] = m*(r0-dx/2.0-i*dx)+b
+        # hm2
+        hm2 = state.problem_data['hm2'] 
+        um2 = beta/(rm2*hm2)
+        qbc[0,0,:] = hm2
+        qbc[1,0,:] = hm2*um2
+        qbc[2,0,:] = 0.0
         #
-
-        # get BC for h via a linear interp
-        hu = beta/x
-        m=(hu[1]-hu[0])/dx
-        b=h0*u0-m*r0
-        for i in range(num_ghost):
-            qbc[1,num_ghost-1-i,:] = m*(r0-dx/2.0-i*dx)+b
-        #
-        qbc[2,:num_ghost,:] = 0.0
     #
 #
 
@@ -127,20 +141,36 @@ def boundary_outflow(state, dim, _, qbc, __, num_ghost):
         qbc[1,-num_ghost:,:] = qbc[1,-2*num_ghost:-num_ghost,:]
         qbc[2,-num_ghost:,:] = qbc[2,-2*num_ghost:-num_ghost,:]
     else:
-        # outflow via exact solution
-        x_exact = np.linspace(r0,1.5*rOutflow,10000)
-        hh = integrate.odeint(steady_rhs,h0,x_exact,args=(beta,g))
-        hInterp = interp1d(x_exact,hh[:,0])
-        
         x = state.grid.x.centers
         dx = x[1]-x[0]
-    
-        for i in range(num_ghost):
-            qbc[0,-num_ghost+i,:] = hInterp(rOutflow+dx/2.0+dx*i)
-            qbc[1,-num_ghost+i,:] = beta/(rOutflow+dx/2.0+dx*i)
-        #
-        qbc[2,-num_ghost:,:] = 0
+        rp1 = rOutflow + dx/2.0
+        rp2 = rOutflow + 3*dx/2.0
+        
+        # hp1
+        hp1 = state.problem_data['hp1']
+        up1 = beta/(rp1*hp1)
+        qbc[0,-2,:] = hp1
+        qbc[1,-2,:] = hp1*up1
+        qbc[2,-2,:] = 0.0
+
+        # hp2
+        hp2 = state.problem_data['hp2']
+        up2 = beta/(rp2*hp2)
+        qbc[0,-1,:] = hp2
+        qbc[1,-1,:] = hp1*up2
+        qbc[2,-1,:] = 0.0
     #
+
+    #plt.clf()
+    #y = state.grid.y.centers
+    #my = len(y)
+    #xbc = state.grid.p_centers_with_ghost(2)[0][:,my/2]
+    ##import pdb; pdb.set_trace()
+    #plt.plot(xbc,qbc[0,:,my/2],'-r')
+    #plt.plot(x,state.q[0,:,my/2])
+    #plt.savefig("plot_with_BCs.png")
+    ##input("stop")
+    
 #
 
 def subsonic_outflow(state, dim, _, qbc, __, num_ghost):
@@ -158,16 +188,35 @@ def subsonic_outflow(state, dim, _, qbc, __, num_ghost):
     # get h and u at outflow
     h = (beta/(rOutflow*Fr*np.sqrt(g)))**(2./3)
     u = beta / (rOutflow*h + 1E-15)
-    
+
+    #print (h, Fr)
+    #input("asd")
     # set outflow boundary to generate a jump
     qbc[0,-num_ghost:,:] = h
     qbc[1,-num_ghost:,:] = h*u
     qbc[2,-num_ghost:,:] = 0.0
 #
 
+def steady_rhs_v2(r,h,beta):
+    g=1.0
+    a=g/beta**2 * r**3
+    b=r
+    return h/(a * h**3 - b)
+#
+
+def steady_rhs_v2_jacobian(r,h,beta):
+    g=1.0
+    a=g/beta**2 * r**3
+    b=r
+    return (-2*a*h**3-b)/(a*h**3-b)**2
+#
 
 def steady_rhs(h,r,beta,g=1.):
     return h/(g/beta**2 * r**3 * h**3 - r)
+#
+
+def steady_rhs_backward(h,r,beta,g=1.):
+    return h/(g/beta**2 * (-r)**3 * h**3 - (-r))
 #
 
 def initial_and_boundary_data(r_jump = 1.,
@@ -252,6 +301,7 @@ def setup(
 
     import shallow_es_2D
     import shallow_roe_with_efix_2D
+    import shallow_llf_dk_2D
     
     riemann_solver = riemann_solver.lower()
 
@@ -265,6 +315,16 @@ def setup(
             solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
             solver.num_eqn = 3
             solver.num_waves = 2
+            solver.fwave = False            
+        elif riemann_solver == 'llf_dk':
+            solver = pyclaw.ClawSolver2D(shallow_llf_dk_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 2
+            solver.fwave = False            
+        elif riemann_solver == 'hlle':
+            solver = pyclaw.ClawSolver2D(riemann.shallow_hlle_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 2
             solver.fwave = False
         elif riemann_solver == 'roe':
             solver = pyclaw.ClawSolver2D(shallow_roe_with_efix_2D)
@@ -272,7 +332,6 @@ def setup(
         else:
             raise Exception('Unrecognized Riemann solver') 
         solver.dimensional_split=True
-        #solver.dimensional_split = 2
         solver.limiters = pyclaw.limiters.tvd.minmod
         #solver.limiters = pyclaw.limiters.tvd.MC
         #solver.limiters = 0
@@ -280,9 +339,24 @@ def setup(
         solver.cfl_desired = 0.45
         solver.transverse_waves = 2
         solver.order = 2
-    elif solver_type == 'sharpclaw':
-        raise Exception('use solver_type classic for now')
 
+        # geometric source term
+        solver.step_source = step_radial_src
+        solver.source_split = 2
+        solver.before_step = b4step
+    elif solver_type == 'sharpclaw':
+            solver = pyclaw.SharpClawSolver2D(shallow_llf_dk_2D)
+            solver.num_eqn = 3
+            solver.num_waves = 2
+            solver.fwave = False
+            
+            solver.dq_src = dq_swe_radial
+            solver.weno_order = 5
+            solver.lim_type   = 2
+            
+            solver.cfl_max     = 0.46
+            solver.cfl_desired = 0.45
+    #
     solver.user_bc_lower = boundary_jet
     solver.bc_lower[0] = pyclaw.BC.custom
     if boundary == 'outflow':
@@ -296,11 +370,7 @@ def setup(
     solver.bc_lower[1] = pyclaw.BC.wall
     solver.bc_upper[1] = pyclaw.BC.wall
 
-    solver.before_step = b4step
-
-    # geometric source term
-    solver.step_source = step_radial_src
-    solver.source_split = 2
+    #solver.before_step = b4step
     
     xlower = 0.1;  xupper =  1.0
     ylower = 0;  yupper =  0.1
@@ -313,15 +383,13 @@ def setup(
     domain = pyclaw.Domain([x,y])
 
     state = pyclaw.State(domain,3,1)
-    
+
     solver.aux_bc_lower[0] = pyclaw.BC.extrap
     solver.aux_bc_upper[0] = pyclaw.BC.extrap
     solver.aux_bc_lower[1] = pyclaw.BC.wall
     solver.aux_bc_upper[1] = pyclaw.BC.wall
     state.aux[0,:,:] = 0
     
-    #old_state = pyclaw.State(domain,3)
-        
     xc, yc = state.p_centers
 
     state.problem_data['r0'] = r0
@@ -336,12 +404,53 @@ def setup(
     state.problem_data['use_dmin_blended'] = use_dmin_blended
     state.problem_data['set_Ri'] = set_Ri
 
+    # ***** COMPUTE EXACT SOLUTION TO USE AT BOUNDARIES ***** #    
+    dx=state.grid.x.centers[1]-state.grid.x.centers[0]
+    beta = r0*h0*u0
+    # inner boundary
+    dh=ode(steady_rhs_v2,
+           steady_rhs_v2_jacobian).set_integrator('vode',
+                                                  method='bdf',
+                                                  nsteps=1E5)
+    dh.set_initial_value(h0,r0).set_f_params(beta).set_jac_params(beta)
+    rEnd=r0-3*dx/2.0 # for 2 ghost cells
+    dr=1E-6*dx
+    r_backward=np.linspace(r0-dr,rEnd,1000)
+    hh_backward = r_backward*0
+    for i in range(len(r_backward)):
+        hh_backward[i] = dh.integrate(r_backward[i])[0]
+    #    
+    hInterp = interp1d(r_backward,hh_backward)
+    state.problem_data['hm1'] = hInterp(r0-dx/2.0)
+    state.problem_data['hm2'] = hInterp(r0-3*dx/2.0)
 
+    #plt.plot(r_backward,hh_backward,'-r')
+    #
+    # outer boundary
+    r_forward = np.linspace(r0,1.1*rOutflow,1000)
+    hh_forward = integrate.odeint(steady_rhs,h0,r_forward,args=(beta,g))[:,0]
+    hInterp = interp1d(r_forward,hh_forward[:])
+    state.problem_data['hp1'] = hInterp(rOutflow+dx/2.0)
+    state.problem_data['hp2'] = hInterp(rOutflow+3*dx/2.0)
+    # END OF COMPUTATION OF EXACT SOLUTION AT BOUNDARIES #    
+
+    #plt.plot(r_forward,hh_forward,'-b')
+    #plt.plot(r0+dx/2.0,state.problem_data['h0'],'go',lw=10)
+    #plt.plot(r0-dx/2.0,state.problem_data['hm1'],'go',lw=10)
+    #plt.plot(r0-3*dx/2.0,state.problem_data['hm2'],'go',lw=10)
+    #plt.savefig('plot.png')
+    
     # INITIAL CONDITIONS #
     if initialConditionType==0:
         state.q[0,:,:] = 0.1
         state.q[1,:,:] = 0.0
         state.q[2,:,:] = 0.0
+
+        #hInit = hInterp(state.p_centers[0])
+        #uInit = beta/(hInit*state.p_centers[0])
+        #state.q[0,:,:] = hInit
+        #state.q[1,:,:] = hInit*uInit
+        #state.q[2,:,:] = 0.0
     elif initialConditionType==1:
         rStab,hStab,uStab,hL = initial_and_boundary_data(r_jump = rJump,
                                                          r_inner = r0,
@@ -350,7 +459,6 @@ def setup(
                                                          g=g,
                                                          h_in=h0,
                                                          u_in=u0)
-        from scipy.interpolate import interp1d
         hInterp = interp1d(rStab,hStab)
         rcInterp = np.minimum(np.maximum(xc,r0),rOutflow)
         state.q[0,:,:] = (xc<r0)*h0 + (xc>=r0)*hInterp(rcInterp)
@@ -375,18 +483,21 @@ def setup(
 if __name__ == "__main__":
     from clawpack.pyclaw.util import run_app_from_main
     # ***** Physical parameters ***** #
-    tfinal = 5
+    tfinal = 5.0
     nDTOut = 10
     grav = 1.0
     
     # ***** numerics ***** #
     num_cells = 50
     solver_type = 'classic'
+    #solver_type = 'sharpclaw'
     #riemann_solver = 'roe'
     riemann_solver = 'es'
-
-    use_dmin_blended = 0.0 #1.0
-    set_Ri = 1.0 #None
+    #riemann_solver = 'llf_dk'
+    riemann_solver = 'hlle'
+    
+    use_dmin_blended = 0.0
+    set_Ri = 1.0
     
     # initial condition
     with_jump = False
@@ -405,9 +516,7 @@ if __name__ == "__main__":
     
     #velInflow = 15.0
     #hOutflow = 6.6845019298155357
-    
-    FrOutflow = get_FrOutflow(hInflow,rInflow,velInflow,rOutflow,hOutflow,grav)    
-    
+        
     if with_jump:
         tfinal=10
         boundary='subsonic'
@@ -415,6 +524,13 @@ if __name__ == "__main__":
         tfinal=5
         boundary='outflow'
     #
+
+    #velInflow=0.05 ####
+    #tfinal=20.0
+    FrOutflow = get_FrOutflow(hInflow,rInflow,velInflow,rOutflow,hOutflow,grav)
+    
+    #print velInflow/np.sqrt(grav*hInflow) ######
+    #print FrOutflow ######
     
     claw = setup(
         set_Ri=set_Ri,
@@ -433,7 +549,8 @@ if __name__ == "__main__":
         # physical parameters
         g=grav,
         tfinal=tfinal,
-        num_output_times = int(nDTOut*tfinal),    
+        num_output_times = int(nDTOut*tfinal),
+        #num_output_times = nDTOut,    
         # numerical parameters
         num_cells=num_cells,
         solver_type = solver_type,
