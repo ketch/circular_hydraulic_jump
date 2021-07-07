@@ -1,0 +1,360 @@
+\documentclass[english,11pt]{article}
+
+\usepackage{enumitem}
+\usepackage{cite}
+\usepackage{bbm}
+\usepackage{ulem}
+\usepackage{amsthm}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage[hmargin=0.9in, vmargin=0.75in]{geometry}
+
+\usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{url}
+\usepackage{bm}
+
+\usepackage{amsmath}
+\usepackage[numbers]{natbib}
+\let\cite=\citet
+\newcommand{\bfx}{{\bf x}}
+
+\makeatletter
+\providecommand{\tabularnewline}{\\}
+\makeatother
+
+%%---------------------------------------------------%%
+%%---------------------- TITLE ----------------------%%
+%%---------------------------------------------------%%
+\begin{document}
+\title{Response to Reviewers}
+\maketitle
+
+\vspace{1.5cm}
+\noindent
+Michael Dumbser \\
+Editor \\
+International Journal for Numerical Methods in Fluids \\
+
+\vspace{1.5cm}
+
+\noindent
+Manuscript \# FLD-21-0079
+\vspace{1.5cm}
+
+\noindent
+Dear Prof. Michael Dumbser,
+
+\vspace{0.25cm}
+\bigskip
+The manuscript entitled
+\begin{center}
+``Numerical simulation and entropy dissipative cure of the carbuncle instability for the shallow water circular hydraulic jump''
+\end{center}
+by David I. Ketcheson and Manuel Quezada de Luna
+has been revised following the comments made by the referees.
+
+\bigskip
+Letters detailing how the comments of each reviewer have been
+addressed are enclosed. To facilitate your perusal of the revised
+manuscript, changes concerning the comments of the first and second
+reviewers are highlighted in red and green, respectively.
+
+
+\vspace{0.25cm}
+\bigskip\noindent 
+With our best regards,
+
+\vspace{0.5cm}
+\bigskip\noindent
+David I. Ketcheson and Manuel Quezada de Luna
+
+\newpage
+%%---------------------------------------------------------%%
+%%-------------------- FIRST REVIEWER -------------------- %%
+%%---------------------------------------------------------%%
+\section*{Revision of Manuscript \# FLD-21-0079 -- Reviewer $\#1$}
+We thank the reviewer for the comments and suggestions.
+We have incorporated all of them.  For your convenience,
+the modifications related to the comments made by reviewer $\#1$ and $\#2$
+appear in red and green respectively in the new version of the manuscript. 
+Statements in red below are comments from the reviewer.
+In this letter, the comments made by the reviewer refer to the original
+manuscript and our responses refer to the new manuscript. 
+
+
+\medskip
+\noindent
+The major change in the new manuscript is XX.
+
+\bigskip
+{\color{red}
+  \begin{itemize}
+    \item[(1)]
+      Firstly, it is not clear why blending the Rusanov and Roe methods (Section 3) would fix the carbuncle
+      using entropy-residual as the guiding principle. From literature, it is obvious that Roe-type methods suffer
+      from carbuncle whereas Rusanov-type schemes do not. But why using the entropy-residual somehow
+      makes the hybrid of the two methods remove the carbuncle? Is entropy-stability a factor (Eq. 13)? If yes,
+      why?
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{red}
+  \begin{itemize}
+  \item[(2)]
+    Assuming there is a solid reason for the proposed fix in the paper. It is also unclear how the indicator
+    ($\theta$, after Eq. 19b) works to actively switch between Rusanov to Roe and vice-versa. The authors
+    mention that $\theta=0$ means Roe-flux whereas $\theta=1$ recovers the Rusanov flux. What is the guiding
+    principle to select the 'appropriate' $\theta$ values? This is somewhat discussed in 3.1 in between Eq. 
+    16-19b but it is not intuitively clear to me how the entropy-residual is used as a guide to select $\theta$.
+    Moreover, what does the value in between $0<\theta<1$ means?
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{red}
+  \begin{itemize}
+  \item[(3)]
+    If we continue to assume that (2) above can also be justified, I strongly suggest that the one or two of
+    the test cases to be further evaluated. Dumbser et al. (04) and Kitamura et al. (AIAA 09) showed that the
+    instability may manifest itself for a certain 'disturbance' in the test cases either via initial point values
+    disturbance or grid disturbances, even if the fix works nicely on the non-disturbed conditions. I strongly
+    suggest to vary the mesh as done in Kitamura et al. for the cylinder case (at least 3 different meshes for
+    cylinder) and to include the residual plot. This is because the residual plot for convergence can easily show
+    potential instability. The contour plot solution may look nice but the residual plot may show that it is
+    moving toward instability.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{red}
+  \begin{itemize}
+  \item[(4)]
+    The hydraulic jumps with random perturbations (Section 5.4.3). This is good start for introducing a
+    'disturbance' but may not be sufficient to justify carbuncle-free fix. Please try out the following
+    disturbance. Let $(u_L, h_L)$ to be the initial left and $(u_R, h_R)$ the right states of the jump. 
+    Introduce the following disturbance at the last cell prior to the jump such that 
+    $u=\delta { u_L} + (1-\delta)u_R, h=\delta {h_L} + (1-\delta)$ where $0\leq{\delta}\leq{1}$. 
+    Please try a discrete increment such that $\delta = 0.0, 0.1, 0.2,...,0.9, 1.0$. 
+    Details can be found in Kitamura et al. (AIAA 2007, 2009). Run the proposed range of $\delta$
+    for at least one of the hydraulic jump cases.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{red}
+  \begin{itemize}
+  \item[(5)]
+    I am a bit concerned when the authors mention in the conclusion that the proposed fix may not be fully
+    entropy-stable. This is somewhat counter-intuitive of using entropy control to remove the instability as
+    proposed throughout the paper. This comes back to my first question. Why is your proposed fix herein
+    removes the carbuncle problem?
+  \end{itemize}
+}
+\noindent
+XX
+
+
+\clearpage
+%\bibliographystyle{plain}
+\bibliographystyle{abbrvnat}
+\bibliography{ref.bib}
+
+%%----------------------------------------------------------%%
+%%-------------------- SECOND REVIEWER -------------------- %%
+%%----------------------------------------------------------%%
+\newpage
+\section*{Revision of Manuscript \# FLD-21-0079 -- Reviewer $\#2$}
+We thank the reviewer for the comments and suggestions.
+We have incorporated all of them.  For your convenience,
+the modifications related to the comments made by reviewer $\#1$ and $\#2$
+appear in red and green respectively in the new version of the manuscript.
+Statements in green below are comments from the reviewer.
+In this letter, the comments made by the reviewer refer to the original
+manuscript and our responses refer to the new manuscript.
+
+\medskip
+\noindent
+The major change in the new manuscript is XX.
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(1)]
+    When dealing with strong transcritical (or transonic, in the case of Euler equations) shocks, 
+    the slowly-moving shock anomaly may appear 
+    (see the thesis from Zaide \url{https://www.danielzaide.com/PDF/zaide_thesis.pdf})
+    This anomaly is related to the discrete shock structure and appears when having a non-linear Hugoniot locus. 
+    A spike in the momentum is observed downstream of the shock wave. Some authors have related the carbuncle to 
+    the discrete shock structure and the unphysical values obtained in the cell containing the shock 
+    (See Xie et al. \url{https://www.sciencedirect.com/science/article/pii/S0021999117306447?via\%3Dihub},
+    Zaide and Roe \url{https://arc.aiaa.org/doi/10.2514/6.2011-3686}, etc). I recommend the authors to mention 
+    this in the introduction and examine if the novel blended solver suffers from this anomaly (see comments below). 
+    The performance of carbuncle-free solvers based on entropy arguments for the reduction of the slowly-moving 
+    shock anomaly has not been yet assessed (to my knowledge).
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(2)]
+    A numerical fix for the slowly-moving shock anomaly which avoids adding additional dissipation is proposed 
+    by Zaide in \url{https://www.danielzaide.com/PDF/zaide_thesis.pdf}.
+    The authors are recommended to include this reference in the introduction, 
+    since it includes a very detailed review on numerical shockwave anomalies.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(3)]
+    The proposed method is designed for the homogeneous SWE. 
+    Please explain if this idea can be easily extended to the SWE with bed elevation, friction, etc. 
+    Is there any limitation when dealing with source terms?
+  \end{itemize}
+}
+\noindent
+We are interested in considering source terms and guaranteeing positivity preservation but 
+we believe that constitutes a whole new project and, as a result, we would prefer to leave that 
+for future work. We have included a remark about this in the conclusions. 
+      
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(4)]
+    There is a paper by Navas-Montilla and Murillo 
+    \url{https://www.sciencedirect.com/science/article/pii/S0021999118307496?via\%3Dihub}
+    where the carbuncle and the slowly-moving shock anomaly for the SWE with bed elevation source term 
+    have been examined together and some numerical fixes are proposed. This seems to be the only work 
+    where source terms are considered in the study of shock anomalies for the SWE. 
+    Please mention it in the introduction.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(5)]
+    In test case 4.1, flow over dry bed is considered but the details of the wet-dry interface 
+    capturing method are omitted. Can you please mention or cite the algorithm for the wet-dry treatment?
+  \end{itemize}
+}
+\noindent
+In the experiments, we set $h_r=10^{-15}$. Therefore, we do not deal with wet-dry interfaces. 
+Related to this, it is reasonable to wonder if the algorithm could yield negative water height values, 
+which would be unphysical and would make the code to crash. 
+The first-order method with Rusanov's solver is positivity preserving (under a CFL-like time step restriction). 
+Using the other Riemann solvers and/or the high-order corrections might introduce violations of positivity.
+To minimize the loss of positivity, we used the first-order scheme for this test problem. 
+Importantly, Roe's and the blended solvers might still introduce violations of positivity, but 
+we did not observe that in our experiments. 
+
+In the original manuscript, we mentioned that we use method (7) for this problem, 
+which is the first-order scheme. However, we believe we were not clear enough and, 
+consequently, have revised the text to improve clarity. 
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(6)]
+    The convergence rates in Table 1 are suboptimal (around 0.4 for Roe solver), 
+    whereas those in Table 2 achieve 1-st order of accuracy. Is this suboptimality caused by 
+    the wet-dry interface? Please add a comment in the text.
+  \end{itemize}
+}
+\noindent
+Due to the entropy glitch, we do not converge to the right solution with Roe solver,
+hence the drop in rate of convergence.
+Using any of the other solvers, we converge to the correct solution. The convergence rate
+for those cases is still smaller than in Table 2 because Table 1 is obtained using the first-order scheme. 
+We revised the text in Section 4.1 to improve clarity. 
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(7)]
+    In test case 4.3, can you add a plot of the solution for hu along x (at y=50)? 
+    This will allow to visualize the possible presence of unphysical intermediate shock values 
+    (slowly-moving shock anomaly) in the traditional solvers and determine if the blended solver 
+    is able to overcome this issue. 
+    See Case 4.1.2 from \url{https://www.sciencedirect.com/science/article/pii/S0021999118307496?via\%3Dihub}
+    and include a plot like figure 4, where the evolution in time of hu is depicted and the shedding of 
+    oscillations observed.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(8)]
+    I think the presence of the aforementioned unphysical values (spike in hu) are observed in Figure 8b (right) 
+    and Figure 9 (right), as there is a ring of amplitude above (red color) for hu separating the supercritical 
+    and subcritical regions. Can you include some comments about this?
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(9)]
+    In figure 7c, can you also plot $hu$?
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(10)]
+    In figure 7c, the label of the $Y$ axis is missing.
+  \end{itemize}
+}
+\noindent
+XX
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(11)]
+    In case 5.4.3, the authors mention that the observed instabilities have a physical base and are not 
+    produced by the numerical method. When saying ``physical instabilities'', what do you mean? 
+    The SWE is a 2D model which consider depth-averaged quantities. Note that the real physics may involve 
+    a more developed hydraulic jump (which involves vertical velocities) which cannot be represented by a 
+    pure discontinuity as done with the SWE. Please clarify in the text the meaning of ``physical instabilities''.
+  \end{itemize}
+}
+\noindent
+XX
+
+
+
+
+
+
+\end{document}
+
+
+
