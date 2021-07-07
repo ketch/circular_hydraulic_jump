@@ -12,7 +12,7 @@
 \usepackage{amsthm}           % writing mathematical theorems
 \usepackage{amssymb}          % writing mathematical symbols
 \usepackage{bm, amsfonts}     % writing bold mathematical symbols
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{fixmath}
 \usepackage{tikz}
 \usepackage{bm}
@@ -795,6 +795,15 @@ The domain is given by $x\in(0,10)$, and the initial condition is $hu(x,0)=0$ an
 \end{align*}
 with $h_l=5\times 10^{-3}$.  In our experiments we use $h_r=1\times
 10^{-15}$ to avoid division by zero.
+{\color{OliveGreen}
+If we use Rusanov's solver with the first-order method \eqref{first-order_via_fluct}, 
+the water height is guaranteed to remain positive. Using Roe or the blended solvers 
+can introduce violations of positivity. Alternatively, if we consider the second-order scheme 
+\eqref{second-order_via_fluct}, the water height could become negative regardless of the Riemann solver.
+To reduce the occurance of loss of positivity, we only use the first-order method 
+\eqref{first-order_via_fluct} for this test problem. 
+Although using Roe or the blended solvers might still lead to loss of positivity, we 
+did not observe that in our experiments.}
 The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is
 \begin{align*}
   h(x,t) =
@@ -820,7 +829,12 @@ The entropy glitch, which is manifested as a non-physical shock at $x=x_0$,
 is present with Roe's solver. Using Rusanov's and the blended solvers
 fixes the entropy glitch.
 In Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
-Note that using the blended solver leads to more accurate results.
+{\color{OliveGreen}
+    Due to the entropy glitch, we do not converge to the right solution with Roe solver,
+    hence the drop in rate of convergence. Using any of the other solvers, we converge to the 
+    correct solution. Note that using the blended solver leads to more accurate results. 
+    Since the method we use is first-order accurate, we get no better than first-order convergence.}
+
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1478,6 +1492,14 @@ where both of these properties are important.  The approach used in Section
 solver of the type used in Clawpack.  The same techniques could also
 be used more generally to avoid carbuncles in the solution of the
 Euler equations.
+{\color{OliveGreen}
+  For future work, we plan to extend these results to the shallow water equations 
+  with source terms that model non-flat bathymetry and friction. In addition, we 
+  are interested in guaranteeing positivity preservation for the water height
+  via algebraic flux limiters, like those proposed by Boris and Book \cite{boris1973flux} 
+  and later extended by Zalesak \cite{zalesak1979fully}.
+}
+  
 
 We have introduced two new test problems for numerical shallow water solvers,
 both consisting of flow in an annulus, with inflow from a jet
