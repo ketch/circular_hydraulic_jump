@@ -5,6 +5,7 @@
 \usepackage[hmargin=0.9in, vmargin=1.25in]{geometry}
 \usepackage[babel]{csquotes}
 \usepackage{subfig}
+\usepackage[export]{adjustbox}
 \usepackage{graphicx}
 \usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{caption}
@@ -1080,6 +1081,50 @@ results.
     \label{fig:cylinder_flow}}
 \end{figure}
 
+{\color{OliveGreen}
+  We inspect further the behavior of the blended solver across the shock. 
+  We are interested in the possible presence of an unphysical spike in the momentum.
+  This numerical artifact might lead to a slow displacement of the position of the shock,
+  which is known as slowly-moving shock anomaly; see for instance \cite{navas2019improved, zaide2012numerical}.
+  In the left panels of Figure \ref{fig:evol_of_hu}, we show the time evolution of $hu(x,y=50)$ using the Rusanov and the blended solvers.
+  Clearly, with both solvers we obtain the spike in $hu$. This behavior is expected due to the non-linear Hugoniot locus
+  and the presence of intermediate states through the numerical shock \cite[Section 4.1]{navas2019improved}.
+  
+  In \cite{navas2019improved}, it is remarked that spurious oscillations in the transverse direction are introduced with Roe's solver.
+  The authors observed these oscillations by plotting the time evolution of a slice along a fixed value of $x$.
+  The authors conjectured that increasing dissipation of the shear waves reduces these oscillations.
+  Rusanov's solver adds more dissipation (than the solvers they use) to the shear waves; therefore,
+  it eliminates the spurious oscillations,
+  as seen in the right-top panel of Figure \ref{fig:evol_of_hu}. Small oscillations are present with the blended solver.
+  %
+  Importantly, with the Rusanov and the blended solvers, the position of the shock appears to remain constant
+  (once the steady state is achieved). This is suggested by the parabolic profile of the space-time evolution of $hu(x=18,y)$.
+  To further confirm this, we run the simulation up to $t=160$ and plot in Figure \ref{fig:pos_of_shock} the location of the shock along $y=50$.
+  Note that after $t\approx 55$, the location of the shock remains constant.
+  
+  \begin{figure}[!h]
+    \centering
+    \subfloat[Evolution of $hu$ along (left) $y=50$ and (right) $x=18$.
+      We use the Rusanov and the blended solvers in the first and second rows, respectively.\label{fig:evol_of_hu}]{
+      \begin{tabular}{ccc}
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_llf_at_y50.png}
+      & &
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_llf_at_x18.png}
+      \\
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_blended_at_y50.png}
+      & &
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_blended_at_x18.png}
+      \end{tabular}
+    }
+    \quad
+    \subfloat[Location of the shock along $y=50$. \label{fig:pos_of_shock}]{
+      \includegraphics[scale=0.475,valign=c]{figures/pos_shock.png}}
+    \caption{Study of the slowly-moving shock anomaly. \label{fig:slowly_moving_anomaly}}
+\end{figure}
+}
+
+
+
 We have also conducted a more challenging version of this test, in which
 the velocity within the domain is initially zero.  In that case, Rusanov's 
 and the blended solvers give carbuncle-free results similar to Figure \ref{fig:steady_outflow},
@@ -1314,7 +1359,10 @@ In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
 Rusanov's, HLLEMCC, and the blended Riemann solvers.
 For this test case, these three solvers give qualitatively similar solutions,
 all of which are free from carbuncles.
-%however, we expect Rusanov's solver to be less accurate. 
+{\color{OliveGreen} In Figure \ref{fig:chj_r1_slices}, we plot the water height and the x-momentum along $y=0$.
+  Clearly, the solution based on Rusanov's solver is more dissipated. From the plot, it is also clear the presence
+  of the non-physical spike in the momentum. Just as in Section \ref{sec:bow_shock}, in our numerical experiments,
+  this spike does not lead to a slowly-moving shock.}
 
 \begin{figure}[!h]
   \centering
@@ -1330,7 +1378,7 @@ all of which are free from carbuncles.
   
   \subfloat[Solution at $t=3$ using (left) Rusanov's,
     (upper-right) HLLEMCC and (bottom-right) the blended solvers.\label{fig:chj_r1_diff}]{
-    \includegraphics[scale=0.3]{figures/chj_r1_quadrants.png}
+    \includegraphics[scale=0.3,valign=c]{figures/chj_r1_quadrants.png}
     %\begin{tabular}{ccc}
     %  \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
     %  \includegraphics[scale=0.3]{figures/chj_r1_hllemcc_p3.png} &
@@ -1338,9 +1386,12 @@ all of which are free from carbuncles.
     %\end{tabular}
   }
   \qquad\qquad
-  \subfloat[Solution at $t=3$ along $y=0$ using the same solvers as in (b).]{
-    \includegraphics[scale=0.3]{figures/chj_r1_slices.png}}
-  
+  \subfloat[(Top) water height and (bottom) x-momentum at $t=3$ along $y=0$ using the same solvers as in (b).\label{fig:chj_r1_slices}]{
+    \begin{tabular}{c}
+      \includegraphics[scale=0.27,valign=c]{figures/chj_r1_slices.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_hu_r1_slices.png}
+    \end{tabular}
+  }
     \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
       We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
       In (a) and (b) we show the Schlieren plot for the water height $h$.
@@ -1362,8 +1413,10 @@ the HLLEMCC solver, which lead to failure of the solver. Therefore, in Figure
 \ref{fig:chj_r2_diff} we only show results with Rusanov's and the blended
 solvers.  
 
-The solutions obtained with these solvers show no carbuncles.  The Rusanov
-solution remains very close to the initial symmetric equilibrium state,
+The solutions obtained with these solvers show no carbuncles.
+{\color{OliveGreen} Note that, similar to the experiments in Section \ref{sec:bow_shock},
+  the non-physical spike in the momentum is present in the numerical solution.}
+The Rusanov solution remains very close to the initial symmetric equilibrium state,
 whereas the blended solver solution includes perturbations that appear
 just downstream from the jump.
 In Figure \ref{fig:chj_r2_later}, we show the Rusanov and blended solutions at
@@ -1433,8 +1486,13 @@ We use the same mean values \eqref{bcs_chj_r2}, but now we set
 with $\tilde h_\jet = \frac{h_\jet}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_\jet|=|\bfu_\jet|(1+\epsilon(x,y,t))$.
 Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
 time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
+
+
+
 In this case, due to the large Froude number, the random perturbations in the inflow
-may trigger physical instabilities, which we want to preserve. At the same time, we
+may trigger physical instabilities;
+{\color{OliveGreen} i.e., the shape of the hydraulic jump might deviate from a rotationally symmetric profile and become unsteady}.
+We want to preserve this behavior. At the same time, we
 do not want the solution to develop carbuncle instabilities.
 In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
 at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
@@ -1498,6 +1556,8 @@ Euler equations.
   are interested in guaranteeing positivity preservation for the water height
   via algebraic flux limiters, like those proposed by Boris and Book \cite{boris1973flux} 
   and later extended by Zalesak \cite{zalesak1979fully}.
+  Finally, we are interested in reducing (or eliminating) the non-physical spike in
+  the momentum. To do this we plan to modify Rusanov's solver based on \cite[Section 5.1]{navas2019improved}. 
 }
   
 

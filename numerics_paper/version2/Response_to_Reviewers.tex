@@ -17,7 +17,7 @@
 
 \usepackage{amsmath}
 \usepackage[numbers]{natbib}
-\let\cite=\citet
+%\let\cite=\citet
 \newcommand{\bfx}{{\bf x}}
 
 \makeatletter
@@ -82,11 +82,6 @@ appear in red and green respectively in the new version of the manuscript.
 Statements in red below are comments from the reviewer.
 In this letter, the comments made by the reviewer refer to the original
 manuscript and our responses refer to the new manuscript. 
-
-
-\medskip
-\noindent
-The major change in the new manuscript is XX.
 
 \bigskip
 {\color{red}
@@ -164,11 +159,12 @@ XX
 \noindent
 XX
 
-
-\clearpage
 %\bibliographystyle{plain}
-\bibliographystyle{abbrvnat}
-\bibliography{ref.bib}
+%\bibliography{refs}
+%\clearpage
+%\bibliographystyle{plain}
+%#\bibliographystyle{abbrvnat}
+%\bibliography{ref.bib}
 
 %%----------------------------------------------------------%%
 %%-------------------- SECOND REVIEWER -------------------- %%
@@ -182,10 +178,6 @@ appear in red and green respectively in the new version of the manuscript.
 Statements in green below are comments from the reviewer.
 In this letter, the comments made by the reviewer refer to the original
 manuscript and our responses refer to the new manuscript.
-
-\medskip
-\noindent
-The major change in the new manuscript is XX.
 
 \bigskip
 {\color{OliveGreen}
@@ -231,7 +223,7 @@ XX
 }
 \noindent
 We are interested in considering source terms and guaranteeing positivity preservation but 
-we believe that constitutes a whole new project and, as a result, we would prefer to leave that 
+we believe that constitutes a new project and, as a result, we would prefer to leave that 
 for future work. We have included a remark about this in the conclusions. 
       
 \bigskip
@@ -268,7 +260,7 @@ Importantly, Roe's and the blended solvers might still introduce violations of p
 we did not observe that in our experiments. 
 
 In the original manuscript, we mentioned that we use method (7) for this problem, 
-which is the first-order scheme. However, we believe we were not clear enough and, 
+which is the first-order scheme. However, we now believe we were not clear enough and, 
 consequently, have revised the text to improve clarity. 
 
 \bigskip
@@ -301,7 +293,22 @@ We revised the text in Section 4.1 to improve clarity.
   \end{itemize}
 }
 \noindent
-XX
+We appreciate the reviewer's suggestion. 
+We have included the requested plots using the Rusanov and the blended solvers.
+%In both cases, we obtain the non-physical spike in the momentum, which is expected due to the non-linear Hugoniot locus
+%and the presence of intermediate states through the numerical shock.
+In \cite[Section 4.1.2]{navas2019improved}, it is remarked that spurious oscillations in the transverse direction
+are introduced with Roe's solver. If HLL(S) is employed, these oscillations are damped but are still present.
+The authors also conjecture that increasing dissipation of the shear waves would reduce this effect even further.
+Rusanov's solver adds more dissipation to the shear waves and, as conjectured by the authors,
+the spurious oscillations are eliminated; see the top-right panel of our newly added Figure 4.
+With the blended solver there are still small oscillations. 
+
+Importantly, with the Rusanov or the blended solvers, the position of the shock appears to remain constant
+(once the steady state is achieved). This is suggested by the parabolic profile of the space-time evolution of $hu(x=18,y)$.
+To further confirm this, we run the simulation up to $t=160$ and plot the location of the shock along $y=50$.
+Note that after $t\approx 55$, the location of the shock remains constant.
+
 
 \bigskip
 {\color{OliveGreen}
@@ -313,7 +320,13 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+We agree with the reviewer. We have included a remark about this in Section 5.4.2 and in the conclusions.
+Our blended solver is a convex combination of Rusanov's and Roe's solvers,
+both of which produce the spike. Consequently, the blended solver also produces the spike. 
+We believe that, within our framework, the key ingredient to solve this problem is to modify
+Rusanov's fluxes to eliminate the spike following for example \cite[Section 5.1]{navas2019improved}.
+Afterwards, we can blend the modified Rusanov's fluxes with Roe's fluxes.
+We leave this for future research but make a corresponding remark in the conclusions. 
 
 \bigskip
 {\color{OliveGreen}
@@ -323,7 +336,8 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+We included the requested plot. As expected, the non-physical spike is clear.
+We also added a remark about this in Section 5.4.1.
 
 \bigskip
 {\color{OliveGreen}
@@ -333,7 +347,7 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+Fixed as requested.
 
 \bigskip
 {\color{OliveGreen}
@@ -347,12 +361,16 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+In Sections 5.1-5.3, we assume rotational symmetry in the shallow water equations and derive a semi-analytical
+profile for the hydraulic jump.
+When we solve the shallow water equations without the assumption on rotational symmetry,
+we might obtain a shock that remains steady or an unsteady shock that deviates from the initial condition.
+When the latter happens, we say the hydraulic jump is physically unstable since we believe this behavior is driven by
+the nonlinear effects of the shallow water equations.
+We revised the text in Section 5.4.3 to improve clarity. 
 
-
-
-
-
+\bibliographystyle{plain}
+\bibliography{refs}
 
 \end{document}
 
