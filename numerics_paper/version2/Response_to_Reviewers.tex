@@ -95,7 +95,23 @@ manuscript and our responses refer to the new manuscript.
   \end{itemize}
 }
 \noindent
-XX
+As the reviewer remarks, Rusanov-type solvers do not suffer from carbuncle instabilities. Therefore,
+our aim is to use Rusanov's solver near shocks without degrading the accuracy of Roe's solver.
+The task is to find a blending criteria that can robustly and sharply locate shocks.
+The entropy-residual has proven to be a successful tool for this; see for instance \cite{guermond2011,guermond2018}. 
+%
+By using $\theta_i\approx 1$, our blended solver induces dissipation of entropy near shocks,
+which is a property of the exact solution. Moreover, if the solver is used with the first order method (7),
+the solution is provably entropy stable, as discussed in Section 3.3.
+Using entropy stability to avoid carbuncle formation is not a new idea. For example, in \cite{ismail2009,ismail2009v2},
+the authors obtain carbuncle free solvers for Euler by either inducing entropy dissipation or guaranteeing entropy stability. 
+To our knowledge, no work has been done exploring similar ideas for the shallow water equations. However, based on
+the success in the aforementioned references, it is reasonable to expect that entropy stability is a good tool to
+eliminate carbuncle formation in the shallow water equations. 
+%
+We have revised the introduction to emphasize our motivation for using the entropy-residual as blending
+criteria between Roe's and Rusanov's solvers. 
+
 
 \bigskip
 {\color{red}
@@ -110,7 +126,13 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+We provide a precise definition of $\theta_i$ in (17) and (19). The guiding principle to select $\theta_i$
+is based on the entropy-residual. As discussed before, using the entropy-residual to locate shocks has proven
+its worth in many works. 
+By selecting $\theta_i=\{0,1\}$, the numerical flux (13) is either Roe's or Rusanov's.
+Having $0<\theta<1$ produces a solver that combines the dissipation of both solvers; i.e.,
+for those cases, the blended solver is more dissipative than Roe's but not as much as Rusanov's. 
+We have added a remark in Section 3.1 to discuss the meaning of $0<\theta_i<1$.
 
 \bigskip
 {\color{red}
@@ -157,7 +179,35 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+In Section 3.3, we enhance the artificial dissipation via $\lambda_{i+1/2}^{\min}$ to guarantee the first-order method (7)
+is entropy stable; that is, the entropy inequality (25) is satisfied. When we add the second-order flux corrections to get method (6),
+we can't guarantee the entropy inequality (25) still holds. When we mentioned in the conclusions that we do not have
+entropy stability, we meant that we do not have a proof that the entropy inequality (25) holds when using the blended solver
+with the second-order method (6). It is important to clarify that the second-order method based on the blended solver
+still induces dissipation of entropy. We have revised the conclusions to improve clarity. 
+
+
+\begin{thebibliography}{99}
+  \bibitem{guermond2011}
+    JL. Guermond, R. Pasquetti, B Popov,
+    Entropy viscosity method for nonlinear conservation laws.
+    {\it J. Comput. Phys.}, {\bf 230} (2011) 4248--4267.
+
+    \bibitem{guermond2018}
+      JL. Guermond, M. Nazarov, B. Popov, I. Tomas,
+      Second-order invariant domain preserving approximation of the Euler equations using convex limiting.
+      {\it SIAM J. Sci. Comput.}, {\bf 40(5)} (2018) A3211--A3239.
+
+    \bibitem{ismail2009}
+      F. Ismail and P.L. Roe,
+      Affordable, entropy-consistent Euler flux functions II: Entropy production at shocks.
+      {\it J. Comput. Phys.}, {\bf 228(15)} (2009) 5410--5436.
+
+    \bibitem{ismail2009v2}
+      F. Ismail, P.L. Roe, and H. Nishikawa,
+      A proposed cure to the carbuncle phenomenon.
+      {\it In Computational Fluid Dynamics}, (2006), 149--154.
+\end{thebibliography}
 
 %\bibliographystyle{plain}
 %\bibliography{refs}
