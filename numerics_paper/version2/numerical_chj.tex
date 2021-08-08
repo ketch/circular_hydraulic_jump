@@ -108,9 +108,20 @@ The shallow water carbuncle behaves similarly to the
 Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
 the HLLE or Rusanov solver is used, and can also be suppressed by particular modifications
 of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
-In this work, we propose a new Riemann solver that blends those of Rusanov and Roe
-based on a local measure of the entropy residual, 
-as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+In this work, we propose a new Riemann solver that blends those of Rusanov and Roe.
+%based on a local measure of the entropy residual, 
+%as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+{\color{red} Since Rusanov's solver does not suffer from carbuncle instabilities,
+  our aim is to use it near shocks without degrading the good accuracy of Roe's solver. 
+  To do this, we need to find a blending criteria that can robustly and sharply locate shocks.
+  The entropy-residual has proven to be a successful tool for this task; see for instance
+  \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+  By doing this, our blended solver induces dissipation of entropy.
+  Entropy dissipative Riemann solvers have been used to produce carbuncle free solvers for the Euler equations;
+  see for instance \cite{ismail2009affordable,ismail2009proposed}.
+  However, to the best of our knowledge, this idea has not been used before to supress carbuncle instabilities for the
+  shallow water equations. 
+}
 Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque 
 finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
 while maintaining an accuracy similar to that of Roe solver.  
@@ -246,7 +257,7 @@ and employed in the Clawpack software \cite{clawpack,pyclaw-sisc}, which impleme
 Lax-Wendroff-LeVeque (LWL) scheme
 \begin{align}\label{second-order_via_fluct}
   Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
-  -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
+  -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right].
 \end{align}
 Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$,
 the fluctuations are given by
@@ -314,7 +325,13 @@ where the intermediate state $\bfu_{i-1/2}$ is determined by imposing conservati
 The fluctuations are given by \eqref{fluct} with $s_{i-1/2}^1=-\lambda_{i-1/2}^{\max}$
 and $s_{i-1/2}^2=\lambda_{i-1/2}^{\max}$, and the first- and second-order methods based
 on Rusanov's solver are given by \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}, respectively.
-
+{\color{red}
+  The second-order method can also be written in flux-differencing form \eqref{flux-differencing-form}, where 
+  \begin{align}\label{first-order_fluxes_LLF}
+    \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+    - \frac{\lambda_{i+1/2}^{\max}}{2}(\bfq_{i+1}-\bfq_{i}).
+  \end{align}
+}
 
 \subsection{Roe's Riemann solver} \label{sec:roe}
 The Roe Riemann solver is based on evaluating the flux Jacobian using Roe's average
@@ -363,6 +380,12 @@ and the factors $\alpha^p_\imh$ obtained by solving
   \end{bmatrix}
   =\Delta Q_{i-1/2}:=\bfq_i-\bfq_{i-1}.
 \end{align}
+{\color{red}
+  The first-order Roe's fluxes used in \eqref{flux-differencing-form} and \eqref{first-order_via_fluct} are given as follows:
+  \begin{align}\label{first-order_fluxes_Roe}
+    \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2} - \frac{1}{2} |\hat A_{i+1/2}|(\bfq_{i+1}-\bfq_{i}).
+  \end{align}
+}
 
 \subsection{Kemm's Riemann solver} \label{sec:kemm}
 Several specialized Riemann solvers have been proposed in order to deal
@@ -587,12 +610,14 @@ $$
 We expect that $\theta_\iph\approx 0 $ in smooth regions,
 while $\theta_\iph\approx 1$ near shocks.
 The value of $\theta_\iph$ controls whether the first-order flux \eqref{blended-flux-1}
-behaves more like that of Rusanov or Roe.  Specifically, if
-$\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, the flux is equivalent to that of
-Rusanov, while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, it is equivalent
-to that of Roe.  
-
-In fact, with the choice \eqref{s_p}, the correction fluxes also match
+behaves more like that of Rusanov or Roe.
+{\color{red}
+  Specifically, if $\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, the flux \eqref{blended-flux-1}
+  is equivalent to that of Rusanov \eqref{first-order_fluxes_LLF},
+  while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, it is equivalent to that of Roe \eqref{first-order_fluxes_Roe}.
+  With $0<\theta<1$ the blended solver is more dissipative than Roe's but less than Rusanov's.
+}
+With the choice \eqref{s_p}, the correction fluxes also match
 those of Rusanov or Roe in the appropriate limit, as shown in the next section.
 
 \subsection{The correction fluxes}
@@ -1542,10 +1567,18 @@ with the momentum in the radial direction. Note that even though the solution is
 In this work we have introduced a new Riemann solver for the shallow water
 equations, described in Section \ref{sec:blended_rs}.  Through numerical tests we have
 shown that the solver gives accuracy similar to that of Roe's method and
-robustness similar to that of Rusanov's method.  Although the full
-second-order method we have proposed is not provably entropy stable or
+robustness similar to that of Rusanov's method.
+{\color{red}
+  Using this Riemann solver with the first-order method \eqref{first-order_via_fluct} we
+  prove that the discrete entropy inequality \eqref{ent_ineq} holds.
+  In principle, we could apply the same idea to further modify the artificial dissipation
+  via $\lambda^{\min}_{i+1/2}$ to guarantee the inequality holds when using the second-order method \eqref{second-order_via_fluct}. 
+  However, in our numerical experiments, we obtained the desired behavior 
+  so, to avoid further complexity, we did not pursue this idea. 
+}
+Although the full second-order method we have proposed is not 
 positivity preserving, it gives improved results for test problems
-where both of these properties are important.  The approach used in Section
+where this property is important.  The approach used in Section
 \ref{sec:blended_rs} could be applied to enforce entropy stability for any Riemann
 solver of the type used in Clawpack.  The same techniques could also
 be used more generally to avoid carbuncles in the solution of the
