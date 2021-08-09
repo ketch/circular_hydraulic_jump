@@ -99,7 +99,7 @@ have been proposed, mainly in the form of additional numerical dissipation
 \cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
 Most notably, dissipative Riemann solvers like HLLE and Rusanov suppress the carbuncle instability \cite{quirk1997contribution}.
 For a recent review of numerical shock instability and work to alleviate it,
-we refer to \cite[Section 2.5]{simonnumerical}.
+we refer to \cite[Section 2.5]{simonnumerical} and \cite{zaide2012numerical}.
 
 Given the similarity of structure between the Euler equations and the shallow
 water equations, it is not surprising that carbuncles appear in numerical
@@ -107,14 +107,16 @@ solutions of the latter as well \cite{kemm2014note}.
 The shallow water carbuncle behaves similarly to the
 Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
 the HLLE or Rusanov solver is used, and can also be suppressed by particular modifications
-of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
+of the Roe solver \cite{kemm2014note,bader2014carbuncle}.  Another approach to avoid
+shallow water carbuncles has been proposed in \cite{navas2019improved}, where it is
+studied together with the slowly-moving shock anomaly and in the presence of varying bathymetry.
 In this work, we propose a new Riemann solver that blends those of Rusanov and Roe.
 %based on a local measure of the entropy residual, 
 %as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
 {\color{red} Since Rusanov's solver does not suffer from carbuncle instabilities,
   our aim is to use it near shocks without degrading the good accuracy of Roe's solver. 
   To do this, we need to find a blending criteria that can robustly and sharply locate shocks.
-  The entropy-residual has proven to be a successful tool for this task; see for instance
+  The entropy residual has proven to be a successful tool for this task; see for instance
   \cite{guermond2011entropy,guermond2018second,guermond2018well}.
   By doing this, our blended solver induces dissipation of entropy.
   Entropy dissipative Riemann solvers have been used to produce carbuncle free solvers for the Euler equations;
@@ -1512,16 +1514,17 @@ with $\tilde h_\jet = \frac{h_\jet}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_\jet|=|
 Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
 time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
 
+{\color{OliveGreen} 
+Solutions are shown in Figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended},
+obtained with Rusanov's method and the blended solver, respectively.
+It is known from experiments that the circular hydraulic jump in a low-viscosity fluid
+exhibits instability at large Froude number; see e.g. \cite[Figure~2]{craik1981circular}.
+Although the physics of this instability is still a matter of study, the blended solver
+produces a solution that bears a qualitative similarity to what is seen in experiments,
+without generating carbuncles.  The Rusanov solver, on the other hand, appears to suppress
+the manifestation of this instability.
+}
 
-
-In this case, due to the large Froude number, the random perturbations in the inflow
-may trigger physical instabilities;
-{\color{OliveGreen} i.e., the shape of the hydraulic jump might deviate from a rotationally symmetric profile and become unsteady}.
-We want to preserve this behavior. At the same time, we
-do not want the solution to develop carbuncle instabilities.
-In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
-at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
-the blended Riemann solvers, respectively.
 In the right panel of Figure \ref{fig:chj_r2wp_blended}, we show an inset figure 
 with the momentum in the radial direction. Note that even though the solution is highly unstable 
 (with the blended Riemann solver), no visible carbuncle instabilities are developed. 
