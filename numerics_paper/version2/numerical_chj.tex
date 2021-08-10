@@ -1426,14 +1426,12 @@ all of which are free from carbuncles.
 \end{figure}
 
 {\color{red}
-  Finally, following \cite[Section III B]{kitamura2009evaluation}, we repeat the same experiment using
-  the blended solver with an initial condition where the shock,
-  located at $r_s=0.3$, is aligned with a grid interface. Afterward, we perturb the initial condition near the shock to misalign it
-  from the grid interface. We use a mesh with $90$ elements in the radial direction and $90$ elements in the angular direction;
-  see Figure \ref{fig:mesh_chj}.
-  For this mesh, $\Delta r=(r_\out-r_\jet)/90=0.01$. 
-  Let $(x_i,y_i)$ denote the coordinates of the center of the $i$-th element and $r_i:=\sqrt{x_i^2+y_i^2}$.
-  For all elements where $r_i\not\in[r_s,r_s+\Delta r]$, we set
+  Next we perform a set of experiments similar to those of \cite[Section III B]{kitamura2009evaluation}.
+  In these experiments, we perturb the initial condition in just one layer of cells, immediately behind the shock.
+  We use an annular mesh (see Figure \ref{fig:mesh_chj}) with $90$ elements in
+  the radial direction and $90$ elements in the angular direction.  Let $h(r)$ denote the exact solution
+  of the ODE \eqref{steady}, and let $r_i$ denote the radius of a given cell center.  Then for all cells
+  away from the shock (i.e. those with $r_i \notin [0.3+\Delta r]$) we use the exact solution averaged over the grid:
   \begin{align*}
     h_i = \frac{1}{\Delta r}\int_{r_i-\Delta r/2}^{r_i+\Delta r/2}h(r) dr,
     \qquad
@@ -1441,11 +1439,11 @@ all of which are free from carbuncles.
     \qquad
     v_i = \frac{\beta}{h_ir_i}\left(\frac{y_i}{r_i}\right),
   \end{align*}
-  where $\beta=r_\jet h_\jet |u_\jet|$ and $h(r)$ is the solution of the ODE \eqref{steady} from either
-  $r=r_\jet$ to $r=r_s^-$ or $r_s^+$ to $r_\out$.
-  If $r_i = r_s+\Delta r/2$, we set
+  where $\beta=r_\jet h_\jet |u_\jet|$ and $(x_i,y_i)$ are the cartesian
+  coordinates of the cell center.  For the layer of cells just behind the shock (with $0.3 \le r \le 0.3+\Delta r$),
+  we set
   \begin{align*}
-    h_i = \delta h_L + (1+\delta) h_R,
+    h_i = \delta h_{i-1} + (1+\delta) h_{i+1},
     \qquad
     u_i = \frac{\beta}{h_ir_i}\left(\frac{x_i}{r_i}\right),
     \qquad
@@ -1453,18 +1451,14 @@ all of which are free from carbuncles.
   \end{align*}
   where $\delta=\{0,0.1,0.2,\dots,0.9,1\}$ and $h_L$ and $h_R$ are the values of the water height
   at the left and right cells from the cell with $r_i=r_s+\Delta r/2$, respectively.
-  In Figure \ref{stab_shock_init_cond}, we plot $h(r,\theta_j)$ with $j=\{1,2,\dots,90\}$; that is,
-  we plot the water height as a function of $r$ for every value of $\theta$.
-  In Figures \ref{stab_shock_roe} and \ref{stab_shock_blended}, we plot the corresponding solutions at
-  $t=3$ using method \eqref{second-order_via_fluct} with the Roe solver and with the blended solver,
-  respectively. With the Roe solver, the carbuncle instability appears; as a consequence, the
-  location of the shock changes for the different values of $\theta$.
-  With the blended solver, no carbuncle instability appears and, therefore, all slices are aligned.
-  In the figures we only show the results using $\delta=\{0,0.5,1\}$ but we
-  obtained similar results with the other values of $\delta$. 
-  
+  In Figure \ref{stab_shock_init_cond}, we plot representative results of these experiments, showing
+  the initial data in the first column and solutions at $t=3$ in the second and third columns.
+  we show only the results using $\delta=\{0,0.5,1\}$ since other results were similar.
+  The solution obtained with the Roe solver, in which the carbuncle instability appears,
+  is sensitive to the perturbation just described, while the solution obtained with the
+  blended solver is radially symmetric and essentially the same for all values of $\delta$.
   \begin{figure}
-    \subfloat[Initial condition.\label{stab_shock_init_cond}]{
+    \subfloat[Initial condition ($t=0$)\label{stab_shock_init_cond}]{
     \begin{tabular}{c}
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0.png} \\ \\
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5.png} \\ \\
@@ -1472,7 +1466,7 @@ all of which are free from carbuncles.
     \end{tabular}
     }
     ~
-    \subfloat[Roe's solver.\label{stab_shock_roe}]{
+    \subfloat[Roe's solver ($t=3$)\label{stab_shock_roe}]{
     \begin{tabular}{c}
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0_roe.png} \\ \\
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5_roe.png} \\ \\
@@ -1480,18 +1474,17 @@ all of which are free from carbuncles.
     \end{tabular}
     }
     ~
-    \subfloat[Blended solver.\label{stab_shock_blended}]{
+    \subfloat[Blended solver ($t=3$)\label{stab_shock_blended}]{
     \begin{tabular}{c}
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0_blended.png} \\ \\
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5_blended.png} \\ \\
       \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta1p0_blended.png} 
     \end{tabular}
   }    
-    \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
-      We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
-      In (a) we show the different initial conditions that we consider.
-      In (b) and (c) we show the corresponding solutions at $t=3$ using method
-      \eqref{second-order_via_fluct} with the Roe solver and with the blended solver, respectively. 
+    \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1},
+      using the 2nd-order method \eqref{second-order_via_fluct} with two Riemann solvers. The depth $h$
+      is shown as a function of $r$.  Note that the plots in the third column contain include lines for
+      each angle along the grid, but only a single line is visible due to the solution's symmetry.
       \label{fig:stab_shock}}
   \end{figure}
 }
