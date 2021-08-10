@@ -1085,14 +1085,29 @@ $[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
 Reflecting boundary conditions are imposed at the surface of the cylinder,
 along with outflow conditions along the rest of the right edge of the domain.
 The depth and velocity are set initially and (for all time) at the other
-boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
-uniform Cartesian grid.
+boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.
+We use a $160 \times 400$ uniform Cartesian grid.
 %
 In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
 a steady state.  With Roe's solver, negative values (of the water height) are generated at an early
 time, leading to failure of the solver.  Therefore, we show results only for
-Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.  These three methods give very similar
-results.
+Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.
+{\color{red}
+  These three methods give carbuncle free results.
+  It is worth noting that the solution with Rusanov's solver is the most dissipated solution. 
+  Let 
+  \begin{align}\label{res}
+    \xi(t^{n+1}):=\frac{||h^{n+1}-h^n||_{\ell^2}}{||h^0||_{\ell^2}}
+  \end{align}
+  denote the residual based on the water height. In Figure \ref{fig:residuals_cylinder_2nd}, we plot $\xi(t)$ considering
+  the three Riemann solvers. With HLLEMCC or the blended solver, the residual stagnates. 
+  In Figure \ref{fig:residuals_cylinder_1st} we repeat the same experiment but using the first-order method \eqref{first-order_via_fluct} instead.
+  In this case, the residual stagnates only when we consider the HLLEMCC solver.
+  Clearly, the ability of the blended solver to converge to the steady state solution is affected only by the second-order corrections.
+  In Figure \ref{fig:cylinder_blended}, we zoom close to the front of the shock and show the grid we use.
+  Note that the grid is cartesian and that the shock is resolved within few cells. Therefore, the ability of the method to deliver
+  carbuncle free solutions does not depend on the shock being aligned with a grid interface. 
+}
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1101,11 +1116,23 @@ results.
     \quad \quad \quad \quad \quad \quad
     \subfloat[HLLEMCC solver.]{\includegraphics[scale=0.4]{figures/cylinder_hllemcc.png}}
     \quad \quad \quad \quad \quad \quad
-    \subfloat[Blended solver.]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
+    \subfloat[Blended solver. \label{fig:cylinder_blended}]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
   }
   \caption{
     Flow past a cylinder.  Results for Rusanov's, HLLEMCC, and the blended solvers.
     \label{fig:cylinder_flow}}
+\end{figure}
+
+\begin{figure}[!h]
+  {\scriptsize
+    \subfloat[First-order method \eqref{first-order_via_fluct} \label{fig:residuals_cylinder_1st}]
+             {\includegraphics[scale=0.4]{figures/residuals_cylinder_order1.png}}
+    \subfloat[Second-order method \eqref{second-order_via_fluct} \label{fig:residuals_cylinder_2nd}]
+             {\includegraphics[scale=0.4]{figures/residuals_cylinder_order2.png}}
+  }
+  \caption{
+    Residual $\xi(t)$ \eqref{res} with different Riemann solvers for the problem of the flow past a cylinder.
+    \label{fig:residuals_cylinder}}
 \end{figure}
 
 {\color{OliveGreen}
