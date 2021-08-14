@@ -1099,13 +1099,15 @@ Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.
   \begin{align}\label{res}
     \xi(t^{n+1}):=\frac{||h^{n+1}-h^n||_{\ell^2}}{||h^0||_{\ell^2}}
   \end{align}
-  denote the residual based on the water height. In Figure \ref{fig:residuals_cylinder_2nd}, we plot $\xi(t)$ considering
-  the three Riemann solvers. With HLLEMCC or the blended solver, the residual stagnates. 
+  denote the residual based on the water height. In Figure \ref{fig:residuals_cylinder_2nd}, we plot $\xi(t)$ for the
+  solution obtained with each Riemann solver. With HLLEMCC or the blended solver, the residual stagnates. 
   In Figure \ref{fig:residuals_cylinder_1st} we repeat the same experiment but using the first-order method \eqref{first-order_via_fluct} instead.
-  In this case, the residual stagnates only when we consider the HLLEMCC solver.
-  Clearly, the ability of the blended solver to converge to the steady state solution is affected only by the second-order corrections.
-  In Figure \ref{fig:cylinder_blended}, we zoom close to the front of the shock and show the grid we use.
-  Note that the grid is cartesian and that the shock is resolved within few cells. Therefore, the ability of the method to deliver
+  We obtain similar results with Rusanov and HLLEMCC, but now the solution with the blended solver continues to converge
+  at a rate similar to that of Rusanov.  This suggests that the lack of convergence for the 2nd-order method with the
+  blended solver is due to the correction terms and not to the Riemann solver itself.
+  In Figure \ref{fig:cylinder_blended}, we show a closeup of the front of the shock and show the grid we use.
+  Note that the grid is cartesian and that the shock is resolved across a few
+  cells. Therefore, the ability of the method to deliver
   carbuncle free solutions does not depend on the shock being aligned with a grid interface. 
 }
 
@@ -1136,26 +1138,25 @@ Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.
 \end{figure}
 
 {\color{OliveGreen}
-  We inspect further the behavior of the blended solver across the shock. 
-  We are interested in the possible presence of an unphysical spike in the momentum.
-  This numerical artifact might lead to a slow displacement of the position of the shock,
+  In Figure \ref{fig:evol_of_hu} we show the time evolution of the momentum in the region around the shock.
+  We see that the momentum is not monotone across the shock; this is a common feature of numerical shock
+  solutions and in some cases is associated with a slow displacement of the position of the shock,
   which is known as slowly-moving shock anomaly; see for instance \cite{navas2019improved, zaide2012numerical}.
-  In the left panels of Figure \ref{fig:evol_of_hu}, we show the time evolution of $hu(x,y=50)$ using the Rusanov and the blended solvers.
-  Clearly, with both solvers we obtain the spike in $hu$. This behavior is expected due to the non-linear Hugoniot locus
-  and the presence of intermediate states through the numerical shock \cite[Section 4.1]{navas2019improved}.
+  This anomaly is, however, not present in the blended solver solution;
+  the position of the shock appears to remain constant (once the steady state
+  is achieved).
+  To further confirm this, we run the simulation up to $t=160$ and plot in
+  Figure \ref{fig:pos_of_shock} the location of the shock along $y=50$.
+  Note that after $t\approx 55$, the location of the shock remains constant.
   
-  In \cite{navas2019improved}, it is remarked that spurious oscillations in the transverse direction are introduced with Roe's solver.
-  The authors observed these oscillations by plotting the time evolution of a slice along a fixed value of $x$.
-  The authors conjectured that increasing dissipation of the shear waves reduces these oscillations.
+  Another numerical artifact that has been observed in this context is that of
+  spurious oscillations in the transverse direction, behind the shock; these have been
+  observed for instance when using Roe's solver \cite{navas2019improved}.
   Rusanov's solver adds more dissipation (than the solvers they use) to the shear waves; therefore,
   it eliminates the spurious oscillations,
   as seen in the right-top panel of Figure \ref{fig:evol_of_hu}. Small oscillations are present with the blended solver.
   %
-  Importantly, with the Rusanov and the blended solvers, the position of the shock appears to remain constant
-  (once the steady state is achieved). This is suggested by the parabolic profile of the space-time evolution of $hu(x=18,y)$.
-  To further confirm this, we run the simulation up to $t=160$ and plot in Figure \ref{fig:pos_of_shock} the location of the shock along $y=50$.
-  Note that after $t\approx 55$, the location of the shock remains constant.
-  
+ 
   \begin{figure}[!h]
     \centering
     \subfloat[Evolution of $hu$ along (left) $y=50$ and (right) $x=18$.
