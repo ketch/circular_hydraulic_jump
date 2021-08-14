@@ -100,6 +100,13 @@ have been proposed, mainly in the form of additional numerical dissipation
 Most notably, dissipative Riemann solvers like HLLE and Rusanov suppress the carbuncle instability \cite{quirk1997contribution}.
 For a recent review of numerical shock instability and work to alleviate it,
 we refer to \cite[Section 2.5]{simonnumerical} and \cite{zaide2012numerical}.
+{\color{OliveGreen}
+  Another important shock anomaly is the presence of a spike in the momentum downstream 
+  from the shock. This unphysical behavior might lead to the so called 
+  slowly-moving shock anomaly. We refer to \cite{zaide2012numerical} for a comprehensive 
+  discussion about this phenomenon.
+  In \cite{navas2019improved}, the authors focus on this problem when solving the shallow water equations. 
+}
 
 Given the similarity of structure between the Euler equations and the shallow
 water equations, it is not surprising that carbuncles appear in numerical
@@ -127,6 +134,11 @@ In this work, we propose a new Riemann solver that blends those of Rusanov and R
 Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque 
 finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
 while maintaining an accuracy similar to that of Roe solver.  
+{\color{OliveGreen}
+  Using Rusanov's solver leads to a non-monotone (and unphysical) profile for the momentum. 
+  Nevertheless, based on our numerical experiments, this behavior does not lead to the slowly-moving 
+  anomaly when using Rusanov's solver. Our blended solver inherets the same properties.
+}
 
 The most common test problems used to investigate carbuncle formation are
 that of bow shock formation or a steady, grid-aligned planar shock.
@@ -1084,9 +1096,11 @@ our interest is in the resolution of the bow shock.  We take the domain
 $[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
 Reflecting boundary conditions are imposed at the surface of the cylinder,
 along with outflow conditions along the rest of the right edge of the domain.
-The depth and velocity are set initially and (for all time) at the other
-boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.
-We use a $160 \times 400$ uniform Cartesian grid.
+{\color{red} The depth and velocity are set initially and (for all time) at the other
+  boundaries to $h_0=1$, $u_0=5$, $v_0=0$ for a Froude number of 5. Therefore, we do not
+  start with a shock; instead, at the beginning of the simulation, the shock forms
+  near the cylinder and travels to its position at steady state.}
+  We use a $160 \times 400$ uniform Cartesian grid.
 %
 In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
 a steady state.  With Roe's solver, negative values (of the water height) are generated at an early

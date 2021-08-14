@@ -129,10 +129,10 @@ criteria between Roe's and Rusanov's solvers.
   \end{itemize}
 }
 \noindent
-We provide a precise definition of $\theta_i$ in (17) and (19). The guiding principle to select $\theta_i$
+We provide a precise definition of $\theta_i$ in (19) and (21). The guiding principle to select $\theta_i$
 is based on the entropy-residual. As discussed before, using the entropy-residual to locate shocks has proven
 its worth in many works. 
-By selecting $\theta_i=\{0,1\}$, the numerical flux (13) is either Roe's or Rusanov's.
+By selecting $\theta_i=\{0,1\}$, the numerical flux (15) is either Roe's or Rusanov's.
 Having $0<\theta<1$ produces a solver that combines the dissipation of both solvers; i.e.,
 for those cases, the blended solver is more dissipative than Roe's but not as much as Rusanov's. 
 We have revised the text in Section 3.1 accordingly. 
@@ -152,7 +152,17 @@ We have revised the text in Section 3.1 accordingly.
   \end{itemize}
 }
 \noindent
-XX
+Our initial condition is given by $h_0=1$, $u_0=5$ and $v_0=0$; i.e., we do not start with a shock. 
+At the beginning of the simulation, the shock forms near the cylinder and travels to its position at 
+steady state. Once at steady state, the shock is not aligned with a grid interface. Instead, the 
+shock is resolved within a few cells (see Figure 3c). 
+Since we start from a condition far from the steady state, 
+perturbing the initital condition or the grid has no effect in the solution. We modified the text in
+Section 4.3 to explain this. In addition, we added a plot of the residual; see equation (29) and 
+Figure 4. 
+The residual stagnates when we use the blended solver with the second-order method (6); however, it 
+continues to decrease if the first-order scheme (7) is considered. This suggests that the residual stagnates 
+not due to the Riemann solver but due to the second-order corrections. 
 
 \bigskip
 {\color{red}
@@ -169,7 +179,10 @@ XX
   \end{itemize}
 }
 \noindent
-XX
+We added the requested simulation (and cited the corresponding reference) 
+for the first hydraulic jump case; see Figure 10. We obtain a similar result as before; that is, 
+when the Roe solver is used with any value of $\delta$, we obtain the carbuncle instability. 
+With the blended solver, we do not obtain carbuncles for any value of $\delta$.
 
 \bigskip
 {\color{red}
@@ -253,7 +266,12 @@ manuscript and our responses refer to the new manuscript.
   \end{itemize}
 }
 \noindent
-XX
+We appreciate you brought these references as well as the slowly-moving anomaly to our attention.
+We modified the introduction as suggested. In addition, in the new manuscript we investigate 
+if our blended solver suffers from this problem. 
+Based on our numercal experiments, the profile of the momentum contains the non-physical spike.
+However, the location of steady shocks remains fixed; i.e., our solver does not suffer from 
+the slowly-moving anomaly. 
 
 \bigskip
 {\color{OliveGreen}
@@ -309,7 +327,7 @@ this work into account.
   \end{itemize}
 }
 \noindent
-Although we use the term "dry bed" in the section title, we note clearly in the text that we
+Although we use the term ``dry bed'' in the section title, we note clearly in the text that we
 use a non-zero depth $h_r=10^{-15}$.  Although we do not have a proof of positivity preservation
 for our method, we do not observe violations of positivity.  Thus we avoid the
 need to deal with wet-dry interfaces.  Note that we use the first-order method
@@ -424,7 +442,7 @@ Fixed as requested.
 }
 \noindent
 We have revised the discussion of this result to be more clear and to avoid
-referring to the instability in the simulations as "physical".  We do refer by
+referring to the instability in the simulations as ``physical''.  We do refer by
 way of comparison to a physical instability of the CHJ that has been known for
 some time
 (see e.g. [8, Figure 2]).  While we agree that the shallow water model omits
