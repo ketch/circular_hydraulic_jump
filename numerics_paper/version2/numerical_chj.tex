@@ -101,9 +101,8 @@ Most notably, dissipative Riemann solvers like HLLE and Rusanov suppress the car
 For a recent review of numerical shock instability and work to alleviate it,
 we refer to \cite[Section 2.5]{simonnumerical} and \cite{zaide2012numerical}.
 {\color{OliveGreen}
-  Another important shock anomaly is the presence of a spike in the momentum downstream 
-  from the shock. This unphysical behavior might lead to the so called 
-  slowly-moving shock anomaly. We refer to \cite{zaide2012numerical} for a comprehensive 
+  The slowly-moving shock anomaly is another important unphysical behavior that might be present 
+  with some numerical schemes. We refer to \cite{zaide2012numerical} for a comprehensive 
   discussion about this phenomenon.
   In \cite{navas2019improved}, the authors focus on this problem when solving the shallow water equations. 
 }
@@ -135,9 +134,8 @@ Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque
 finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
 while maintaining an accuracy similar to that of Roe solver.  
 {\color{OliveGreen}
-  Using Rusanov's solver leads to a non-monotone (and unphysical) profile for the momentum. 
-  Nevertheless, based on our numerical experiments, this behavior does not lead to the slowly-moving 
-  anomaly when using Rusanov's solver. Our blended solver inherets the same properties.
+  Based on our numerical experiments, using Rusanov's solver does not lead to the 
+  slowly-moving shock anomaly. Our blended solver inherits the same property.
 }
 
 The most common test problems used to investigate carbuncle formation are
@@ -1097,9 +1095,9 @@ $[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
 Reflecting boundary conditions are imposed at the surface of the cylinder,
 along with outflow conditions along the rest of the right edge of the domain.
 {\color{red} The depth and velocity are set initially and (for all time) at the other
-  boundaries to $h_0=1$, $u_0=5$, $v_0=0$ for a Froude number of 5. Therefore, we do not
-  start with a shock; instead, at the beginning of the simulation, the shock forms
-  near the cylinder and travels to its position at steady state.}
+  boundaries to $h_0=1$, $u_0=5$, $v_0=0$ for a Froude number of 5. Therefore, 
+  the initial condition does not contain a shock, but due to the presence of the 
+  cylinder a bow shock rapidly forms and travels to its eventual steady-state position.}
   We use a $160 \times 400$ uniform Cartesian grid.
 %
 In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
