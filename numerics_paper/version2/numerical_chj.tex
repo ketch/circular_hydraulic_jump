@@ -5,6 +5,7 @@
 \usepackage[hmargin=0.9in, vmargin=1.25in]{geometry}
 \usepackage[babel]{csquotes}
 \usepackage{subfig}
+\usepackage[export]{adjustbox}
 \usepackage{graphicx}
 \usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
 \usepackage{caption}
@@ -12,7 +13,7 @@
 \usepackage{amsthm}           % writing mathematical theorems
 \usepackage{amssymb}          % writing mathematical symbols
 \usepackage{bm, amsfonts}     % writing bold mathematical symbols
-\usepackage{xcolor}
+\usepackage[dvipsnames]{xcolor}
 \usepackage{fixmath}
 \usepackage{tikz}
 \usepackage{bm}
@@ -98,7 +99,13 @@ have been proposed, mainly in the form of additional numerical dissipation
 \cite{quirk1997contribution,pandolfi2001numerical,dumbser2004matrix,chauvat2005shock,ismail2009proposed,shen2014stability}.
 Most notably, dissipative Riemann solvers like HLLE and Rusanov suppress the carbuncle instability \cite{quirk1997contribution}.
 For a recent review of numerical shock instability and work to alleviate it,
-we refer to \cite[Section 2.5]{simonnumerical}.
+we refer to \cite[Section 2.5]{simonnumerical} and \cite{zaide2012numerical}.
+{\color{OliveGreen}
+  The slowly-moving shock anomaly is another important unphysical behavior that might be present 
+  with some numerical schemes. We refer to \cite{zaide2012numerical} for a comprehensive 
+  discussion about this phenomenon.
+  In \cite{navas2019improved}, the authors focus on this problem when solving the shallow water equations. 
+}
 
 Given the similarity of structure between the Euler equations and the shallow
 water equations, it is not surprising that carbuncles appear in numerical
@@ -106,13 +113,30 @@ solutions of the latter as well \cite{kemm2014note}.
 The shallow water carbuncle behaves similarly to the
 Euler carbuncle; for instance, it appears when the Roe solver is used, but not when
 the HLLE or Rusanov solver is used, and can also be suppressed by particular modifications
-of the Roe solver \cite{kemm2014note,bader2014carbuncle}.
-In this work, we propose a new Riemann solver that blends those of Rusanov and Roe
-based on a local measure of the entropy residual, 
-as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+of the Roe solver \cite{kemm2014note,bader2014carbuncle}.  Another approach to avoid
+shallow water carbuncles has been proposed in \cite{navas2019improved}, where it is
+studied together with the slowly-moving shock anomaly and in the presence of varying bathymetry.
+In this work, we propose a new Riemann solver that blends those of Rusanov and Roe.
+%based on a local measure of the entropy residual, 
+%as in \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+{\color{red} Since Rusanov's solver does not suffer from carbuncle instabilities,
+  our aim is to use it near shocks without degrading the good accuracy of Roe's solver. 
+  To do this, we need to find a blending criteria that can robustly and sharply locate shocks.
+  The entropy residual has proven to be a successful tool for this task; see for instance
+  \cite{guermond2011entropy,guermond2018second,guermond2018well}.
+  By doing this, our blended solver induces dissipation of entropy.
+  Entropy dissipative Riemann solvers have been used to produce carbuncle free solvers for the Euler equations;
+  see for instance \cite{ismail2009affordable,ismail2009proposed}.
+  However, to the best of our knowledge, this idea has not been used before to supress carbuncle instabilities for the
+  shallow water equations. 
+}
 Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque 
 finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
 while maintaining an accuracy similar to that of Roe solver.  
+{\color{OliveGreen}
+  Based on our numerical experiments, using Rusanov's solver does not lead to the 
+  slowly-moving shock anomaly. Our blended solver inherits the same property.
+}
 
 The most common test problems used to investigate carbuncle formation are
 that of bow shock formation or a steady, grid-aligned planar shock.
@@ -245,7 +269,7 @@ and employed in the Clawpack software \cite{clawpack,pyclaw-sisc}, which impleme
 Lax-Wendroff-LeVeque (LWL) scheme
 \begin{align}\label{second-order_via_fluct}
   Q_i^{n+1} = Q_i^n-\frac{\Delta t}{\Delta x}\left[\apdq_\imh+\amdq_\iph\right]
-  -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right],
+  -\frac{\Delta t}{\Delta x}\left[\tilde{F}_{i+1/2}-\tilde{F}_{i-1/2}\right].
 \end{align}
 Upon defining $z^+:=\frac{1}{2}(z+|z|)$ and $z^-:=\frac{1}{2}(z-|z|)$,
 the fluctuations are given by
@@ -313,7 +337,13 @@ where the intermediate state $\bfu_{i-1/2}$ is determined by imposing conservati
 The fluctuations are given by \eqref{fluct} with $s_{i-1/2}^1=-\lambda_{i-1/2}^{\max}$
 and $s_{i-1/2}^2=\lambda_{i-1/2}^{\max}$, and the first- and second-order methods based
 on Rusanov's solver are given by \eqref{first-order_via_fluct} and \eqref{second-order_via_fluct}, respectively.
-
+{\color{red}
+  The second-order method can also be written in flux-differencing form \eqref{flux-differencing-form}, where 
+  \begin{align}\label{first-order_fluxes_LLF}
+    \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2}
+    - \frac{\lambda_{i+1/2}^{\max}}{2}(\bfq_{i+1}-\bfq_{i}).
+  \end{align}
+}
 
 \subsection{Roe's Riemann solver} \label{sec:roe}
 The Roe Riemann solver is based on evaluating the flux Jacobian using Roe's average
@@ -362,6 +392,12 @@ and the factors $\alpha^p_\imh$ obtained by solving
   \end{bmatrix}
   =\Delta Q_{i-1/2}:=\bfq_i-\bfq_{i-1}.
 \end{align}
+{\color{red}
+  The first-order Roe's fluxes used in \eqref{flux-differencing-form} and \eqref{first-order_via_fluct} are given as follows:
+  \begin{align}\label{first-order_fluxes_Roe}
+    \bfF_{i+1/2} = \frac{\bff(\bfq_{i+1})+\bff(\bfq_i)}{2} - \frac{1}{2} |\hat A_{i+1/2}|(\bfq_{i+1}-\bfq_{i}).
+  \end{align}
+}
 
 \subsection{Kemm's Riemann solver} \label{sec:kemm}
 Several specialized Riemann solvers have been proposed in order to deal
@@ -586,12 +622,14 @@ $$
 We expect that $\theta_\iph\approx 0 $ in smooth regions,
 while $\theta_\iph\approx 1$ near shocks.
 The value of $\theta_\iph$ controls whether the first-order flux \eqref{blended-flux-1}
-behaves more like that of Rusanov or Roe.  Specifically, if
-$\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, the flux is equivalent to that of
-Rusanov, while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, it is equivalent
-to that of Roe.  
-
-In fact, with the choice \eqref{s_p}, the correction fluxes also match
+behaves more like that of Rusanov or Roe.
+{\color{red}
+  Specifically, if $\lambda_\iph^{\min}=0$ and $\theta_\iph=1$, the flux \eqref{blended-flux-1}
+  is equivalent to that of Rusanov \eqref{first-order_fluxes_LLF},
+  while if $\lambda_\iph^{\min}=0$ and $\theta_\iph=0$, it is equivalent to that of Roe \eqref{first-order_fluxes_Roe}.
+  With $0<\theta<1$ the blended solver is more dissipative than Roe's but less than Rusanov's.
+}
+With the choice \eqref{s_p}, the correction fluxes also match
 those of Rusanov or Roe in the appropriate limit, as shown in the next section.
 
 \subsection{The correction fluxes}
@@ -795,6 +833,15 @@ The domain is given by $x\in(0,10)$, and the initial condition is $hu(x,0)=0$ an
 \end{align*}
 with $h_l=5\times 10^{-3}$.  In our experiments we use $h_r=1\times
 10^{-15}$ to avoid division by zero.
+{\color{OliveGreen}
+If we use Rusanov's solver with the first-order method \eqref{first-order_via_fluct}, 
+the water height is guaranteed to remain positive. Using Roe or the blended solvers 
+can introduce violations of positivity. Alternatively, if we consider the second-order scheme 
+\eqref{second-order_via_fluct}, the water height could become negative regardless of the Riemann solver.
+To reduce the occurance of loss of positivity, we only use the first-order method 
+\eqref{first-order_via_fluct} for this test problem. 
+Although using Roe or the blended solvers might still lead to loss of positivity, we 
+did not observe that in our experiments.}
 The exact solution, which can also be found in \cite{delestre2013swashes} and references therein, is
 \begin{align*}
   h(x,t) =
@@ -820,7 +867,12 @@ The entropy glitch, which is manifested as a non-physical shock at $x=x_0$,
 is present with Roe's solver. Using Rusanov's and the blended solvers
 fixes the entropy glitch.
 In Table \ref{table:rp_dry_bed}, we summarize the results of a convergence test.
-Note that using the blended solver leads to more accurate results.
+{\color{OliveGreen}
+    Due to the entropy glitch, we do not converge to the right solution with Roe solver,
+    hence the drop in rate of convergence. Using any of the other solvers, we converge to the 
+    correct solution. Note that using the blended solver leads to more accurate results. 
+    Since the method we use is first-order accurate, we get no better than first-order convergence.}
+
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1042,15 +1094,34 @@ our interest is in the resolution of the bow shock.  We take the domain
 $[0,40]\times[0,100]$ with a cylinder of radius 20 centered at $(40,50)$.
 Reflecting boundary conditions are imposed at the surface of the cylinder,
 along with outflow conditions along the rest of the right edge of the domain.
-The depth and velocity are set initially and (for all time) at the other
-boundaries to $h_0=1$, $u_0=5$, for a Froude number of 5.  We use a $160 \times 400$
-uniform Cartesian grid.
+{\color{red} The depth and velocity are set initially and (for all time) at the other
+  boundaries to $h_0=1$, $u_0=5$, $v_0=0$ for a Froude number of 5. Therefore, 
+  the initial condition does not contain a shock, but due to the presence of the 
+  cylinder a bow shock rapidly forms and travels to its eventual steady-state position.}
+  We use a $160 \times 400$ uniform Cartesian grid.
 %
 In Figure \ref{fig:steady_outflow}, we show results at $t=80$, after the flow has reached
 a steady state.  With Roe's solver, negative values (of the water height) are generated at an early
 time, leading to failure of the solver.  Therefore, we show results only for
-Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.  These three methods give very similar
-results.
+Rusanov's, HLLEMCC by \cite{kemm2014note}, and the blended solvers.
+{\color{red}
+  These three methods give carbuncle free results.
+  It is worth noting that the solution with Rusanov's solver is the most dissipated solution. 
+  Let 
+  \begin{align}\label{res}
+    \xi(t^{n+1}):=\frac{||h^{n+1}-h^n||_{\ell^2}}{||h^0||_{\ell^2}}
+  \end{align}
+  denote the residual based on the water height. In Figure \ref{fig:residuals_cylinder_2nd}, we plot $\xi(t)$ for the
+  solution obtained with each Riemann solver. With HLLEMCC or the blended solver, the residual stagnates. 
+  In Figure \ref{fig:residuals_cylinder_1st} we repeat the same experiment but using the first-order method \eqref{first-order_via_fluct} instead.
+  We obtain similar results with Rusanov and HLLEMCC, but now the solution with the blended solver continues to converge
+  at a rate similar to that of Rusanov.  This suggests that the lack of convergence for the 2nd-order method with the
+  blended solver is due to the correction terms and not to the Riemann solver itself.
+  In Figure \ref{fig:cylinder_blended}, we show a closeup of the front of the shock and show the grid we use.
+  Note that the grid is cartesian and that the shock is resolved across a few
+  cells. Therefore, the ability of the method to deliver
+  carbuncle free solutions does not depend on the shock being aligned with a grid interface. 
+}
 
 \begin{figure}[!h]
   {\scriptsize
@@ -1059,12 +1130,67 @@ results.
     \quad \quad \quad \quad \quad \quad
     \subfloat[HLLEMCC solver.]{\includegraphics[scale=0.4]{figures/cylinder_hllemcc.png}}
     \quad \quad \quad \quad \quad \quad
-    \subfloat[Blended solver.]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
+    \subfloat[Blended solver. \label{fig:cylinder_blended}]{\includegraphics[scale=0.4]{figures/cylinder_ES.png}}
   }
   \caption{
     Flow past a cylinder.  Results for Rusanov's, HLLEMCC, and the blended solvers.
     \label{fig:cylinder_flow}}
 \end{figure}
+
+\begin{figure}[!h]
+  {\scriptsize
+    \subfloat[First-order method \eqref{first-order_via_fluct} \label{fig:residuals_cylinder_1st}]
+             {\includegraphics[scale=0.4]{figures/residuals_cylinder_order1.png}}
+    \subfloat[Second-order method \eqref{second-order_via_fluct} \label{fig:residuals_cylinder_2nd}]
+             {\includegraphics[scale=0.4]{figures/residuals_cylinder_order2.png}}
+  }
+  \caption{
+    Residual $\xi(t)$ \eqref{res} with different Riemann solvers for the problem of the flow past a cylinder.
+    \label{fig:residuals_cylinder}}
+\end{figure}
+
+{\color{OliveGreen}
+  In Figure \ref{fig:evol_of_hu} we show the time evolution of the momentum in the region around the shock.
+  We see that the momentum is not monotone across the shock; this is a common feature of numerical shock
+  solutions and in some cases is associated with a slow displacement of the position of the shock,
+  which is known as slowly-moving shock anomaly; see for instance \cite{navas2019improved, zaide2012numerical}.
+  This anomaly is, however, not present in the blended solver solution;
+  the position of the shock appears to remain constant (once the steady state
+  is achieved).
+  To further confirm this, we run the simulation up to $t=160$ and plot in
+  Figure \ref{fig:pos_of_shock} the location of the shock along $y=50$.
+  Note that after $t\approx 55$, the location of the shock remains constant.
+  
+  Another numerical artifact that has been observed in this context is that of
+  spurious oscillations in the transverse direction, behind the shock; these have been
+  observed for instance when using Roe's solver \cite{navas2019improved}.
+  Rusanov's solver adds more dissipation (than the solvers they use) to the shear waves; therefore,
+  it eliminates the spurious oscillations,
+  as seen in the right-top panel of Figure \ref{fig:evol_of_hu}. Small oscillations are present with the blended solver.
+  %
+ 
+  \begin{figure}[!h]
+    \centering
+    \subfloat[Evolution of $hu$ along (left) $y=50$ and (right) $x=18$.
+      We use the Rusanov and the blended solvers in the first and second rows, respectively.\label{fig:evol_of_hu}]{
+      \begin{tabular}{ccc}
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_llf_at_y50.png}
+      & &
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_llf_at_x18.png}
+      \\
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_blended_at_y50.png}
+      & &
+      \includegraphics[scale=0.25,valign=t]{figures/slices_of_hu_blended_at_x18.png}
+      \end{tabular}
+    }
+    \quad
+    \subfloat[Location of the shock along $y=50$. \label{fig:pos_of_shock}]{
+      \includegraphics[scale=0.475,valign=c]{figures/pos_shock.png}}
+    \caption{Study of the slowly-moving shock anomaly. \label{fig:slowly_moving_anomaly}}
+\end{figure}
+}
+
+
 
 We have also conducted a more challenging version of this test, in which
 the velocity within the domain is initially zero.  In that case, Rusanov's 
@@ -1300,7 +1426,10 @@ In Figure \ref{fig:chj_r1_diff}, we show solutions at $t=3$ for
 Rusanov's, HLLEMCC, and the blended Riemann solvers.
 For this test case, these three solvers give qualitatively similar solutions,
 all of which are free from carbuncles.
-%however, we expect Rusanov's solver to be less accurate. 
+{\color{OliveGreen} In Figure \ref{fig:chj_r1_slices}, we plot the water height and the x-momentum along $y=0$.
+  Clearly, the solution based on Rusanov's solver is more dissipated. From the plot, it is also clear the presence
+  of the non-physical spike in the momentum. Just as in Section \ref{sec:bow_shock}, in our numerical experiments,
+  this spike does not lead to a slowly-moving shock.}
 
 \begin{figure}[!h]
   \centering
@@ -1316,7 +1445,7 @@ all of which are free from carbuncles.
   
   \subfloat[Solution at $t=3$ using (left) Rusanov's,
     (upper-right) HLLEMCC and (bottom-right) the blended solvers.\label{fig:chj_r1_diff}]{
-    \includegraphics[scale=0.3]{figures/chj_r1_quadrants.png}
+    \includegraphics[scale=0.3,valign=c]{figures/chj_r1_quadrants.png}
     %\begin{tabular}{ccc}
     %  \includegraphics[scale=0.3]{figures/chj_r1_llf_p3.png} &
     %  \includegraphics[scale=0.3]{figures/chj_r1_hllemcc_p3.png} &
@@ -1324,14 +1453,81 @@ all of which are free from carbuncles.
     %\end{tabular}
   }
   \qquad\qquad
-  \subfloat[Solution at $t=3$ along $y=0$ using the same solvers as in (b).]{
-    \includegraphics[scale=0.3]{figures/chj_r1_slices.png}}
-  
+  \subfloat[(Top) water height and (bottom) x-momentum at $t=3$ along $y=0$ using the same solvers as in (b).\label{fig:chj_r1_slices}]{
+    \begin{tabular}{c}
+      \includegraphics[scale=0.27,valign=c]{figures/chj_r1_slices.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_hu_r1_slices.png}
+    \end{tabular}
+  }
     \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1}.    
       We consider method \eqref{second-order_via_fluct} with different Riemann solvers.
       In (a) and (b) we show the Schlieren plot for the water height $h$.
     \label{fig:chj_r1}}
 \end{figure}
+
+{\color{red}
+  Next we perform a set of experiments similar to those of \cite[Section III B]{kitamura2009evaluation}.
+  In these experiments, we perturb the initial condition in just one layer of cells, immediately behind the shock.
+  We use an annular mesh (see Figure \ref{fig:mesh_chj}) with $90$ elements in
+  the radial direction and $90$ elements in the angular direction.  Let $h(r)$ denote the exact solution
+  of the ODE \eqref{steady}, and let $r_i$ denote the radius of a given cell center.  Then for all cells
+  away from the shock (i.e. those with $r_i \notin [0.3+\Delta r]$) we use the exact solution averaged over the grid:
+  \begin{align*}
+    h_i = \frac{1}{\Delta r}\int_{r_i-\Delta r/2}^{r_i+\Delta r/2}h(r) dr,
+    \qquad
+    u_i = \frac{\beta}{h_ir_i}\left(\frac{x_i}{r_i}\right),
+    \qquad
+    v_i = \frac{\beta}{h_ir_i}\left(\frac{y_i}{r_i}\right),
+  \end{align*}
+  where $\beta=r_\jet h_\jet |u_\jet|$ and $(x_i,y_i)$ are the cartesian
+  coordinates of the cell center.  For the layer of cells just behind the shock (with $0.3 \le r \le 0.3+\Delta r$),
+  we set
+  \begin{align*}
+    h_i = \delta h_{L} + (1+\delta) h_{R},
+    \qquad
+    u_i = \frac{\beta}{h_ir_i}\left(\frac{x_i}{r_i}\right),
+    \qquad
+    v_i = \frac{\beta}{h_ir_i}\left(\frac{y_i}{r_i}\right),
+  \end{align*}
+  where $\delta=\{0,0.1,0.2,\dots,0.9,1\}$ and $h_L$ and $h_R$ are the values of the water height
+  at the left and right cells from the cell with $r_i=r_s+\Delta r/2$, respectively.
+  In Figure \ref{stab_shock_init_cond}, we plot representative results of these experiments, showing
+  the initial data in the first column and solutions at $t=3$ in the second and third columns.
+  We show only the results using $\delta=\{0,0.5,1\}$ since other results were similar.
+  The solution obtained with the Roe solver, in which the carbuncle instability appears,
+  is sensitive to the perturbation just described, while the solution obtained with the
+  blended solver is radially symmetric and essentially the same for all values of $\delta$.
+  \begin{figure}
+    \subfloat[Initial condition ($t=0$)\label{stab_shock_init_cond}]{
+    \begin{tabular}{c}
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta1p0.png} 
+    \end{tabular}
+    }
+    ~
+    \subfloat[Roe's solver ($t=3$)\label{stab_shock_roe}]{
+    \begin{tabular}{c}
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0_roe.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5_roe.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta1p0_roe.png} 
+    \end{tabular}
+    }
+    ~
+    \subfloat[Blended solver ($t=3$)\label{stab_shock_blended}]{
+    \begin{tabular}{c}
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p0_blended.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta0p5_blended.png} \\ \\
+      \includegraphics[scale=0.27,valign=c]{figures/chj_slices_delta1p0_blended.png} 
+    \end{tabular}
+  }    
+    \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1},
+      using the 2nd-order method \eqref{second-order_via_fluct} with two Riemann solvers. The depth $h$
+      is shown as a function of $r$.  Note that the plots in the third column include lines for
+      each angle along the grid, but only a single line is visible due to the solution's symmetry.
+      \label{fig:stab_shock}}
+  \end{figure}
+}
 
 \subsubsection{Regime II ($F_\jet\approx27.39$)}\label{sec:regime_ii}
 We now consider a higher-Froude number regime. The boundary conditions are
@@ -1348,8 +1544,10 @@ the HLLEMCC solver, which lead to failure of the solver. Therefore, in Figure
 \ref{fig:chj_r2_diff} we only show results with Rusanov's and the blended
 solvers.  
 
-The solutions obtained with these solvers show no carbuncles.  The Rusanov
-solution remains very close to the initial symmetric equilibrium state,
+The solutions obtained with these solvers show no carbuncles.
+{\color{OliveGreen} Note that, similar to the experiments in Section \ref{sec:bow_shock},
+  the non-physical spike in the momentum is present in the numerical solution.}
+The Rusanov solution remains very close to the initial symmetric equilibrium state,
 whereas the blended solver solution includes perturbations that appear
 just downstream from the jump.
 In Figure \ref{fig:chj_r2_later}, we show the Rusanov and blended solutions at
@@ -1419,12 +1617,18 @@ We use the same mean values \eqref{bcs_chj_r2}, but now we set
 with $\tilde h_\jet = \frac{h_\jet}{1+\epsilon(x,y,t)}$ and $|\tilde\bfu_\jet|=|\bfu_\jet|(1+\epsilon(x,y,t))$.
 Here $\epsilon(x,y,t)$ is chosen at each inflow boundary ghost cell and at each
 time step as an i.i.d. random variable from the uniform distribution $[-0.01,0.01]$.
-In this case, due to the large Froude number, the random perturbations in the inflow
-may trigger physical instabilities, which we want to preserve. At the same time, we
-do not want the solution to develop carbuncle instabilities.
-In figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended}, we show the solution
-at different times considering method \eqref{second-order_via_fluct} with Rusanov's and
-the blended Riemann solvers, respectively.
+
+{\color{OliveGreen} 
+Solutions are shown in Figures \ref{fig:chj_r2wp_rusanov} and \ref{fig:chj_r2wp_blended},
+obtained with Rusanov's method and the blended solver, respectively.
+It is known from experiments that the circular hydraulic jump in a low-viscosity fluid
+exhibits instability at large Froude number; see e.g. \cite[Figure~2]{craik1981circular}.
+Although the physics of this instability is still a matter of study, the blended solver
+produces a solution that bears a qualitative similarity to what is seen in experiments,
+without generating carbuncles.  The Rusanov solver, on the other hand, appears to suppress
+the manifestation of this instability.
+}
+
 In the right panel of Figure \ref{fig:chj_r2wp_blended}, we show an inset figure 
 with the momentum in the radial direction. Note that even though the solution is highly unstable 
 (with the blended Riemann solver), no visible carbuncle instabilities are developed. 
@@ -1470,14 +1674,32 @@ with the momentum in the radial direction. Note that even though the solution is
 In this work we have introduced a new Riemann solver for the shallow water
 equations, described in Section \ref{sec:blended_rs}.  Through numerical tests we have
 shown that the solver gives accuracy similar to that of Roe's method and
-robustness similar to that of Rusanov's method.  Although the full
-second-order method we have proposed is not provably entropy stable or
+robustness similar to that of Rusanov's method.
+{\color{red}
+  Using this Riemann solver with the first-order method \eqref{first-order_via_fluct} we
+  prove that the discrete entropy inequality \eqref{ent_ineq} holds.
+  In principle, we could apply the same idea to further modify the artificial dissipation
+  via $\lambda^{\min}_{i+1/2}$ to guarantee the inequality holds when using the second-order method \eqref{second-order_via_fluct}. 
+  However, in our numerical experiments, we obtained the desired behavior 
+  so, to avoid further complexity, we did not pursue this idea. 
+}
+Although the full second-order method we have proposed is not 
 positivity preserving, it gives improved results for test problems
-where both of these properties are important.  The approach used in Section
+where this property is important.  The approach used in Section
 \ref{sec:blended_rs} could be applied to enforce entropy stability for any Riemann
 solver of the type used in Clawpack.  The same techniques could also
 be used more generally to avoid carbuncles in the solution of the
 Euler equations.
+{\color{OliveGreen}
+  For future work, we plan to extend these results to the shallow water equations 
+  with source terms that model non-flat bathymetry and friction. In addition, we 
+  are interested in guaranteeing positivity preservation for the water height
+  via algebraic flux limiters, like those proposed by Boris and Book \cite{boris1973flux} 
+  and later extended by Zalesak \cite{zalesak1979fully}.
+  Finally, we are interested in reducing (or eliminating) the non-physical spike in
+  the momentum. To do this we plan to modify Rusanov's solver based on \cite[Section 5.1]{navas2019improved}. 
+}
+  
 
 We have introduced two new test problems for numerical shallow water solvers,
 both consisting of flow in an annulus, with inflow from a jet
