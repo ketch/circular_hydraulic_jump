@@ -1483,7 +1483,7 @@ all of which are free from carbuncles.
   coordinates of the cell center.  For the layer of cells just behind the shock (with $0.3 \le r \le 0.3+\Delta r$),
   we set
   \begin{align*}
-    h_i = \delta h_{i-1} + (1+\delta) h_{i+1},
+    h_i = \delta h_{L} + (1+\delta) h_{R},
     \qquad
     u_i = \frac{\beta}{h_ir_i}\left(\frac{x_i}{r_i}\right),
     \qquad
@@ -1493,7 +1493,7 @@ all of which are free from carbuncles.
   at the left and right cells from the cell with $r_i=r_s+\Delta r/2$, respectively.
   In Figure \ref{stab_shock_init_cond}, we plot representative results of these experiments, showing
   the initial data in the first column and solutions at $t=3$ in the second and third columns.
-  we show only the results using $\delta=\{0,0.5,1\}$ since other results were similar.
+  We show only the results using $\delta=\{0,0.5,1\}$ since other results were similar.
   The solution obtained with the Roe solver, in which the carbuncle instability appears,
   is sensitive to the perturbation just described, while the solution obtained with the
   blended solver is radially symmetric and essentially the same for all values of $\delta$.
@@ -1523,7 +1523,7 @@ all of which are free from carbuncles.
   }    
     \caption{Simulation of a CHJ with boundary conditions given by \eqref{bcs_chj} and \eqref{bcs_chj_r1},
       using the 2nd-order method \eqref{second-order_via_fluct} with two Riemann solvers. The depth $h$
-      is shown as a function of $r$.  Note that the plots in the third column contain include lines for
+      is shown as a function of $r$.  Note that the plots in the third column include lines for
       each angle along the grid, but only a single line is visible due to the solution's symmetry.
       \label{fig:stab_shock}}
   \end{figure}
