@@ -88,13 +88,17 @@ manuscript and our responses refer to the new manuscript.
   \begin{itemize}
     \item[(1)]
       Firstly, it is not clear why blending the Rusanov and Roe methods (Section 3) would fix the carbuncle
-      using entropy-residual as the guiding principle. From literature, it is obvious that Roe-type methods suffer
-      from carbuncle whereas Rusanov-type schemes do not. But why using the entropy-residual somehow
+      using entropy residual as the guiding principle. From literature, it is obvious that Roe-type methods suffer
+      from carbuncle whereas Rusanov-type schemes do not. But why using the entropy residual somehow
       makes the hybrid of the two methods remove the carbuncle? Is entropy-stability a factor (Eq. 13)? If yes,
       why?
   \end{itemize}
 }
 \noindent
+Thank you for raising this import point. 
+We have revised the introduction to emphasize our motivation for using the entropy residual as blending
+criteria between Roe's and Rusanov's solvers. 
+
 As the reviewer remarks, Rusanov-type solvers do not suffer from carbuncle instabilities. Therefore,
 our aim is to use Rusanov's solver near shocks (where the carbuncle instability might appear) 
 while using the less-diffusive Roe's solver elsewhere.
@@ -104,16 +108,14 @@ from shocks and has proven to be a successful tool for this; see for instance
 \cite{guermond2011,guermond2018}. 
 %
 Near shocks the entropy residual is non-zero, so our blended solver induces dissipation of entropy near shocks,
-similarly to the exact solution. Moreover, if the solver is used with the first order method (7),
+similarly to the exact solution. Moreover, if the blended Riemann solver is used with the first order method (7),
 the solution is provably entropy stable, as discussed in Section 3.3.
 Using entropy stability to avoid carbuncle formation is not a new idea. For example, in \cite{ismail2009,ismail2009v2},
-the authors obtain carbuncle free solvers for Euler by either inducing entropy dissipation or guaranteeing entropy stability. 
+the authors obtain carbuncle-free solvers for the Euler equations by either inducing entropy dissipation or guaranteeing entropy stability. 
 To our knowledge, no work has been done exploring similar ideas for the shallow water equations. However, based on
 the success in the aforementioned references, it is reasonable to expect that entropy stability is a good tool to
 eliminate carbuncle formation in the shallow water equations. 
 %
-We have revised the introduction to emphasize our motivation for using the entropy residual as blending
-criteria between Roe's and Rusanov's solvers. 
 
 
 \bigskip
@@ -124,15 +126,14 @@ criteria between Roe's and Rusanov's solvers.
     ($\theta$, after Eq. 19b) works to actively switch between Rusanov to Roe and vice-versa. The authors
     mention that $\theta=0$ means Roe-flux whereas $\theta=1$ recovers the Rusanov flux. What is the guiding
     principle to select the 'appropriate' $\theta$ values? This is somewhat discussed in 3.1 in between Eq. 
-    16-19b but it is not intuitively clear to me how the entropy-residual is used as a guide to select $\theta$.
+    16-19b but it is not intuitively clear to me how the entropy residual is used as a guide to select $\theta$.
     Moreover, what does the value in between $0<\theta<1$ means?
   \end{itemize}
 }
 \noindent
 We provide a precise definition of $\theta_i$ in (19) and (21). The guiding principle to select $\theta_i$
-is based on the entropy-residual. As discussed before, using the entropy-residual to locate shocks has proven
+is based on the entropy residual. As discussed before, using the entropy residual to locate shocks has proven
 its worth in many works. 
-By selecting $\theta_i=\{0,1\}$, the numerical flux (15) is either Roe's or Rusanov's.
 Having $0<\theta<1$ produces a solver that combines the dissipation of both solvers; i.e.,
 for those cases, the blended solver is more dissipative than Roe's but not as much as Rusanov's. 
 We have revised the text in Section 3.1 accordingly. 
@@ -152,13 +153,14 @@ We have revised the text in Section 3.1 accordingly.
   \end{itemize}
 }
 \noindent
-Our initial condition is given by $h_0=1$, $u_0=5$ and $v_0=0$; i.e., we do not start with a shock. 
-At the beginning of the simulation, the shock forms near the cylinder and travels to its position at 
-steady state. Once at steady state, the shock is not aligned with a grid interface. Instead, the 
+For this problem, we do not initialize the flow with the steady state solution; we start
+with a uniform flow given by $h_0=1$, $u_0=5$ and $v_0=0$ (i.e., we do not start with a shock).
+After a very short time, a shock forms near the cylinder and travels to its steady state position.
+Once at steady state, the shock is not aligned with a grid interface. Instead, the 
 shock is resolved within a few cells (see Figure 3c). 
 Since we start from a condition far from the steady state, 
-perturbing the initital condition or the grid has no effect in the solution. We modified the text in
-Section 4.3 to explain this. In addition, we added a plot of the residual; see equation (29) and 
+perturbing the initital condition or the grid has no effect on the eventual shock that forms. We modified the text in
+Section 4.3 to explain this.  In addition, we added a plot of the residual; see equation (29) and 
 Figure 4. 
 The residual stagnates when we use the blended solver with the second-order method (6); however, it 
 continues to decrease if the first-order scheme (7) is considered. This suggests that the residual stagnates 
@@ -195,9 +197,9 @@ With the blended solver, we do not obtain carbuncles for any value of $\delta$.
   \end{itemize}
 }
 \noindent
-We have revised the conclusions to make it clear that we do propose an entropy-stable carbuncel-free scheme;
+We have revised the conclusions to make it clear that we do propose an entropy-stable carbuncle-free scheme;
 namely, the first-order method (7).  It is only the second-order method (6) that is not entropy-stable.
-Furthermore, the second-order scheme retains the modification made to the first-order scheme, which is
+The second-order scheme does incorporate the modification made to the first-order scheme, which is
 presumably the reason that it does not exhibit carbuncles.
 In the design of numerical methods, it is often the case that some compromise must be made between conflicting
 objectives, and this is such a case.  In the construction of the second order
@@ -266,10 +268,10 @@ manuscript and our responses refer to the new manuscript.
   \end{itemize}
 }
 \noindent
-We appreciate you brought these references as well as the slowly-moving anomaly to our attention.
+Thank you for bringing these references to our attention.
 We modified the introduction as suggested. In addition, in the new manuscript we investigate 
-if our blended solver suffers from this problem. 
-Based on our numercal experiments, the profile of the momentum contains the non-physical spike.
+whether our blended solver suffers from this problem. 
+Based on our numercal experiments, the profile of the momentum across the shock is non-monotone.
 However, the location of steady shocks remains fixed; i.e., our solver does not suffer from 
 the slowly-moving anomaly. 
 
@@ -353,10 +355,10 @@ that emphasizes this.
   \end{itemize}
 }
 \noindent
-Due to the entropy glitch, we do not converge to the right solution with Roe solver,
+Due to the entropy glitch, Roe's solver does not converge to the correct solution with Roe solver,
 hence the drop in rate of convergence.
-Using any of the other solvers, we converge to the correct solution. The convergence rate
-for those cases is still smaller than in Table 2 because Table 1 is obtained using the first-order scheme. 
+The other solvers do converge to the correct solution, but at a slower rate than
+in Table 2 because Table 1 is obtained using the first-order scheme. 
 We revised the text in Section 4.1 to improve clarity. 
 
 \bigskip
@@ -385,7 +387,7 @@ the spurious oscillations are eliminated; see the top-right panel of our newly a
 With the blended solver there are still small oscillations. 
 
 Importantly, with the Rusanov or the blended solvers, the position of the shock appears to remain constant
-(once the steady state is achieved). This is suggested by the parabolic profile of the space-time evolution of $hu(x=18,y)$.
+(once the steady state is achieved).
 To further confirm this, we run the simulation up to $t=160$ and plot the location of the shock along $y=50$.
 Note that after $t\approx 55$, the location of the shock remains constant.
 
@@ -403,7 +405,7 @@ Note that after $t\approx 55$, the location of the shock remains constant.
 We agree with the reviewer. We have included a remark about this in Section 5.4.2 and in the conclusions.
 Our blended solver is a convex combination of Rusanov's and Roe's solvers,
 both of which produce the spike. Consequently, the blended solver also produces the spike. 
-We believe that, within our framework, the key ingredient to solve this problem is to modify
+We believe that, within our framework, the key ingredient to solve this problem would be to modify
 Rusanov's fluxes to eliminate the spike following for example \cite[Section 5.1]{navas2019improved}.
 Afterwards, we can blend the modified Rusanov's fluxes with Roe's fluxes.
 We leave this for future research but make a corresponding remark in the conclusions. 
