@@ -1,0 +1,226 @@
+\documentclass[english,11pt]{article}
+
+\usepackage{enumitem}
+\usepackage{cite}
+\usepackage{bbm}
+\usepackage{ulem}
+\usepackage{amsthm}
+\usepackage[latin9]{inputenc}
+\usepackage{babel}
+\usepackage[hmargin=0.9in, vmargin=0.75in]{geometry}
+
+\usepackage[colorlinks=true,citecolor=blue,urlcolor=blue]{hyperref}
+\usepackage[dvipsnames]{xcolor}
+
+\usepackage{url}
+\usepackage{bm}
+
+\usepackage{amsmath}
+\usepackage[numbers]{natbib}
+%\let\cite=\citet
+\newcommand{\bfx}{{\bf x}}
+
+\makeatletter
+\providecommand{\tabularnewline}{\\}
+\makeatother
+
+%%---------------------------------------------------%%
+%%---------------------- TITLE ----------------------%%
+%%---------------------------------------------------%%
+\begin{document}
+\title{Response to Reviewers}
+\maketitle
+
+\vspace{1.5cm}
+\noindent
+Michael Dumbser \\
+Editor \\
+International Journal for Numerical Methods in Fluids \\
+
+\vspace{1.5cm}
+
+\noindent
+Manuscript \# FLD-21-0079.R1
+\vspace{1.5cm}
+
+\noindent
+Dear Prof. Michael Dumbser,
+
+\vspace{0.25cm}
+\bigskip
+The manuscript entitled
+\begin{center}
+``Numerical simulation and entropy dissipative cure of the carbuncle instability for the shallow water circular hydraulic jump''
+\end{center}
+by David I. Ketcheson and Manuel Quezada de Luna
+has been revised following the comments made by the referees.
+
+\bigskip
+Letters detailing how the comments of each reviewer have been
+addressed are enclosed. To facilitate your perusal of the revised
+manuscript, changes concerning the comments of the first and second
+reviewers are highlighted in red and green, respectively.
+
+
+\vspace{0.25cm}
+\bigskip\noindent 
+With our best regards,
+
+\vspace{0.5cm}
+\bigskip\noindent
+David I. Ketcheson and Manuel Quezada de Luna
+
+\newpage
+%%---------------------------------------------------------%%
+%%-------------------- FIRST REVIEWER -------------------- %%
+%%---------------------------------------------------------%%
+\section*{Revision of Manuscript \# FLD-21-0079.R1 -- Reviewer $\#1$}
+We thank the reviewer for the comments and suggestions.
+We have incorporated all of them.  For your convenience,
+the modifications related to the comments made by reviewer $\#1$ and $\#2$
+appear in red and green respectively in the new version of the manuscript. 
+Statements in red below are comments from the reviewer.
+In this letter, the comments made by the reviewer refer to the original
+manuscript and our responses refer to the new manuscript. 
+
+{\color{red}
+  The authors have closely applied the reviewer's suggestions 
+  and the quality of the paper has been improved. This manuscript contains 
+  a highly valuable work, very relevant to the journal, which may spur 
+  some new ideas in the field of numerical shockwave anomalies. 
+  Therefore, I do recommend this paper for publication after a minor correction (see below).
+
+  Before publication, I would ask the authors to remove the sentence in lines 14-15. 
+  As far as I understand, the slowly moving shock anomaly does not necessarily 
+  involve the oscillation of a steady shock. It also involves the presence of the spike. 
+  When the shock is not steady and moves slowly, the spike swings and sheds oscillations 
+  downstream. However, when the shock is steady, the spike may remain fixed.
+}
+
+\noindent
+%
+%Following the reviewer's suggestion, we have removed the sentence in lines 14-15. 
+
+
+
+
+%%----------------------------------------------------------%%
+%%-------------------- SECOND REVIEWER -------------------- %%
+%%----------------------------------------------------------%%
+\newpage
+\section*{Revision of Manuscript \# FLD-21-0079.R1 -- Reviewer $\#2$}
+We thank the reviewer for the comments and suggestions.
+We have incorporated all of them.  For your convenience,
+the modifications related to the comments made by reviewer $\#1$ and $\#2$
+appear in red and green respectively in the new version of the manuscript.
+Statements in green below are comments from the reviewer.
+In this letter, the comments made by the reviewer refer to the original
+manuscript and our responses refer to the new manuscript.
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(1)]
+    To strengthen the notion of using entropy-control as a means to remove the carbuncle, 
+    I strongly suggest to cite the most recent work in removing shock instability using 
+    entropy control. Chizari et al.
+    (CAMWA 2021) developed a more general (and more multidimensional) entropy-stable finite volume
+    scheme which has many benefits including minimal sensitivity to grid skewness and does not 
+    suffer from shock-instability as shown for the Quirk's problem (Section 5.3). 
+    Perhaps, citation of this paper can be done in page 2 in the authors' paper where 
+    references [19,20] are cited.
+
+    Cell-vertex entropy-stable finite volume methods for the system of Euler equations 
+    on unstructured grids, CAMWA 2021, Vol 98, pp 261-279.
+  \end{itemize}
+}
+
+\noindent
+Thank you for bringing this reference to our attention. We have included the reference as suggested. 
+
+\bigskip
+{\color{OliveGreen}
+  \begin{itemize}
+  \item[(2)]
+    For the flow past a cylinder problem, I still believe that the choice grids will be a 
+    crucial factor in fully understanding the instability unless one can develop a scheme 
+    which is minimally sensitive to grid changes as done by Chizari et al (CAMWA 2021). 
+    As shown in that paper, the classic entropy-stable FV scheme will eventually succumb to 
+    shock instability if the grids are 'bad' enough but the newly developed entropystable 
+    FV method (residual-distribution based) therein does not, since the latter is proven to be 
+    almost non-affected by grid degradations. 
+
+    In the authors' case. Even on a nice grid like the one used in 4.3, there are some 
+    issues with convergence (Figure 4b) using the blended 2nd order scheme where there 
+    seem to be limit cycle in the residual convergence. The limit cycle may be an onset 
+    for instability if the simulation is ran long enough. This is the classic instability 
+    issue that has troubled the carbuncle community for decades. The authors' claim
+    that this is due to the second order influence, which is fair enough. 
+
+    \begin{itemize}
+    \item[(a)]
+      However, how do you guarantee that the residual of the second order method will completely decay?
+      Fig 4b does not indicate that this will happen. In other words, how do you know if the 
+      second-order residual limit cycle will not manifest into shock instability if you ran the 
+      simulations longer?      
+    \end{itemize}
+  \end{itemize}
+}
+\noindent
+For a given mesh, we believe the residual will not decay anymore. 
+This is a common problem with many 2nd order schemes that make use of limiters 
+based on a posteriori fixes; see for instance \cite{kuzmin2020monolithic}. As stated in the 
+paper, we believe the reason for the lack of convergence to a steady state is related the second-order 
+correction (including the limiters). This is suggested by the fact that the blended solver with 
+the first-order scheme does not prevent convergence to a steady state and since it is well-known that 
+some a posteriori limiters inhibit convergence to steady state solutions.
+
+We have run the simulation for a much longer time ($t=16000$ instead of $t=160$) and we still do not 
+observe a shock instability. Of course this is not a guarantee that a problem will never occur. 
+We have modified the text to discuss this problem. 
+
+{\color{OliveGreen}
+  \begin{itemize}
+    \item[]
+    \begin{itemize}
+      \item[(b)]
+        Looking at the magnitude of residual of $\mathcal{O}(10^{-3})$ for the blended 
+        2nd order scheme. This is of the same magnitude with the residuals of the HLLEMCC 
+        (Fig 4b). The authors state in page 14 that the HLLEMCC residual stagnates. 
+        Is this is a bad thing? If yes, how would it be any different from the similar 
+        residual behavior for the second order blended method?
+    \end{itemize}
+  \end{itemize}
+}
+\noindent
+In the paper we state ``With HLLEMCC or the blended solver, the residual stagnates.'' That is, 
+we acknowledge that with both solvers the residual stagnates. In our opinion, the fact that the 
+residual stagnates is not necessarily a bad thing, assuming this does not lead to a 
+serious shock instability, as remarked by the reviewer. We only have numerical evidence that 
+this does not occur. In any case, having a method for which the residual of a steady state solution 
+decays to zero (up to machine precision) is desirable. We have started a new line of research to 
+fix this problem; however, we believe this new research should be included in a different publication. 
+We have modified the text (in Section 4.3 and in the conclusions) to discuss this problem and 
+to comment on the new line of work we are pursuing.
+
+{\color{OliveGreen}
+  \begin{itemize}
+    \item[]
+    \begin{itemize}
+      Is the blended solution in Fig 3c based on the first or second order method? 
+      I suggest to included the first order (Fig 3c?) and second order (Fig 3d?) 
+      blended shock profiles to demonstrate the difference between the two on a contour plot.
+    \end{itemize}
+  \end{itemize}
+}
+\noindent
+The solution is based on the second-order method. As suggested by the reviewer, we have included 
+a new figure using the first-order method. 
+
+\bibliographystyle{plain}
+\bibliography{refs}
+
+\end{document}
+
+
+
