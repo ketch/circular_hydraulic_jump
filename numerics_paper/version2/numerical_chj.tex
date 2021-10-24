@@ -130,8 +130,9 @@ However, to the best of our knowledge, this idea has not been used before to sup
 Using this Riemann solver (within the second-order Lax-Wendroff-LeVeque 
 finite volume scheme \cite{leveque1997wave, leveque2002finite}) supresses the formation of carbuncles 
 while maintaining an accuracy similar to that of Roe solver.  
-Based on our numerical experiments, using Rusanov's solver does not lead to the 
-slowly-moving shock anomaly. Our blended solver inherits the same property.
+Based on our numerical experiments, 
+{\color{red} the Rusanov's solver does not perturb the location of steady shocks.} 
+Our blended solver inherits the same property.
 
 The most common test problems used to investigate carbuncle formation are
 that of bow shock formation or a steady, grid-aligned planar shock.
