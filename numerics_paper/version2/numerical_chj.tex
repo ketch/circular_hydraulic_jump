@@ -813,7 +813,7 @@ This problem is a canonical example that demonstrates the `entropy glitch' of Ro
 at transonic rarefactions. Since the baseline Roe solver we use (see \S\ref{sec:roe}) does not contain
 an entropy fix, it is important to demonstrate that the blended Riemann solver fixes the entropy glitch.
 We follow the setup in \cite[\S 4.1.2]{delestre2013swashes}.
-The domain is given by $x\in(0,10)$, and the initial condition is ${\color{cyan}u(x,0)=0}$ and
+The domain is given by $x\in(0,10)$, and the initial condition is $u(x,0)=0$ and
 \begin{align*}
   h(x,0)=
   \begin{cases}
@@ -918,7 +918,7 @@ and references therein.
 We consider now a one-dimensional dam break problem on a wet domain.
 We follow the setup in \cite[\S 4.1.1]{delestre2013swashes}.
 The domain is $x\in(0,10)$ and the initial condition is given by
-${\color{cyan} u(x,0)=0}$ and
+$u(x,0)=0$ and
 \begin{align*}
   h(x,0) =
   \begin{cases}
@@ -1216,7 +1216,7 @@ By direct integration one finds that steady-state solutions of
 \begin{subequations}\label{steady}
 \begin{align}
     rhu & = C \\
-    h'(r) & = \frac{h(r)}{\frac{g}{{\color{cyan} C}^2} r^3 (h(r))^3 -r} = \frac{h(r)}{r} \cdot \frac{(F(r))^2}{1-(F(r))^2} \label{eq:dh}
+    h'(r) & = \frac{h(r)}{\frac{g}{C^2} r^3 (h(r))^3 -r} = \frac{h(r)}{r} \cdot \frac{(F(r))^2}{1-(F(r))^2} \label{eq:dh}
 \end{align}
 \end{subequations}
 for some $C$ independent of $r$.  Here $F(r)=|u(r)|/\sqrt{gh(r)}$ is the Froude number.
@@ -1229,7 +1229,7 @@ We now test the numerical methods by using a time-dependent simulation
 to compute the steady flow solution just described, 
 in the annulus $r\in(0.1,1)$ with constant inflow at $r=0.1$ and outflow at $r=1$.
 The initial condition is
-$h(r,t=0)=0.1$, ${\color{cyan}u(r,t=0)=0}$, the inner boundary condition is $h(0.1,t)=0.3$, ${\color{cyan}u(0.1,t)=0.75}$,
+$h(r,t=0)=0.1$, $u(r,t=0)=0$, the inner boundary condition is $h(0.1,t)=0.3$, $u(0.1,t)=0.75$,
 and the outer boundary condition is set to outflow
 (see \cite[\S 21.8.5]{leveque2002finite} for details).
 The computational mesh is logically quadrilateral, of the type shown in
