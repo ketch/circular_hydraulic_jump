@@ -10,8 +10,8 @@ end subroutine get_f
 
 subroutine get_phi(grav,dh,dhL,dhR,velL,velR,phi)
   double precision grav,dh,dhL,dhR,velL,velR,dfL,dfR,phi
-  call get_f(g,h,hL,dfL)
-  call get_f(g,h,hR,dfR) 
+  call get_f(grav,dh,dhL,dfL)
+  call get_f(grav,dh,dhR,dfR) 
   phi = dfL + dfR + velR - velL
   return
 end subroutine get_phi
