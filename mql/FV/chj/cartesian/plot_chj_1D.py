@@ -164,7 +164,7 @@ def get_L1_error(frame,
 
     rJump = 0.3
     rOutflow = 1.0
-    from hydraulic_jump_1D import *
+    import hydraulic_jump_1D
     rStab,hStab,uStab,hL = initial_and_boundary_data(r_jump = rJump,
                                                      r_inner = r0,
                                                      r_outer = rOutflow,
@@ -206,7 +206,7 @@ def get_L1_error(frame,
         
     dx=x[1]-x[0]; dy=y[1]-y[0]
     L1_error = dx*dy*np.sum(np.abs(h - h_exact))
-    print "**********... L1-error: ", L1_error
+    print("**********... L1-error: ", L1_error)
 #
    
 def plot_Ri(frame,
@@ -228,7 +228,7 @@ if __name__== "__main__":
     if not os.path.exists('./_plots_chj_1D'): os.mkdir('_plots_chj_1D')
     from_frame = 0
     to_frame   = 100
-    frames=xrange(from_frame,to_frame+1)
+    frames=range(from_frame,to_frame+1)
 
     with_jump = False
     time = 100 if with_jump else 50
