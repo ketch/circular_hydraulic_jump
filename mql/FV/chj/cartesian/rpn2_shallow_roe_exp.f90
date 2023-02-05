@@ -16,7 +16,10 @@ subroutine get_phi(grav,dh,dhL,dhR,velL,velR,phi)
   return
 end subroutine get_phi
 
-subroutine get_lambda_llf(dhL,dhR,velL,velR,dlambda_llf)            
+subroutine get_lambda_llf(grav,dhL,dhR,velL,velR,dlambda_llf)
+  double precision grav, dhL, dhR, velL, velR, dlambda_llf
+  double precision dhMin, dhMax, x0, dlambda1, dlambda3
+  double precision dfMin, dfMax
   dhMin = min(dhL,dhR)
   dhMax = max(dhL,dhR)            
   x0 = (2.0d0*dsqrt(2.0d0)-1.0d0)**2.0d0
@@ -75,9 +78,18 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
 ! This Riemann solver differs from the original clawpack Riemann solver
 ! for the interleaved indices
 
-    implicit double precision (a-h,o-z)
+  implicit none
+  !  implicit double precision (a-h,o-z)
 
-    dimension   ql(meqn,           1-mbc:maxm+mbc)
+  double precision ql, qr, auxl, auxr, wave, s, amdq, apdq
+  integer, intent(in) :: ixy, maxm, meqn, mwaves, maux, mbc, mx
+  double precision grav
+  double precision a1, a2, a3
+  double precision delta(3)
+  double precision dlev, dlllf, drimh, hsq2, hsqrtl, hsqrtr
+  integer i, m, mu, mv, mw, maxm2
+
+  dimension   ql(meqn,           1-mbc:maxm+mbc)
     dimension   qr(meqn,           1-mbc:maxm+mbc)
     dimension   auxl(maux,           1-mbc:maxm+mbc)
     dimension   auxr(maux,           1-mbc:maxm+mbc)    
@@ -98,7 +110,7 @@ subroutine rpn2(ixy,maxm,meqn,mwaves,maux,mbc,mx,ql,qr,auxl,auxr,wave,s,amdq,apd
     
 !   local arrays
 !   ------------
-    dimension delta(3)
+    !dimension delta(3)
     logical :: efix
 
     data efix /.false./    !# Use entropy fix for transonic rarefactions
