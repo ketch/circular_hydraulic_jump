@@ -1,5 +1,3 @@
-#all: shallow_hllemccRoEF_2D.so shallow_hllemcc_2D.so shallow_llf_2D.so shallow_ev_2D.so shallow_es_2D.so shallow_roe_with_efix_2D.so shallow_llf_dk_2D.so
-
 all: shallow_hllemccRoEF_2D.so shallow_hllemcc_2D.so shallow_roe_exp_2D.so shallow_llf_2D.so shallow_ev_2D.so shallow_es_2D.so shallow_roe_with_efix_2D.so shallow_llf_dk_2D.so
 
 shallow_hllemcc_2D.so:
